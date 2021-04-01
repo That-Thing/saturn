@@ -1,0 +1,41 @@
+@-webkit-keyframes slide {
+    from { background-position: 0 0; }
+    to { background-position: -400px 0; }
+}
+body {
+    color: #ACACAC;
+    background: #1e2327 url(../images/clouds.svg);
+    font-family: arial,helvetica,sans-serif;
+    font-size: 100%;
+    margin: 0px;
+    background-size: Auto 250px;
+    background-repeat: repeat-x;
+    -webkit-animation: slide 20s linear infinite;
+}
+#logo {
+    width: 50%;
+    height: auto;
+    padding: 5px;
+}
+#logoBox {
+    margin-top: 10%;
+}
+#boardsList {
+    margin-top: 10px;
+    overflow: hidden;
+}
+#boardsList ul {
+    float: left;
+}
+#boardsList .column {
+    float: left;
+    width: 12em;
+}
+.listHeader {
+    text-decoration: underline;
+    display: inline;
+}
+#statistics {
+    font-size: 75%;
+    padding: 5px;
+}

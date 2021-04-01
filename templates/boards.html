@@ -1,0 +1,32 @@
+<html>
+    <head>
+        <title>{{data['siteName']}} - Boards</title>
+        <meta charset="UTF-8">
+        <link href="../static/css/global.css" type="text/css" rel="stylesheet">
+        <link rel="shortcut icon" type="image/png" href="../{{data['faviconUrl']}}"/>
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+    </head>
+    <body>
+        <nav>
+            <span id="navMain">
+                <a href="{{ url_for('index') }}"><i class="fas fa-home textIcon"></i>Home</a>
+                <a href="{{ url_for('help') }}"><i class="fas fa-question textIcon"></i>Help</a>
+                <a href="settings"><i class="fas fa-cog textIcon"></i>Settings</a>
+            </span>
+        </nav>
+        <div id="boardsDiv" class="box alligned">
+            <h2 class="boxHeader">Boards</h2>
+             <div id="boardContainer" class="settingsCategory"></div>
+                 <span id="boardLabel">Board</span><span class="boardManagementLabel">Posts</span><span class="boardManagementLabel">PPH</span><span class="boardManagementLabel">Users</span>
+                {% for board in sqlData %}
+                    <hr>
+                    <div class="boardEntry">
+                        <a href="/{{board['uri']}}/">/{{board['uri']}}/ - {{board['name']}}</a><span class="boardManagementLabel">{{board['posts']}}</span><span class="boardManagementLabel">{{board['PPH']}}</span><span class="boardManagementLabel">{{board['users']}}</span><br>
+                        <span>{{board['description']}}</span>
+                        
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </body>
+</html>

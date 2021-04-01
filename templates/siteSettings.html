@@ -1,0 +1,77 @@
+<html>
+    <head>
+        <title>Server Settings</title>
+        <meta charset="UTF-8">
+        <link href="../static/css/global.css" type="text/css" rel="stylesheet">
+        <link rel="shortcut icon" type="image/png" href="../{{data['faviconUrl']}}"/>
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+    </head>
+    <body>
+        <nav>
+            <span id="navMain">
+                <a href="{{ url_for('index') }}"><i class="fas fa-home textIcon"></i>Home</a>
+                <a href="{{ url_for('boards') }}"><i class="fas fa-stream textIcon"></i>Boards</a>
+                <a href="{{ url_for('help') }}"><i class="fas fa-question textIcon"></i>Help</a>
+                <a href="settings"><i class="fas fa-cog textIcon"></i>Settings</a>
+            </span>
+        </nav>
+        <div id="settingsDiv" class="box">
+            <h2 class="boxHeader">{{data['siteName']}} Global Settings</h2>
+            <div id="serverSettings" class="settingsCategory">
+                <form action="/saveSettings" method="POST">
+                    <h3>Server Settings</h3>
+                    <hr>
+                    <label>
+                        Server Port:
+                        <input type="text" name="port" id="serverPortInput" value="{{data['port']}}"> <span class="small">Server must be restarted</span>
+                    </label>
+                    <label>
+                        Media Location:
+                        <input type="text" name="mediaLocation" id="serverMediaLocationInput" value="{{data['mediaLocation']}}">
+                    </label>
+                    <hr>
+                    <h3>Site Settings</h3>
+                    <hr>
+                    <label>
+                        Site Name:
+                        <input type="text" name="siteName" id="siteNameInput" value="{{data['siteName']}}">
+                    </label>
+                    <label>
+                        Logo:
+                        <input type="text" name="siteLogo" id="siteLogoInput" value="{{data['logoUrl']}}">
+                    </label>
+                    <label>
+                        Favicon:
+                        <input type="text" name="siteFavicon" id="siteFaviconInput" value="{{data['faviconUrl']}}"> <span class="small">Must be in PNG format</span>
+                    </label>
+                    <label>
+                        Required role for board creation:
+                        <select name="requiredRole" id="requiredRole">
+                            {% if data['requiredRole'] == 'administrator' %}
+                                <option value="administrator" selected>Administrator</option>
+                                <option value="user">User</option>
+                            {% else %}
+                                <option value="administrator">Administrator</option>
+                                <option value="user" selected>User</option>
+                            {% endif %}
+                        </select>
+                    </label>
+                    <label>
+                        Allow registrations:
+                        <select name="enableRegistration" id="enableRegistration">
+                            {% if data['enableRegistration'] == 'on' %}
+                                <option value="on" selected>on</option>
+                                <option value="off">off</option>
+                            {% else %}
+                                <option value="on">on</option>
+                                <option value="off" selected>off</option>
+                            {% endif %}
+                        </select>
+                    </label>
+
+                    <p><input class="btn btn-primary" type="submit" value="save settings"></p>
+                </form>
+            </div>
+        </div>
+    </body>
+</html>

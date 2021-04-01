@@ -1,0 +1,62 @@
+<html>
+    <head>
+        <title>Account Settings</title>
+        <meta charset="UTF-8">
+        <link href="../static/css/global.css" type="text/css" rel="stylesheet">
+        <link rel="shortcut icon" type="image/png" href="../{{data['faviconUrl']}}"/>
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+    </head>
+    <body>
+        <nav>
+            <span id="navMain">
+                <a href="{{ url_for('index') }}"><i class="fas fa-home textIcon"></i>Home</a>
+                <a href="{{ url_for('boards') }}"><i class="fas fa-stream textIcon"></i>Boards</a>
+                <a href="{{ url_for('help') }}"><i class="fas fa-question textIcon"></i>Help</a>
+                <a href="settings"><i class="fas fa-cog textIcon"></i>Settings</a>
+            </span>
+        </nav>
+        <div id="settingsDiv" class="box">
+            <h2 class="boxHeader">Account settings Settings</h2>
+             <div id="accountSettings" class="settingsCategory">
+                <h3 style="text-align: center;">Welcome {{session['username']}} [{{session['group']}}]</h3>    
+                <div id="serverSettings" class="settingsCategory">
+                    <form action="/saveAccountSettings" method="POST">
+                        <hr>
+                        <h4>Password Change <span class="small">You will have to log back in</span></h4> 
+                        <label> 
+                            Current password:
+                            <input type="text" name="currentPassword" id="currentPasswordInput">
+                        </label>
+                        <label> 
+                            New password:
+                            <input type="text" name="newPassword" id="newPasswordInput">
+                        </label>
+                        <label> 
+                            Confirm password:
+                            <input type="text" name="confirmPassword" id="confirmPasswordInput">
+                        </label>
+                        <p><input class="btn btn-primary" type="submit" value="update password"></p>
+                    </form>
+                    <hr>
+                    <form action="/updateemail" method="POST">
+                        <label> 
+                            E-mail:
+                            <input type="text" name="email" id="emailInput" value="{{session['email']}}">
+                            <input class="btn btn-primary" type="submit" value="update e-mail">
+                        </label>
+                        <span class="small">You will need to log out and log back in</span>
+                    </form>
+                    <hr>
+                    <h4>Owned Boards</h4>
+                    {% for board in sqlData %}
+                        {% if board['owner'] == session['username'] %}
+                            <a href="/manageboard?uri={{board['uri']}}" style="float: left; margin-right: 20px;"><i class="fas fa-cog"></i></a>
+                            <a href="/{{board['uri']}}/">/{{board['uri']}}/ - {{board['name']}}</a>
+                            <br>
+                        {% endif %}  
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

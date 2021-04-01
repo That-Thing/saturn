@@ -1,0 +1,55 @@
+<html>
+    <head>
+        <title>Board Management</title>
+        <meta charset="UTF-8">
+        <link href="../static/css/global.css" type="text/css" rel="stylesheet">
+        <link rel="shortcut icon" type="image/png" href="../{{data['faviconUrl']}}"/>
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+    </head>
+    <body>
+        <nav>
+            <span id="navMain">
+                <a href="{{ url_for('index') }}"><i class="fas fa-home textIcon"></i>Home</a>
+                <a href="{{ url_for('boards') }}"><i class="fas fa-stream textIcon"></i>Boards</a>
+                <a href="{{ url_for('help') }}"><i class="fas fa-question textIcon"></i>Help</a>
+                <a href="settings"><i class="fas fa-cog textIcon"></i>Settings</a>
+            </span>
+        </nav>
+        <div id="settingsDiv" class="box">
+            <h2 class="boxHeader">Board Management</h2>
+             <div id="boardManagement" class="settingsCategory">
+                 <span id="boardLabel" style="margin-left: 40px;">Board</span><span class="boardManagementLabel">Posts</span><span class="boardManagementLabel">PPH</span><span class="boardManagementLabel">Users</span>
+                {% for board in sqlData %}
+                    <hr>
+                    <div class="boardManagementDiv">
+                        <a href="/{{board['uri']}}/">/{{board['uri']}}/ - {{board['name']}}</a>
+                        <span class="boardManagementLabel">{{board['posts']}}</span>
+                        <span class="boardManagementLabel">{{board['PPH']}}</span>
+                        <span class="boardManagementLabel">{{board['users']}}</span>
+                        <a href="/manageboard?uri={{board['uri']}}" style="float: left; margin-right: 20px;"><i class="fas fa-cog"></i></a>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% if data['requiredRole'] == session['group'] or session['group'] == 'administrator' %}
+            <div class="box" style="width: 40%;">
+                <h2 class="boxHeader">Create board</h2>
+                <form id="createBoard" action="/createboard" method="POST">
+                    <label> 
+                        Board URI:
+                        <input type="text" name="uri" id="uriInput" class="settingsInput" placeholder="ex: b" required>
+                    </label>
+                    <label> 
+                        Board Name:
+                        <input type="text" name="name" id="boardNameInput" class="settingsInput" placeholder="ex: Random" required>
+                    </label>
+                    <label> 
+                        Board Description:
+                        <input type="text" name="description" id="boarddescriptionInput" class="settingsInput" placeholder="ex: The random board" required>
+                    </label>
+                    <input class="btn btn-primary" type="submit" value="Create Board">
+                </form>
+            </div>  
+        {% endif %}
+    </body>
+</html>

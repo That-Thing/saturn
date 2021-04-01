@@ -1,0 +1,175 @@
+body {
+    color: #ACACAC;
+    background-color: #1e2327;
+    font-family: arial,helvetica,sans-serif;
+    font-size: 100%;
+    margin: 0px;
+}
+/*Nav bar at the top*/
+nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    text-align: center;
+    z-index: 1;
+    height: auto;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    background-color: #131618e0;
+    font-size: 80%;
+}
+nav span{
+    /*display: inline-block;*/
+    text-decoration: none;
+    margin: 0 0.2em;
+    float: left;
+}
+nav a{
+    margin-left: 5px;
+    margin-right: 5px;
+}
+/*Links*/
+a{
+    color: #81be84;
+    text-decoration: none;
+}
+  
+a:hover{
+    color: #5b8c5d;
+}
+/*Text decorations*/
+u{
+    text-decoration: underline;
+}
+s{
+    text-decoration: line-through;
+}
+/*List*/
+li{
+    list-style: none;
+}
+hr {
+    height: 0px;
+    border-width: 1px medium medium;
+    border-style: solid none none;
+    border-color: #2f3840;
+}
+/*Button*/
+.btn:hover {
+    background-color: #454e56
+}
+/*small text*/
+.small {
+    font-size: 70%;
+    color: #767676;
+    user-select: none;
+}
+/*Error Messages*/
+.errorText {
+    text-align: center;
+    margin-top: 20%;
+}
+/*Inputs and text boxes*/
+input, select, textarea {
+    border: 0px solid;
+    background: #32393f;
+    color: #ACACAC;
+    font-size: 100%;
+}
+/*Fontawesome icons next to text*/
+.textIcon {
+    margin-right: 5px;
+}
+
+/*Boxes containing content*/
+.box {
+    background-color: #2a3137;
+    border-radius: 5px;
+    border: none;
+    margin-bottom: 16px;
+    vertical-align: middle;
+    width: 500px;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    border-color: #353535;
+    /* text-align: center; */
+    margin: auto;
+}
+.box form {
+    margin: 5px;
+    padding-bottom: 10px;
+}
+.alligned {
+    margin-top: 10%;
+    width: 50%;
+    padding-bottom: 5px;
+}
+/*Box label*/
+.boxHeader {
+    background-color: #131618e0;
+    border: none;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    margin-bottom: 0px;
+    text-align: center;
+}
+.center {
+    text-align: center;
+}
+/*Settings box*/
+#settingsDiv {
+    margin-top: 10%;
+    width: 50%;
+    display: table;
+}
+/*Category in settings*/
+.settingsCategory {
+    text-align: left;
+    margin: 5px;
+    margin-left: 10px;
+}
+.settingsCategory input{
+    border: 1px #35414b99 solid;
+}
+.settingsCategory label {
+    display: block;
+    margin: 5px;
+}
+.settingsInput {
+    border: 1px #35414b99 solid;
+}
+
+.boardManagementLabel {
+    float: right;
+    margin-right: 15px;
+    width: 6%;
+    text-align: center;
+    display: inherit;
+}
+
+
+/*boards*/
+#boardLabel {
+    text-align: left;
+    margin: 5px;
+    margin-left: 10px;
+}
+.boardEntry {
+    text-align: left;
+    margin: 5px;
+    margin-left: 10px;
+}
+#boardManagement {
+    padding-bottom: 5px;
+}
+#createBoard {
+    display: grid;
+}
+#createBoard label{
+    margin-bottom: 10px;
+}
+#createBoard .btn {
+    width: 40%;
+    margin: auto;
+} 
