@@ -321,5 +321,27 @@ def register():
 
 
 
+
+
+
+
+
+
+
+
+@app.route('/<board>/', methods=['GET'])
+@app.route('/<board>', methods=['GET'])
+def boardPage(board):
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT * FROM boards")
+    boards = cursor.fetchall()
+    for x in boards:
+        if x['uri'] == board:
+            return render_template('thread.html', data=globalSettings, board=board, boardData=x)
+
+
+
+
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=configData["port"])
