@@ -3,9 +3,13 @@ from flask import request, jsonify, render_template, url_for, session, redirect
 from flask_mysqldb import MySQL
 import MySQLdb.cursors
 import re
+from werkzeug.utils import secure_filename
 from flask import session
 import json
 import os
+import time
+import pathlib
+import math
 with open('./config/config.json') as configFile: #global config file
     configData = json.load(configFile)
 with open('./config/database.json') as configFile: #database config
@@ -79,7 +83,15 @@ def reloadSettings():
     )
     return globalSettings
 
-
+#return correct filesize name. Thanks StackOverflow
+def convert_size(size_bytes):
+   if size_bytes == 0:
+       return "0B"
+   size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+   i = int(math.floor(math.log(size_bytes, 1024)))
+   p = math.pow(1024, i)
+   s = round(size_bytes / p, 2)
+   return "%s %s" % (s, size_name[i])
 
 
 
@@ -195,9 +207,11 @@ def manageBoard():
     sqlData = cursor.fetchall()
     sqlData = sqlData[0]
     msg=""
+    cursor.execute("SELECT * FROM banners WHERE board=%s", [uri])
+    bannerData = cursor.fetchall()
     try:
         if session['group'] == 'administrator' or sqlData['owner'] == session['username']:
-            return render_template('manageBoard.html', data=globalSettings, sqlData=sqlData, msg=msg)
+            return render_template('manageBoard.html', data=globalSettings, sqlData=sqlData, bannerData=bannerData, msg=msg)
     except Exception as e:
         return render_template('error.html', errorMsg="Not logged in", data=globalSettings)
 #create board
@@ -239,11 +253,36 @@ def deleteBoard():
                 if request.form["deleteBoard"] == "on":
                     cursor.execute("DELETE FROM boards WHERE  uri=%s AND owner=%s LIMIT 1", (uri, session['username']))
                     mysql.connection.commit()
-                    path = os.path.join(globalSettings['bannerLocation'], uri)
+                    path = os.path.join(globalSettings['bannerLocation'], uri) #path for banner folder for specific board. 
                     os.rmdir(path)#remove banner folder
                     return redirect(url_for('boardManagement', msg=uri + " successfully deleted"))
             except Exception as e:
                 return render_template('manageBoard.html', data=globalSettings, sqlData=sqlData, msg="Please confirm board deletion") #probably could have done better
+
+#banner management
+@app.route('/uploadbanner', methods=['POST'])
+def uploadBanner():
+    globalSettings = reloadSettings()
+    uri = request.args.get('uri', type=str)
+    if request.method == 'POST':
+        banner = request.files['file']
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT * FROM boards WHERE uri=%s", [uri])
+        sqlData = cursor.fetchall()
+        sqlData = sqlData[0]
+        if sqlData['owner'] == session['username'] or session['group'] == 'administrator':
+            path = os.path.join(globalSettings['bannerLocation'], uri)
+            filename = secure_filename(banner.filename)
+            extention = pathlib.Path(filename).suffix
+            filename = str(time.time())+extention
+            banner.save(os.path.join(path, filename))
+            size = os.path.getsize(os.path.join(path, filename))
+            cursor.execute("INSERT INTO banners VALUES (%s, %s, %s)",(uri, filename, size))
+            mysql.connection.commit()
+            cursor.execute("SELECT * FROM banners WHERE board=%s", [uri])
+            bannerData = cursor.fetchall()
+            return render_template('manageBoard.html', data=globalSettings, sqlData=sqlData, bannerData=bannerData, msg="Banner added")
+
 
 #Account stuff  Most of it isn't mine lol. 
 @app.route('/login/', methods=['GET', 'POST'])

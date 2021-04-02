@@ -4,7 +4,7 @@
     "siteName": "Saturn",
     "siteLogo": "static/images/logoS.png",
     "siteFavicon": "static/images/favicon.png",
+    "bannerLocation": "static/banners",
     "requiredRole": "administrator",
-    "enableRegistration": "on",
-    "bannerLocation":"static/banners"
+    "enableRegistration": "on"
 }

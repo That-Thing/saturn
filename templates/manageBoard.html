@@ -25,8 +25,78 @@
                     <input type="checkbox" id="deleteBoard" name="deleteBoard">
                     <p><input class="btn btn-primary" type="submit" value="Delete /{{sqlData['uri']}}/"></p>
                 </label>
+                <p class="small center">Deleting the board will also delete all of the posts made on the board</p>
                 <div class="msg">{{msg}}</div>
             </form>
+            <hr>
+            <div id="bannerManagement">
+                <h3 class="center">Banners</h3>
+                <div id="drop-area">
+                    <form class="my-form">
+                        <input type="file" id="fileElem" multiple accept="image/*" onchange="handleFiles(this.files)">
+                        <label class="button center" for="fileElem">Drag or select files</label>
+                    </form>
+                  </div>
+            </div>
+            <div id="bannerList">
+                {% for banner in bannerData %}
+                    <img src="../{{data['bannerLocation']}}/{{banner['board']}}/{{banner['filename']}}">
+                {% endfor %}
+            </div>
         </div>
+        <script>
+            let dropArea = document.getElementById('drop-area')
+            ;['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false)
+            })
+
+            function preventDefaults (e) {
+            e.preventDefault()
+            e.stopPropagation()
+            }
+            ;['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, highlight, false)
+            })
+
+            ;['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, unhighlight, false)
+            })
+
+            function highlight(e) {
+            dropArea.classList.add('highlight')
+            }
+
+            function unhighlight(e) {
+            dropArea.classList.remove('highlight')
+            }
+            dropArea.addEventListener('drop', handleDrop, false)
+
+            function handleDrop(e) {
+            let dt = e.dataTransfer
+            let files = dt.files
+
+            handleFiles(files)
+            }
+            function handleFiles(files) {
+            ([...files]).forEach(uploadFile)
+            }
+            function uploadFile(file) {
+            var url = "uploadbanner?uri={{sqlData['uri']}}"
+            let formData = new FormData()
+
+            formData.append('file', file)
+            console.log(file)
+
+            fetch(url, {
+                method: 'POST',
+                body: formData
+                
+            })
+            .then(() => {
+                console.log("Success!")   
+            })
+            .catch(() => {console.log("The opposite of success")})
+            }
+        </script>
     </body>
 </html>
