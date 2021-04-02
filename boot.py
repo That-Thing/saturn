@@ -174,7 +174,8 @@ def boardManagement():
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
             cursor.execute("SELECT * FROM boards")
             sqlData = cursor.fetchall()
-            return render_template('boardManagement.html', data=globalSettings, sqlData=sqlData)
+            msg=""
+            return render_template('boardManagement.html', data=globalSettings, sqlData=sqlData, msg="")
         else:
             return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings)   
     except Exception as e:
@@ -189,27 +190,53 @@ def manageBoard():
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("SELECT * FROM boards WHERE uri=%s", [uri])
     sqlData = cursor.fetchall()
+    sqlData = sqlData[0]
+    msg=""
     try:
         if session['group'] == 'administrator' or sqlData['owner'] == session['username']:
-            return render_template('manageBoard.html', data=globalSettings, sqlData=sqlData[0])
+            return render_template('manageBoard.html', data=globalSettings, sqlData=sqlData, msg=msg)
     except Exception as e:
         return render_template('error.html', errorMsg="Not logged in", data=globalSettings)       
-
+#create board
 @app.route('/createboard', methods=['POST'])
 def createBoard():
     globalSettings = reloadSettings()
     if request.method == 'POST':
         try:
-            if session['group'] == 'administrator' or globalSettings['group'] == session['group']:
+            if session['group'] == 'administrator' or globalSettings['requiredRole'] == session['group']:
                 cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-                cursor.execute("INSERT INTO boards VALUES (%s, %s, %s, %s, 0, 0, 0)",(request.form['uri'], request.form['name'], request.form['description'], session['username']))
-                mysql.connection.commit()
-                return redirect(url_for('boardManagement'))
+                cursor.execute("SELECT * FROM boards WHERE uri=%s", [request.form['uri']])
+                board = cursor.fetchone()
+                if board:
+                    return redirect(url_for('boardManagement', msg="Board already exists"))
+                else:    
+                    cursor.execute("INSERT INTO boards VALUES (%s, %s, %s, %s, 0, 0, 0)",(request.form['uri'], request.form['name'], request.form['description'], session['username']))
+                    mysql.connection.commit()
+                    return redirect(url_for('boardManagement'))
             else:
                 return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings) 
         except Exception as e:
             return render_template('error.html', errorMsg="Not logged in", data=globalSettings)  
-
+#delete board
+@app.route('/deleteboard', methods=['POST'])
+def deleteBoard():
+    if request.method == 'POST':
+        uri = request.args.get('uri', type=str)
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT * FROM boards WHERE uri=%s", [uri])
+        boardData = cursor.fetchall()
+        boardData = boardData[0]
+        cursor.execute("SELECT * FROM boards WHERE uri=%s", [uri])
+        sqlData = cursor.fetchall()
+        sqlData = sqlData[0]
+        if boardData['owner'] == session['username']:
+            try:
+                if request.form["deleteBoard"] == "on":
+                    cursor.execute("DELETE FROM boards WHERE  uri=%s AND owner=%s LIMIT 1", (uri, session['username']))
+                    mysql.connection.commit()
+                    return redirect(url_for('boardManagement', msg=uri + " successfully deleted"))
+            except Exception as e:
+                return render_template('manageBoard.html', data=globalSettings, sqlData=sqlData, msg="Please confirm board deletion")
 
 #Account stuff  Most of it isn't mine lol. 
 @app.route('/login/', methods=['GET', 'POST'])

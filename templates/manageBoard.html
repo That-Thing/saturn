@@ -17,6 +17,16 @@
         </nav>
         <div class="box alligned">
             <h2 class="boxHeader">/{{sqlData['uri']}}/ - {{sqlData['name']}}</h2>
+            <hr>
+            <h3 class="center">Board deletion</h3>
+            <form class="center" action="/deleteboard?uri={{sqlData['uri']}}" method="POST">
+                <label>
+                    Confirm board deletion
+                    <input type="checkbox" id="deleteBoard" name="deleteBoard">
+                    <p><input class="btn btn-primary" type="submit" value="Delete /{{sqlData['uri']}}/"></p>
+                </label>
+                <div class="msg">{{msg}}</div>
+            </form>
         </div>
     </body>
 </html>

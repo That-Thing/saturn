@@ -81,6 +81,9 @@ input, select, textarea {
     margin-right: 5px;
 }
 
+.msg {
+    color: #767676;
+}
 /*Boxes containing content*/
 .box {
     background-color: #2a3137;
