@@ -45,6 +45,10 @@
                         <input type="text" name="siteFavicon" id="siteFaviconInput" value="{{data['faviconUrl']}}"> <span class="small">Must be in PNG format</span>
                     </label>
                     <label>
+                        Banner Location:
+                        <input type="text" name="bannerLocation" id="bannerLocationInput" value="{{data['bannerLocation']}}"> <span class="small">This decides where uploaded banners will be kept</span>
+                    </label>
+                    <label>
                         Required role for board creation:
                         <select name="requiredRole" id="requiredRole">
                             {% if data['requiredRole'] == 'administrator' %}

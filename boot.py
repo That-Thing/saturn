@@ -5,6 +5,7 @@ import MySQLdb.cursors
 import re
 from flask import session
 import json
+import os
 with open('./config/config.json') as configFile: #global config file
     configData = json.load(configFile)
 with open('./config/database.json') as configFile: #database config
@@ -60,7 +61,8 @@ globalSettings = dict(
     logoUrl = configData["siteLogo"],
     faviconUrl = configData["siteFavicon"],
     enableRegistration = configData["enableRegistration"],
-    requiredRole = configData["requiredRole"]
+    requiredRole = configData["requiredRole"],
+    bannerLocation = configData["bannerLocation"]
 )
 def reloadSettings():
     with open('./config/config.json') as configFile: #global config file
@@ -72,7 +74,8 @@ def reloadSettings():
         logoUrl = reloadData["siteLogo"],
         faviconUrl = reloadData["siteFavicon"],
         enableRegistration = reloadData["enableRegistration"],
-        requiredRole = reloadData["requiredRole"]
+        requiredRole = reloadData["requiredRole"],
+        bannerLocation = reloadData["bannerLocation"]
     )
     return globalSettings
 
@@ -196,7 +199,7 @@ def manageBoard():
         if session['group'] == 'administrator' or sqlData['owner'] == session['username']:
             return render_template('manageBoard.html', data=globalSettings, sqlData=sqlData, msg=msg)
     except Exception as e:
-        return render_template('error.html', errorMsg="Not logged in", data=globalSettings)       
+        return render_template('error.html', errorMsg="Not logged in", data=globalSettings)
 #create board
 @app.route('/createboard', methods=['POST'])
 def createBoard():
@@ -210,13 +213,15 @@ def createBoard():
                 if board:
                     return redirect(url_for('boardManagement', msg="Board already exists"))
                 else:    
-                    cursor.execute("INSERT INTO boards VALUES (%s, %s, %s, %s, 0, 0, 0)",(request.form['uri'], request.form['name'], request.form['description'], session['username']))
+                    cursor.execute("INSERT INTO boards VALUES (%s, %s, %s, %s, 0, 0, 0)",(request.form['uri'], request.form['name'], request.form['description'], session['username'])) #create the board in the MySQL database
                     mysql.connection.commit()
+                    path = os.path.join(globalSettings['bannerLocation'], request.form['uri']) #make folder for banner. 
+                    os.mkdir(path) 
                     return redirect(url_for('boardManagement'))
             else:
                 return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings) 
         except Exception as e:
-            return render_template('error.html', errorMsg="Not logged in", data=globalSettings)  
+            return render_template('error.html', errorMsg="Not logged in", data=globalSettings) 
 #delete board
 @app.route('/deleteboard', methods=['POST'])
 def deleteBoard():
@@ -234,9 +239,11 @@ def deleteBoard():
                 if request.form["deleteBoard"] == "on":
                     cursor.execute("DELETE FROM boards WHERE  uri=%s AND owner=%s LIMIT 1", (uri, session['username']))
                     mysql.connection.commit()
+                    path = os.path.join(globalSettings['bannerLocation'], uri)
+                    os.rmdir(path)#remove banner folder
                     return redirect(url_for('boardManagement', msg=uri + " successfully deleted"))
             except Exception as e:
-                return render_template('manageBoard.html', data=globalSettings, sqlData=sqlData, msg="Please confirm board deletion")
+                return render_template('manageBoard.html', data=globalSettings, sqlData=sqlData, msg="Please confirm board deletion") #probably could have done better
 
 #Account stuff  Most of it isn't mine lol. 
 @app.route('/login/', methods=['GET', 'POST'])
