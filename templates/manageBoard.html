@@ -31,6 +31,7 @@
             <hr>
             <div id="bannerManagement">
                 <h3 class="center">Banners</h3>
+                <h4 class="center">Upload banners</h4>
                 <div id="drop-area">
                     <form class="my-form">
                         <input type="file" id="fileElem" multiple accept="image/*" onchange="handleFiles(this.files)">
@@ -38,10 +39,21 @@
                     </form>
                   </div>
             </div>
+            <hr>
+            <h4 class="center">Existing banners:</h4>
             <div id="bannerList">
-                {% for banner in bannerData %}
+            {% for banner in bannerData %}
+                <hr>
+                <div class="bannerEntry">
+                    <span class="bannerOptions">
+                        <p>Banner size: {{banner['filesize']}}B</p>
+                        <form action="/deletebanner?uri={{sqlData['uri']}}&name={{banner['filename']}}" method="POST">
+                            <i class="fas fa-trash-alt textIcon"></i><input type="submit" value="Delete">
+                        </form>
+                    </span>
                     <img src="../{{data['bannerLocation']}}/{{banner['board']}}/{{banner['filename']}}">
-                {% endfor %}
+                </div>
+            {% endfor %}
             </div>
         </div>
         <script>

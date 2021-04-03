@@ -218,12 +218,14 @@ p {
 }
 
 /*banner stuff*/
-#bannerList {
+.bannerList {
     margin: auto;
     margin-top: 5px;
 }
-#bannerList img {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
+.bannerOptions{
+    margin: auto;
+}
+.bannerEntry {
+    display: flex;
+    margin: 10px;
 }

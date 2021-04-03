@@ -248,18 +248,22 @@ def deleteBoard():
         cursor.execute("SELECT * FROM boards WHERE uri=%s", [uri])
         sqlData = cursor.fetchall()
         sqlData = sqlData[0]
-        if boardData['owner'] == session['username']:
-            try:
-                if request.form["deleteBoard"] == "on":
-                    cursor.execute("DELETE FROM boards WHERE  uri=%s AND owner=%s LIMIT 1", (uri, session['username']))
-                    mysql.connection.commit()
-                    path = os.path.join(globalSettings['bannerLocation'], uri) #path for banner folder for specific board. 
-                    os.rmdir(path)#remove banner folder
-                    return redirect(url_for('boardManagement', msg=uri + " successfully deleted"))
-            except Exception as e:
-                return render_template('manageBoard.html', data=globalSettings, sqlData=sqlData, msg="Please confirm board deletion") #probably could have done better
-
+        try:
+            if boardData['owner'] == session['username'] or session['group'] == 'administrator':
+                try:
+                    if request.form["deleteBoard"] == "on":
+                        cursor.execute("DELETE FROM boards WHERE  uri=%s AND owner=%s LIMIT 1", (uri, session['username']))
+                        mysql.connection.commit()
+                        path = os.path.join(globalSettings['bannerLocation'], uri) #path for banner folder for specific board. 
+                        os.rmdir(path)#remove banner folder
+                        return redirect(url_for('boardManagement', msg=uri + " successfully deleted"))
+                except Exception as e:
+                    return render_template('manageBoard.html', data=globalSettings, sqlData=sqlData, msg="Please confirm board deletion") #probably could have done better
+        except Exception as e:
+            return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings) 
 #banner management
+
+#upload banner and create sql entry
 @app.route('/uploadbanner', methods=['POST'])
 def uploadBanner():
     globalSettings = reloadSettings()
@@ -270,19 +274,40 @@ def uploadBanner():
         cursor.execute("SELECT * FROM boards WHERE uri=%s", [uri])
         sqlData = cursor.fetchall()
         sqlData = sqlData[0]
-        if sqlData['owner'] == session['username'] or session['group'] == 'administrator':
-            path = os.path.join(globalSettings['bannerLocation'], uri)
-            filename = secure_filename(banner.filename)
-            extention = pathlib.Path(filename).suffix
-            filename = str(time.time())+extention
-            banner.save(os.path.join(path, filename))
-            size = os.path.getsize(os.path.join(path, filename))
-            cursor.execute("INSERT INTO banners VALUES (%s, %s, %s)",(uri, filename, size))
-            mysql.connection.commit()
-            cursor.execute("SELECT * FROM banners WHERE board=%s", [uri])
-            bannerData = cursor.fetchall()
-            return render_template('manageBoard.html', data=globalSettings, sqlData=sqlData, bannerData=bannerData, msg="Banner added")
-
+        try:
+            if sqlData['owner'] == session['username'] or session['group'] == 'administrator':
+                path = os.path.join(globalSettings['bannerLocation'], uri)
+                filename = secure_filename(banner.filename)
+                extention = pathlib.Path(filename).suffix
+                filename = str(time.time())+extention
+                banner.save(os.path.join(path, filename))
+                size = os.path.getsize(os.path.join(path, filename))
+                cursor.execute("INSERT INTO banners VALUES (%s, %s, %s)",(uri, filename, size))
+                mysql.connection.commit()
+                cursor.execute("SELECT * FROM banners WHERE board=%s", [uri])
+                bannerData = cursor.fetchall()
+                return redirect(url_for('boardManagement'))
+        except Exception as e:
+            return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings) 
+@app.route('/deletebanner', methods=['POST'])
+def deleteBanner():
+    globalSettings = reloadSettings()
+    uri = request.args.get('uri', type=str)
+    name = request.args.get('name', type=str)
+    if request.method == 'POST':
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT * FROM boards WHERE uri=%s", [uri])
+        sqlData = cursor.fetchall()
+        sqlData = sqlData[0]
+        try:
+            if sqlData['owner'] == session['username'] or session['group'] == 'administrator':
+                cursor.execute("DELETE FROM banners WHERE filename=%s LIMIT 1", [name]) 
+                mysql.connection.commit()
+                cursor.execute("SELECT * FROM banners WHERE board=%s", [uri])
+                bannerData = cursor.fetchall()
+                return render_template('manageBoard.html', data=globalSettings, sqlData=sqlData, bannerData=bannerData)
+        except Exception as e:
+            return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings) 
 
 #Account stuff  Most of it isn't mine lol. 
 @app.route('/login/', methods=['GET', 'POST'])
