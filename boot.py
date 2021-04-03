@@ -55,6 +55,7 @@ app.config['MYSQL_HOST'] = databaseConfig["host"]
 app.config['MYSQL_USER'] = databaseConfig["user"]
 app.config['MYSQL_PASSWORD'] = databaseConfig["password"]
 app.config['MYSQL_DB'] = databaseConfig["name"]
+app.config['TEMPLATES_AUTO_RELOAD'] = True
 mysql = MySQL(app)
 
 #settings for use in html
@@ -286,7 +287,8 @@ def uploadBanner():
                 mysql.connection.commit()
                 cursor.execute("SELECT * FROM banners WHERE board=%s", [uri])
                 bannerData = cursor.fetchall()
-                return redirect(url_for('boardManagement'))
+                #return redirect(url_for('manageBoard'))
+                return redirect(url_for('manageBoard', data=globalSettings, bannerData=bannerData)) #Find a better solution for this. 
         except Exception as e:
             return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings) 
 @app.route('/deletebanner', methods=['POST'])
@@ -299,15 +301,17 @@ def deleteBanner():
         cursor.execute("SELECT * FROM boards WHERE uri=%s", [uri])
         sqlData = cursor.fetchall()
         sqlData = sqlData[0]
-        try:
-            if sqlData['owner'] == session['username'] or session['group'] == 'administrator':
-                cursor.execute("DELETE FROM banners WHERE filename=%s LIMIT 1", [name]) 
-                mysql.connection.commit()
-                cursor.execute("SELECT * FROM banners WHERE board=%s", [uri])
-                bannerData = cursor.fetchall()
-                return render_template('manageBoard.html', data=globalSettings, sqlData=sqlData, bannerData=bannerData)
-        except Exception as e:
-            return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings) 
+        # try:
+        if sqlData['owner'] == session['username'] or session['group'] == 'administrator':
+            cursor.execute("DELETE FROM banners WHERE filename=%s LIMIT 1", [name]) 
+            mysql.connection.commit()
+            cursor.execute("SELECT * FROM banners WHERE board=%s", [uri])
+            bannerData = cursor.fetchall()
+            path = os.path.join(globalSettings['bannerLocation'], uri)
+            os.remove(os.path.join(path, name))
+            return redirect(url_for('manageBoard', data=globalSettings, bannerData=bannerData)) #Find a better solution for this. 
+        # except Exception as e:
+        #     return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings) 
 
 #Account stuff  Most of it isn't mine lol. 
 @app.route('/login/', methods=['GET', 'POST'])
