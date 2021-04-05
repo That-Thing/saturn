@@ -229,3 +229,13 @@ p {
     display: flex;
     margin: 10px;
 }
+
+/*Board*/
+#banner {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+#boardInfo {
+    margin-top: 5%;
+}

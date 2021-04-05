@@ -14,8 +14,11 @@
                 <a href="settings"><i class="fas fa-cog textIcon"></i>Settings</a>
             </span>
         </nav>
-        <h1 class="center">/{{board}}/ - {{boardData['name']}}</h1>
-        <h2 class="center">{{boardData['description']}}</h2>
+        <div id="boardInfo">
+            <img src="../{{data['bannerLocation']}}/{{board}}/{{banner}}" id="banner">
+            <h1 class="center">/{{board}}/ - {{boardData['name']}}</h1>
+            <h2 class="center">{{boardData['description']}}</h2>
+        </div>
         <div class="authorContainer">
             
         </div>

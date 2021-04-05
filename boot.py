@@ -10,6 +10,7 @@ import os
 import time
 import pathlib
 import math
+import random
 with open('./config/config.json') as configFile: #global config file
     configData = json.load(configFile)
 with open('./config/database.json') as configFile: #database config
@@ -412,7 +413,15 @@ def boardPage(board):
     boards = cursor.fetchall()
     for x in boards:
         if x['uri'] == board:
-            return render_template('thread.html', data=globalSettings, board=board, boardData=x)
+            path = os.path.join(globalSettings['bannerLocation'], board)
+            print(path)
+            print(os.listdir(path))
+            if len(os.listdir(path)) > 0:
+                banner = random.choice(os.listdir(path))
+            else:
+                banner = "static/banners/defaultbanner.png"
+            #banner = random.choice(os.listdir(path))
+            return render_template('board.html', data=globalSettings, board=board, boardData=x, banner=banner)
 
 
 
