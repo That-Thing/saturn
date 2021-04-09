@@ -1,0 +1,21 @@
+#authorContainer {
+    margin: auto;
+    width: 50%;
+    text-align:center;
+}
+#toggleAuthorBox {
+    margin: auto;
+    width: 50%;
+    text-align:center;
+}
+#banner {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+#boardInfo {
+    margin-top: 5%;
+}
+#boardInfo h1, h4 {
+    font-weight: normal;
+}

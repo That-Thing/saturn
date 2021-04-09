@@ -3,6 +3,7 @@
         <title>/{{board}}/ - {{boardData['name']}}</title>
         <meta charset="UTF-8">
         <link href="../static/css/global.css" type="text/css" rel="stylesheet">
+        <link href="../static/css/board.css" type="text/css" rel="stylesheet">
         <link rel="shortcut icon" type="image/png" href="../{{data['faviconUrl']}}"/>
         <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
     </head>
@@ -19,8 +20,17 @@
             <h1 class="center">/{{board}}/ - {{boardData['name']}}</h1>
             <h4 class="center">{{boardData['description']}}</h4>
         </div>
-        <div class="authorContainer">
-            
+        <div id="toggleAuthorBox">
+            <button onclick="showAuthor()">Start a new thread</button>
         </div>
+        <div id="authorContainer" style="display: none;">  
+            <form action="/newThread" method="POST">
+                <tr id="nameField">
+                    <td>Name</td>
+                    <td><input type="text" name="name" autocomplete="off" placeholder="Anonymous"></td>
+                </tr>
+            </form>
+        </div>
+        <script src="../static/js/board.js"></script>
     </body>
 </html>
