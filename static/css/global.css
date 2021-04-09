@@ -239,3 +239,6 @@ p {
 #boardInfo {
     margin-top: 5%;
 }
+#boardInfo h1, h4 {
+    font-weight: normal;
+}

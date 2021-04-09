@@ -211,11 +211,11 @@ def manageBoard():
     msg=""
     cursor.execute("SELECT * FROM banners WHERE board=%s", [uri])
     bannerData = cursor.fetchall()
-    try:
-        if session['group'] == 'administrator' or sqlData['owner'] == session['username']:
-            return render_template('manageBoard.html', data=globalSettings, sqlData=sqlData, bannerData=bannerData, msg=msg)
-    except Exception as e:
-        return render_template('error.html', errorMsg="Not logged in", data=globalSettings)
+    # try:
+    if session['group'] == 'administrator' or sqlData['owner'] == session['username']:
+        return render_template('manageBoard.html', data=globalSettings, sqlData=sqlData, bannerData=bannerData, msg=msg)
+    # except Exception as e:
+    #     return render_template('error.html', errorMsg="Not logged in", data=globalSettings)
 #create board
 @app.route('/createboard', methods=['POST'])
 def createBoard():
@@ -288,8 +288,7 @@ def uploadBanner():
                 mysql.connection.commit()
                 cursor.execute("SELECT * FROM banners WHERE board=%s", [uri])
                 bannerData = cursor.fetchall()
-                #return redirect(url_for('manageBoard'))
-                return redirect(url_for('manageBoard', data=globalSettings, bannerData=bannerData)) #Find a better solution for this. 
+                return redirect(url_for('manageBoard', uri=uri)) #Find a better solution for this. 
         except Exception as e:
             return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings) 
 @app.route('/deletebanner', methods=['POST'])
@@ -310,7 +309,7 @@ def deleteBanner():
             bannerData = cursor.fetchall()
             path = os.path.join(globalSettings['bannerLocation'], uri)
             os.remove(os.path.join(path, name))
-            return redirect(url_for('manageBoard', data=globalSettings, bannerData=bannerData)) #Find a better solution for this. 
+            return redirect(url_for('manageBoard', uri=uri)) #Find a better solution for this. 
         # except Exception as e:
         #     return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings) 
 
@@ -417,7 +416,7 @@ def boardPage(board):
             print(path)
             print(os.listdir(path))
             if len(os.listdir(path)) > 0:
-                banner = random.choice(os.listdir(path))
+                banner = os.path.join(path, random.choice(os.listdir(path)))
             else:
                 banner = "static/banners/defaultbanner.png"
             #banner = random.choice(os.listdir(path))
