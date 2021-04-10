@@ -437,8 +437,6 @@ def boardPage(board):
     for x in boards:
         if x['uri'] == board:
             path = os.path.join(globalSettings['bannerLocation'], board)
-            print(path)
-            print(os.listdir(path))
             if len(os.listdir(path)) > 0:
                 banner = os.path.join(path, random.choice(os.listdir(path)))
             else:

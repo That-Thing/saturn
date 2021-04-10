@@ -3,16 +3,32 @@
     width: 50%;
     text-align:center;
 }
+#authorContainer table {
+    margin: auto;
+}
 .authorLabel {
-    font-weight: bold;
+    font-weight: normal;
     text-align: left;
     width: 100px;
-    padding-left: 5px;
-    padding-right: 5px;
+    padding: 0 5px;
     background-color: #32393f;
+    border: 1px solid #464f57;
 }
-
-
+.authorInput {
+    float: left;
+    border: 1px solid #464f57;
+    width: 244px;
+}
+#postButton {
+    float: left;
+    margin: 0 5px;
+    background: #32393f;
+    color: #ACACAC;
+    border: 1px solid #2f373d;
+}
+#postButton:hover {
+    background: #2a3137;
+}
 #toggleAuthorBox {
     margin: auto;
     width: 50%;
@@ -28,4 +44,14 @@
 }
 #boardInfo h1, h4 {
     font-weight: normal;
+}
+button {
+    background: #1e2327;
+    color: #ACACAC;
+    border: 1px solid #2f373d;
+    padding: 3px 5px;
+
+}
+button:hover {
+    background: #2a3137;
 }
