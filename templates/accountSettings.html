@@ -20,20 +20,20 @@
              <div id="accountSettings" class="settingsCategory">
                 <h3 style="text-align: center;">Welcome {{session['username']}} [{{session['group']}}]</h3>    
                 <div id="serverSettings" class="settingsCategory">
-                    <form action="/saveAccountSettings" method="POST">
+                    <form action="/updatePassword" method="POST">
                         <hr>
                         <h4>Password Change <span class="small">You will have to log back in</span></h4> 
                         <label> 
                             Current password:
-                            <input type="text" name="currentPassword" id="currentPasswordInput">
+                            <input type="text" name="currentPassword" id="currentPasswordInput" required autocomplete="off">
                         </label>
                         <label> 
                             New password:
-                            <input type="text" name="newPassword" id="newPasswordInput">
+                            <input type="text" name="newPassword" id="newPasswordInput" required autocomplete="off">
                         </label>
                         <label> 
                             Confirm password:
-                            <input type="text" name="confirmPassword" id="confirmPasswordInput">
+                            <input type="text" name="confirmPassword" id="confirmPasswordInput" required autocomplete="off">
                         </label>
                         <p><input class="btn btn-primary" type="submit" value="update password"></p>
                     </form>
@@ -41,7 +41,7 @@
                     <form action="/updateemail" method="POST">
                         <label> 
                             E-mail:
-                            <input type="text" name="email" id="emailInput" value="{{session['email']}}">
+                            <input type="text" name="email" id="emailInput" value="{{session['email']}}" autocomplete="off" required>
                             <input class="btn btn-primary" type="submit" value="update e-mail">
                         </label>
                         <span class="small">You will need to log out and log back in</span>

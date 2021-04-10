@@ -40,10 +40,9 @@ with open('./config/database.json') as configFile: #database config
 
 #TO DO:
 #Polish server settings
-#Make User settings
-#make board creation
-#make board settings
-
+#polish user settings
+#add more board settings
+#finish making board template
 
 
 #flask app configuration
@@ -162,8 +161,33 @@ def accountSettings():
             return render_template('error.html', errorMsg="Not logged in", data=globalSettings) 
     except Exception as e:
         return render_template('error.html', errorMsg="Not logged in", data=globalSettings)   
-# @app.route('/saveAccountSettings', methods=['POST'])
-# def saveAccountSettings():
+@app.route('/updatePassword', methods=['POST'])
+def updatePassword():
+    if request.method == 'POST':
+        if session['loggedin'] == True:
+            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute("SELECT * FROM accounts WHERE username=%s", [session['username']])
+            accountData = cursor.fetchall()
+            accountData = accountData[0]
+            currentPassword = request.form['currentPassword']
+            newPassword = request.form['newPassword']
+            confirmPassword = request.form['confirmPassword']
+            if currentPassword == accountData['password']:
+                if newPassword == confirmPassword:
+                    cursor.execute("UPDATE accounts SET password=%s WHERE username=%s", (newPassword, session['username']))
+                    mysql.connection.commit()
+                    session.pop('loggedin', None)
+                    session.pop('id', None)
+                    session.pop('username', None)
+                    session.pop('group', None)
+                    return render_template('login.html', msg="Password successfully updated, please log in.", data=globalSettings)
+                else:
+                    return render_template('error.html', errorMsg="New passwords don't match.", data=globalSettings)  
+            else:
+                return render_template('error.html', errorMsg="Current password is incorrect.", data=globalSettings)  
+
+            
+
 
 @app.route('/updateemail', methods=['POST'])
 def updateEmail():
