@@ -37,15 +37,15 @@
                 <form id="createBoard" action="/createboard" method="POST">
                     <label> 
                         Board URI:
-                        <input type="text" name="uri" id="uriInput" class="settingsInput" placeholder="ex: b" required>
+                        <input type="text" name="uri" id="uriInput" class="settingsInput" placeholder="ex: b" required autocomplete="off">
                     </label>
                     <label> 
                         Board Name:
-                        <input type="text" name="name" id="boardNameInput" class="settingsInput" placeholder="ex: Random" required>
+                        <input type="text" name="name" id="boardNameInput" class="settingsInput" placeholder="ex: Random" required autocomplete="off">
                     </label>
                     <label> 
                         Board Description:
-                        <input type="text" name="description" id="boarddescriptionInput" class="settingsInput" placeholder="ex: The random board" required>
+                        <input type="text" name="description" id="boarddescriptionInput" class="settingsInput" placeholder="ex: The random board" required autocomplete="off">
                     </label>
                     <input class="btn btn-primary" type="submit" value="Create Board">
                 </form>

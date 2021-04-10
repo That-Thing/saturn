@@ -23,30 +23,30 @@
                     <hr>
                     <label>
                         Server Port:
-                        <input type="text" name="port" id="serverPortInput" value="{{data['port']}}"> <span class="small">Server must be restarted</span>
+                        <input type="text" name="port" id="serverPortInput" value="{{data['port']}}" required autocomplete="off"> <span class="small">Server must be restarted</span>
                     </label>
                     <label>
                         Media Location:
-                        <input type="text" name="mediaLocation" id="serverMediaLocationInput" value="{{data['mediaLocation']}}">
+                        <input type="text" name="mediaLocation" id="serverMediaLocationInput" value="{{data['mediaLocation']}}" required autocomplete="off"> 
                     </label>
                     <hr>
                     <h3>Site Settings</h3>
                     <hr>
                     <label>
                         Site Name:
-                        <input type="text" name="siteName" id="siteNameInput" value="{{data['siteName']}}">
+                        <input type="text" name="siteName" id="siteNameInput" value="{{data['siteName']}}" required autocomplete="off">
                     </label>
                     <label>
                         Logo:
-                        <input type="text" name="siteLogo" id="siteLogoInput" value="{{data['logoUrl']}}">
+                        <input type="text" name="siteLogo" id="siteLogoInput" value="{{data['logoUrl']}}" required autocomplete="off">
                     </label>
                     <label>
                         Favicon:
-                        <input type="text" name="siteFavicon" id="siteFaviconInput" value="{{data['faviconUrl']}}"> <span class="small">Must be in PNG format</span>
+                        <input type="text" name="siteFavicon" id="siteFaviconInput" value="{{data['faviconUrl']}}" required autocomplete="off"> <span class="small">Must be in PNG format</span>
                     </label>
                     <label>
                         Banner Location:
-                        <input type="text" name="bannerLocation" id="bannerLocationInput" value="{{data['bannerLocation']}}"> <span class="small">This decides where uploaded banners will be kept</span>
+                        <input type="text" name="bannerLocation" id="bannerLocationInput" value="{{data['bannerLocation']}}" required autocomplete="off"> <span class="small">This decides where uploaded banners will be kept</span>
                     </label>
                     <label>
                         Required role for board creation:
