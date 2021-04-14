@@ -58,3 +58,25 @@ button:hover {
 .captcha {
     margin-bottom: 2px;
 }
+#fileInput {
+    margin-right: 10px;
+    width: 200px;
+    float: left;
+    font-size: 90%;
+}
+li {
+    list-style-type: disc;
+}
+#rules ul{
+    margin: 0px;
+    float: left;
+    padding: 0 15px;
+}
+#spoiler {
+    font-size: 80%;
+}
+#boardMessage {
+    font-size: 70%;
+    margin: 1em;
+    text-align: center;
+}

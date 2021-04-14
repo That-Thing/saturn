@@ -75,6 +75,7 @@ input, select, textarea {
     background: #32393f;
     color: #ACACAC;
     font-size: 100%;
+    max-width: 100%;
 }
 /*Fontawesome icons next to text*/
 .textIcon {

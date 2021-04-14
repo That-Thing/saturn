@@ -51,9 +51,28 @@
                                 
                             </tr>
                         {% endif %}
+                        <tr>
+                            <td class="authorLabel">File</td>
+                            <td>
+                                <input id="fileInput" name="file" type="file" tabindex="7">
+                                <span id="spoiler">[<label><input type="checkbox" name="spoiler" value="on" tabindex="8">Spoiler?</label>]</span>
+                            </td>
+                        </tr>
+                        <tr id="rules">
+                            <td colspan="2">
+                                <ul id="rules">
+                                    <li class="small">Please read the <a href="rules">Board Rules</a> and <a href="../globalRules">Global Rules</a> before posting.</li>
+                                </ul>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </form>
+            
+            <div id="boardMessage">
+                <hr>
+                {{boardData['message']}}
+            </div>
         </div>
         <script src="../static/js/board.js"></script>
     </body>

@@ -261,7 +261,7 @@ def createBoard():
                 if board:
                     return redirect(url_for('boardManagement', msg="Board already exists"))
                 else:    
-                    cursor.execute("INSERT INTO boards VALUES (%s, %s, %s, %s, 0, 0, 0, 0)",(request.form['uri'], request.form['name'], request.form['description'], session['username'])) #create the board in the MySQL database
+                    cursor.execute("INSERT INTO boards VALUES (%s, %s, %s, %s, 'Anonymous', '', 0, 0, 0, 0)",(request.form['uri'], request.form['name'], request.form['description'], session['username'])) #create the board in the MySQL database
                     mysql.connection.commit()
                     path = os.path.join(globalSettings['bannerLocation'], request.form['uri']) #make folder for banner. 
                     os.mkdir(path) 
@@ -269,6 +269,7 @@ def createBoard():
             else:
                 return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings) 
         except Exception as e:
+            print(e)
             return render_template('error.html', errorMsg="Not logged in", data=globalSettings) 
 #delete board
 @app.route('/deleteboard', methods=['POST'])
@@ -312,7 +313,6 @@ def updateBoard():
                 anonymous = request.form['anonymous']
                 message = request.form['message']
                 captcha = request.form['captcha']
-                print(f"UPDATE boards SET name={name}, description={desc}, anonymous={anonymous}, message={message} WHERE uri={uri}")
                 cursor.execute("UPDATE boards SET name=%s, description=%s, anonymous=%s, message=%s, captcha=%s WHERE uri=%s", (name, desc, anonymous, message, captcha, uri))
                 mysql.connection.commit()
                 return redirect(url_for('manageBoard', uri=uri))
