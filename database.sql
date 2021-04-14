@@ -44,9 +44,12 @@ CREATE TABLE IF NOT EXISTS `boards` (
   `name` varchar(100) NOT NULL,
   `description` varchar(250) NOT NULL,
   `owner` varchar(250) NOT NULL,
+  `anonymous` tinytext NOT NULL DEFAULT 'Anonymous',
+  `message` tinytext DEFAULT '',
   `posts` int(250) DEFAULT NULL,
   `PPH` int(250) DEFAULT NULL,
-  `users` int(250) DEFAULT NULL
+  `users` int(250) DEFAULT NULL,
+  `captcha` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='The list of boards. ';
 
 -- Data exporting was unselected.

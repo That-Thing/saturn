@@ -30,7 +30,7 @@
                     <tbody>
                         <tr>
                             <td class="authorLabel">Name</td>
-                            <td><input class="authorInput" type="text" tabindex="1" name="name" autocomplete="off" placeholder="Anonymous"></td>
+                            <td><input class="authorInput" type="text" tabindex="1" name="name" autocomplete="off" placeholder="{{boardData['anonymous']}}"></td>
                         </tr>
                         <tr>
                             <td class="authorLabel">Options</td>
@@ -44,6 +44,13 @@
                             <td class="authorLabel">Comment</td>
                             <td><textarea class="authorInput" name="comment" cols="48" rows="4" wrap="soft" tabindex="4" style="width: 292px;"></textarea></td>
                         </tr>
+                        {% if boardData['captcha'] == 1 %}
+                            <tr>
+                                <td class="authorLabel">Verification</td>
+                                <td style="display: grid;"><img src="../{{captcha}}" tabindex="5" class="captcha"><input class="authorInput" tabindex="6" type="text" name="captcha" autocomplete="off"></td>
+                                
+                            </tr>
+                        {% endif %}
                     </tbody>
                 </table>
             </form>

@@ -229,3 +229,6 @@ p {
     display: flex;
     margin: 10px;
 }
+.captcha {
+    float: left;
+}

@@ -11,10 +11,14 @@ import time
 import pathlib
 import math
 import random
+import string
+from captcha.image import ImageCaptcha
 with open('./config/config.json') as configFile: #global config file
     configData = json.load(configFile)
 with open('./config/database.json') as configFile: #database config
     databaseConfig = json.load(configFile)
+
+captcha = ImageCaptcha(fonts=['./static/fonts/quicksand.ttf']) #Fonts for captcha. 
 
 
 #           _                        
@@ -41,9 +45,10 @@ with open('./config/database.json') as configFile: #database config
 #TO DO:
 #Polish server settings
 #polish user settings
+#Invade poland
 #add more board settings
 #finish making board template
-
+#write thing to sell data to google for cheap >:)
 
 #flask app configuration
 app = flask.Flask(__name__)
@@ -95,6 +100,9 @@ def convert_size(size_bytes):
    return "%s %s" % (s, size_name[i])
 
 
+#Random string generator for captcha. Thanks StackOverflow :^)
+def randomString(size, chars=string.ascii_lowercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
 
 
 #index
@@ -253,7 +261,7 @@ def createBoard():
                 if board:
                     return redirect(url_for('boardManagement', msg="Board already exists"))
                 else:    
-                    cursor.execute("INSERT INTO boards VALUES (%s, %s, %s, %s, 0, 0, 0)",(request.form['uri'], request.form['name'], request.form['description'], session['username'])) #create the board in the MySQL database
+                    cursor.execute("INSERT INTO boards VALUES (%s, %s, %s, %s, 0, 0, 0, 0)",(request.form['uri'], request.form['name'], request.form['description'], session['username'])) #create the board in the MySQL database
                     mysql.connection.commit()
                     path = os.path.join(globalSettings['bannerLocation'], request.form['uri']) #make folder for banner. 
                     os.mkdir(path) 
@@ -285,6 +293,29 @@ def deleteBoard():
                         return redirect(url_for('boardManagement', msg=uri + " successfully deleted"))
                 except Exception as e:
                     return render_template('manageBoard.html', data=globalSettings, sqlData=sqlData, msg="Please confirm board deletion") #probably could have done better
+        except Exception as e:
+            return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings) 
+
+@app.route('/updateBoard', methods=['POST'])
+def updateBoard():
+    if request.method == 'POST':
+        uri = request.args.get('uri', type=str)
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT * FROM boards WHERE uri=%s", [uri])
+        boardData = cursor.fetchall()
+        boardData = boardData[0]
+        try:
+            if boardData['owner'] == session['username'] or session['group'] == 'administrator':
+
+                name = request.form['name']
+                desc = request.form['description']
+                anonymous = request.form['anonymous']
+                message = request.form['message']
+                captcha = request.form['captcha']
+                print(f"UPDATE boards SET name={name}, description={desc}, anonymous={anonymous}, message={message} WHERE uri={uri}")
+                cursor.execute("UPDATE boards SET name=%s, description=%s, anonymous=%s, message=%s, captcha=%s WHERE uri=%s", (name, desc, anonymous, message, captcha, uri))
+                mysql.connection.commit()
+                return redirect(url_for('manageBoard', uri=uri))
         except Exception as e:
             return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings) 
 #banner management
@@ -420,14 +451,19 @@ def register():
 
 
 
+#generate captcha for the board
+#Syntax: generateCaptcha(captcha length)
+def generateCaptcha(difficulty):
+    captchaText = randomString(difficulty)
+    print("#########################")
+    print(captchaText)
+    print("#########################")
+    currentCaptcha = captcha.generate(captchaText)
+    filename = time.time()
+    captcha.write(captchaText, f'./static/captchas/{filename}.png')
+    return f'./static/captchas/{filename}.png'
 
-
-
-
-
-
-
-
+#board page
 @app.route('/<board>/', methods=['GET'])
 @app.route('/<board>', methods=['GET'])
 def boardPage(board):
@@ -441,8 +477,13 @@ def boardPage(board):
                 banner = os.path.join(path, random.choice(os.listdir(path)))
             else:
                 banner = "static/banners/defaultbanner.png"
-            #banner = random.choice(os.listdir(path))
-            return render_template('board.html', data=globalSettings, board=board, boardData=x, banner=banner)
+
+            print(x['captcha'])
+            if x['captcha'] == 1:
+                captcha = generateCaptcha(5)
+                return render_template('board.html', data=globalSettings, board=board, boardData=x, banner=banner, captcha=captcha)
+            else:
+                return render_template('board.html', data=globalSettings, board=board, boardData=x, banner=banner)
 
 
 

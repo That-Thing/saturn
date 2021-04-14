@@ -28,6 +28,40 @@
                 <p class="small center">Deleting the board will also delete all of the posts made on the board</p>
                 <div class="msg">{{msg}}</div>
             </form>
+            <div class="settingsCategory">
+                <form action="/updateBoard?uri={{sqlData['uri']}}" method="POST">
+                    <h3>Board Settings</h3>
+                    <label>
+                        Board Name:
+                        <input type="text" name="name" value="{{sqlData['name']}}" required autocomplete="off">
+                    </label>
+                    <label>
+                        Board Description:
+                        <input type="text" name="description" value="{{sqlData['description']}}" required autocomplete="off">
+                    </label>
+                    <label>
+                        Default Anonymous Name:
+                        <input type="text" name="anonymous" value="{{sqlData['anonymous']}}" required autocomplete="off">
+                    </label>
+                    <label>
+                        Board Message:
+                        <textarea type="textarea" name="message" required wrap="soft" tabindex="4" style="width: 100%">{{sqlData['message']}}</textarea>
+                    </label>
+                    <label>
+                        Captcha:
+                        <select name="captcha">
+                            {% if sqlData['captcha'] == 1 %}
+                                <option value="1" selected>on</option>
+                                <option value="2">off</option>
+                            {% else %}
+                                <option value="1">on</option>
+                                <option value="2" selected>off</option>
+                            {% endif %}
+                        </select>
+                    </label>
+                    <p><input class="btn btn-primary" type="submit" value="Update /{{sqlData['uri']}}/"></p>
+                </form>
+            </div>
             <hr>
             <div id="bannerManagement">
                 <h3 class="center">Banners</h3>

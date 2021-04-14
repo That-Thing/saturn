@@ -1,6 +1,6 @@
 #authorContainer {
     margin: auto;
-    width: 50%;
+    width: auto;
     text-align:center;
 }
 #authorContainer table {
@@ -54,4 +54,7 @@ button {
 }
 button:hover {
     background: #2a3137;
+}
+.captcha {
+    margin-bottom: 2px;
 }
