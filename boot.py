@@ -312,6 +312,7 @@ def updateBoard():
                 desc = request.form['description']
                 anonymous = request.form['anonymous']
                 message = request.form['message']
+                print(message)
                 captcha = request.form['captcha']
                 cursor.execute("UPDATE boards SET name=%s, description=%s, anonymous=%s, message=%s, captcha=%s WHERE uri=%s", (name, desc, anonymous, message, captcha, uri))
                 mysql.connection.commit()

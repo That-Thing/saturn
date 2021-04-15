@@ -76,7 +76,10 @@ li {
     font-size: 80%;
 }
 #boardMessage {
-    font-size: 70%;
+    font-size: 80%;
     margin: 1em;
     text-align: center;
+}
+#boardMessage span {
+    white-space: pre-line;
 }
