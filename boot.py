@@ -464,6 +464,14 @@ def generateCaptcha(difficulty):
     captcha.write(captchaText, f'./static/captchas/{filename}.png')
     return f'./static/captchas/{filename}.png'
 
+#get all threads for a board
+def getThreads(uri):
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT * FROM posts WHERE board = %s AND type = 1", (uri))
+    threads = cursor.fetchall()
+    print(threads)
+    return threads
+
 #board page
 @app.route('/<board>/', methods=['GET'])
 @app.route('/<board>', methods=['GET'])
@@ -482,13 +490,51 @@ def boardPage(board):
             print(x['captcha'])
             if x['captcha'] == 1:
                 captcha = generateCaptcha(5)
-                return render_template('board.html', data=globalSettings, board=board, boardData=x, banner=banner, captcha=captcha)
+                return render_template('board.html', data=globalSettings, board=board, boardData=x, banner=banner, captcha=captcha, threads=getThreads(board))
             else:
-                return render_template('board.html', data=globalSettings, board=board, boardData=x, banner=banner)
+                return render_template('board.html', data=globalSettings, board=board, boardData=x, banner=banner, threads=getThreads(board))
 
 
-
-
-
+@app.route('/newThread', methods=['POST'])
+def newThread():
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT * FROM boards")
+    boards = cursor.fetchall()
+    for x in boards:
+        if x['uri'] == request.form['board']:
+            if x['captcha'] == 1:
+                if request.method == 'POST' and 'comment' in request.form and 'captcha' in request.form:
+                    #Add captcha
+                    if "name" in request.form:
+                        name = request.form['name']
+                    else:
+                        name = x['anonymous']
+                    if 'subject' in request.form:
+                        subject = request.form['subject']
+                    else:
+                        subject = ""
+                    if 'options' in request.form:
+                        options = request.form['options']
+                    else:
+                        options = ""
+                    cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s)', (name, subject, options, request.form['message'])) #parse message later
+            else:
+                if request.method == 'POST' and 'comment' in request.form:
+                    if "name" in request.form:
+                        name = request.form['name']
+                    else:
+                        name = x['anonymous']
+                    if 'subject' in request.form:
+                        subject = request.form['subject']
+                    else:
+                        subject = ""
+                    if 'options' in request.form:
+                        options = request.form['options']
+                    else:
+                        options = ""
+                    for f in request.form['files']:
+                        f.save(f"{globalSettings['mediaLocation']}/{secure_filename(f.filename)}")
+                        url = f"{globalSettings['mediaLocation']}/{secure_filename(f.filename)}" #figure out a way to get all urls into the thing
+                    cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s)', (name, subject, options, request.form['message'])) #parse message later
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=configData["port"])

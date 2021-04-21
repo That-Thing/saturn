@@ -26,6 +26,7 @@
         </div>
         <div id="authorContainer" style="display: none;">  
             <form action="/newThread" method="POST" id="authorForm">
+                <input type="hidden" name="board" value="{{board}}">
                 <table>
                     <tbody>
                         <tr>
@@ -72,6 +73,24 @@
         <div id="boardMessage">
             <hr>
             <span>{{boardData['message']}}</span>
+        </div>
+        <div id="boardNavigation">
+            <hr>
+            <span>
+              [<a href="/catalog">Catalog</a>]
+            </span>
+            <span>
+              [<a href="#footer">Bottom</a>]
+            </span>
+            <hr>
+        </div>
+        <div id="threadList">
+            {% for thread in threads %}
+                <div class="op">
+                    <hr>
+                    <span class="fileInfo"></span>
+                </div>
+            {% endfor %}
         </div>
         <script src="../static/js/board.js"></script>
     </body>
