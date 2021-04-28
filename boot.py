@@ -1,5 +1,5 @@
 import flask
-from flask import request, jsonify, render_template, url_for, session, redirect
+from flask import request, jsonify, render_template, url_for, session, redirect, send_from_directory
 from flask_mysqldb import MySQL
 import MySQLdb.cursors
 import re
@@ -108,6 +108,11 @@ def randomString(size, chars=string.ascii_lowercase + string.digits):
 def convertToBinary(f):
     binaryData = f.read()
     return binaryData
+
+#allow files in the media folder to be served
+@app.route('/media/<path:path>')
+def showMedia(path):
+    return send_from_directory(globalSettings['mediaLocation'], path)
 
 #index
 @app.route('/', methods=['GET'])
@@ -268,6 +273,8 @@ def createBoard():
                     cursor.execute("INSERT INTO boards VALUES (%s, %s, %s, %s, 'Anonymous', '', 0, 0, 0, 0)",(request.form['uri'], request.form['name'], request.form['description'], session['username'])) #create the board in the MySQL database
                     mysql.connection.commit()
                     path = os.path.join(globalSettings['bannerLocation'], request.form['uri']) #make folder for banner. 
+                    os.mkdir(path) 
+                    path = os.path.join(globalSettings['mediaLocation'], request.form['uri']) #make folder for files.  
                     os.mkdir(path) 
                     return redirect(url_for('boardManagement'))
             else:
@@ -500,15 +507,12 @@ def boardPage(board):
                 return render_template('board.html', data=globalSettings, board=board, boardData=x, banner=banner, threads=getThreads(board))
 
 
-def uploadFiles(f, board, number):
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    binary = f.read()
-    fileName = secure_filename(f.filename)
-    cursor.execute('INSERT INTO files VALUES (%s, %s, %s, %s)', (binary, fileName, board, number))
-    #cursor.execute(f'INSERT INTO files VALUES ({binary}, {fileName}, {number}, 1)')
-    print("Success!!!")
-    mysql.connection.commit()
-
+def uploadFile(f, board, filename):
+    extention = pathlib.Path(secure_filename(f.filename)).suffix
+    filename = filename+extention
+    print(filename)
+    f.save(os.path.join(globalSettings['mediaLocation'], board, filename))
+    return str(os.path.join(globalSettings['mediaLocation'], board, filename))
 @app.route('/newThread', methods=['POST'])
 def newThread():
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
@@ -534,11 +538,19 @@ def newThread():
                             options = ""
                         #add max file amount exceeded here.                    
                         files = request.files.getlist("file")
-                        for f in files:
-                            uploadFiles(f, x['uri'], x['posts']+1)     
-                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s)', (name, subject, options, request.form['comment'], x['posts']+1, time.time(), x['uri'])) #parse message later
+                        curTime = time.time()
+                        filenames = []
+                        filePaths = []
+                        for f in files: #CHANGE SO THAT IT STORES FILES ON DISK BECAUSE IM FUCKING STUPID
+                            filename = uploadFile(f, x['uri'], str(curTime))
+                            filePaths.append(filename)
+                            filenames.append(secure_filename(f.filename))
+                        filenames = ','.join([str(x) for x in filenames])
+                        filePaths = ','.join([str(x) for x in filePaths])
+                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s)', (name, subject, options, request.form['comment'], x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames))) #parse message later
+                        cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (x['posts']+1, x['uri']))
                         mysql.connection.commit()
-                        return 'thread created'
+                        return 'thread created' #change to something better
                     else:
                         return "Incorrect captcha"
                 else:
@@ -559,10 +571,18 @@ def newThread():
                         options = ""
                     #add max file amount exceeded here.
                     files = request.files.getlist("file")
-                    for f in files:
-                        uploadFiles(f, x['uri'], x['posts']+1)     
-                    cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s)', (name, subject, options, request.form['comment'], x['posts']+1, time.time(), x['uri'])) #parse message later
+                    curTime = time.time()
+                    filenames = []
+                    filePaths = []
+                    for f in files: #CHANGE SO THAT IT STORES FILES ON DISK BECAUSE IM FUCKING STUPID
+                        filename = uploadFile(f, x['uri'], str(curTime))
+                        filePaths.append(filename)
+                        filenames.append(secure_filename(f.filename))
+                    filenames = ','.join([str(x) for x in filenames])
+                    filePaths = ','.join([str(x) for x in filePaths])
+                    cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s)', (name, subject, options, request.form['comment'], x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames))) #parse message later
+                    cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (x['posts']+1, x['uri']))
                     mysql.connection.commit()
-                    return 'thread created'
+                    return 'thread created' #change to something better
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=configData["port"])

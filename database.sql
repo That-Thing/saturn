@@ -54,16 +54,6 @@ CREATE TABLE IF NOT EXISTS `boards` (
 
 -- Data exporting was unselected.
 
--- Dumping structure for table saturn.files
-CREATE TABLE IF NOT EXISTS `files` (
-  `file` blob NOT NULL COMMENT 'Binary data of the file',
-  `filename` tinytext NOT NULL,
-  `board` tinytext NOT NULL,
-  `post` int(11) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- Data exporting was unselected.
-
 -- Dumping structure for table saturn.posts
 CREATE TABLE IF NOT EXISTS `posts` (
   `name` tinytext DEFAULT NULL,
@@ -74,19 +64,9 @@ CREATE TABLE IF NOT EXISTS `posts` (
   `date` int(11) NOT NULL COMMENT 'Unix Timestamp',
   `type` int(1) NOT NULL COMMENT '1 for thread, 2 for reply',
   `thread` int(11) DEFAULT NULL,
-  `board` tinytext NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- Data exporting was unselected.
-
--- Dumping structure for table saturn.threads
-CREATE TABLE IF NOT EXISTS `threads` (
-  `name` tinytext DEFAULT NULL,
-  `subject` tinytext DEFAULT NULL,
-  `options` tinytext DEFAULT NULL,
-  `message` text NOT NULL,
-  `files` varchar(50) NOT NULL,
-  `number` int(11) NOT NULL
+  `board` tinytext NOT NULL,
+  `files` text DEFAULT NULL,
+  `filenames` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Data exporting was unselected.
