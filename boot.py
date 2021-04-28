@@ -104,6 +104,10 @@ def convert_size(size_bytes):
 def randomString(size, chars=string.ascii_lowercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
+#convert file to binary data.
+def convertToBinary(f):
+    binaryData = f.read()
+    return binaryData
 
 #index
 @app.route('/', methods=['GET'])
@@ -462,12 +466,13 @@ def generateCaptcha(difficulty):
     currentCaptcha = captcha.generate(captchaText)
     filename = time.time()
     captcha.write(captchaText, f'./static/captchas/{filename}.png')
+    session["captcha"] = captchaText #find a better solution for this
     return f'./static/captchas/{filename}.png'
 
 #get all threads for a board
 def getThreads(uri):
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT * FROM posts WHERE board = %s AND type = 1", (uri))
+    cursor.execute("SELECT * FROM posts WHERE board = %s AND type = 1", [uri])
     threads = cursor.fetchall()
     print(threads)
     return threads
@@ -495,6 +500,15 @@ def boardPage(board):
                 return render_template('board.html', data=globalSettings, board=board, boardData=x, banner=banner, threads=getThreads(board))
 
 
+def uploadFiles(f, board, number):
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    binary = f.read()
+    fileName = secure_filename(f.filename)
+    cursor.execute('INSERT INTO files VALUES (%s, %s, %s, %s)', (binary, fileName, board, number))
+    #cursor.execute(f'INSERT INTO files VALUES ({binary}, {fileName}, {number}, 1)')
+    print("Success!!!")
+    mysql.connection.commit()
+
 @app.route('/newThread', methods=['POST'])
 def newThread():
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
@@ -503,21 +517,32 @@ def newThread():
     for x in boards:
         if x['uri'] == request.form['board']:
             if x['captcha'] == 1:
-                if request.method == 'POST' and 'comment' in request.form and 'captcha' in request.form:
-                    #Add captcha
-                    if "name" in request.form:
-                        name = request.form['name']
+                if request.method == 'POST' and 'comment' in request.form and 'captcha' in request.form and 'file' in request.form:
+                    print(session['captcha'])
+                    if session['captcha'] == request.form['captcha']:
+                        if "name" in request.form:
+                            name = request.form['name']
+                        else:
+                            name = x['anonymous']
+                        if 'subject' in request.form:
+                            subject = request.form['subject']
+                        else:
+                            subject = ""
+                        if 'options' in request.form:
+                            options = request.form['options']
+                        else:
+                            options = ""
+                        #add max file amount exceeded here.                    
+                        files = request.files.getlist("file")
+                        for f in files:
+                            uploadFiles(f, x['uri'], x['posts']+1)     
+                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s)', (name, subject, options, request.form['comment'], x['posts']+1, time.time(), x['uri'])) #parse message later
+                        mysql.connection.commit()
+                        return 'thread created'
                     else:
-                        name = x['anonymous']
-                    if 'subject' in request.form:
-                        subject = request.form['subject']
-                    else:
-                        subject = ""
-                    if 'options' in request.form:
-                        options = request.form['options']
-                    else:
-                        options = ""
-                    cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s)', (name, subject, options, request.form['message'])) #parse message later
+                        return "Incorrect captcha"
+                else:
+                    return "Please fill out all required forms"
             else:
                 if request.method == 'POST' and 'comment' in request.form:
                     if "name" in request.form:
@@ -532,9 +557,12 @@ def newThread():
                         options = request.form['options']
                     else:
                         options = ""
-                    for f in request.form['files']:
-                        f.save(f"{globalSettings['mediaLocation']}/{secure_filename(f.filename)}")
-                        url = f"{globalSettings['mediaLocation']}/{secure_filename(f.filename)}" #figure out a way to get all urls into the thing
-                    cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s)', (name, subject, options, request.form['message'])) #parse message later
+                    #add max file amount exceeded here.
+                    files = request.files.getlist("file")
+                    for f in files:
+                        uploadFiles(f, x['uri'], x['posts']+1)     
+                    cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s)', (name, subject, options, request.form['comment'], x['posts']+1, time.time(), x['uri'])) #parse message later
+                    mysql.connection.commit()
+                    return 'thread created'
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=configData["port"])

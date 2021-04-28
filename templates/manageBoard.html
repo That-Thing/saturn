@@ -71,7 +71,7 @@
                         <input type="file" id="fileElem" multiple accept="image/*" onchange="handleFiles(this.files)">
                         <label class="button center" for="fileElem">Drag or select files</label>
                     </form>
-                  </div>
+                </div>
             </div>
             <hr>
             <h4 class="center">Existing banners:</h4>
@@ -137,9 +137,6 @@
                 method: 'POST',
                 body: formData
                 
-            })
-            .then(() => {
-                console.log("Success!")   
             })
             .catch(() => {console.log("The opposite of success")})
             }
