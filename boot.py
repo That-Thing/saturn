@@ -325,7 +325,6 @@ def updateBoard():
                 desc = request.form['description']
                 anonymous = request.form['anonymous']
                 message = request.form['message']
-                print(message)
                 captcha = request.form['captcha']
                 cursor.execute("UPDATE boards SET name=%s, description=%s, anonymous=%s, message=%s, captcha=%s WHERE uri=%s", (name, desc, anonymous, message, captcha, uri))
                 mysql.connection.commit()
@@ -483,7 +482,6 @@ def getThreads(uri):
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("SELECT * FROM posts WHERE board = %s AND type = 1", [uri])
     threads = cursor.fetchall()
-    print(threads)
     return threads
 
 #board page
@@ -512,7 +510,6 @@ def boardPage(board):
 def uploadFile(f, board, filename):
     extention = pathlib.Path(secure_filename(f.filename)).suffix
     filename = filename+extention
-    print(filename)
     f.save(os.path.join(globalSettings['mediaLocation'], board, filename))
     return str(os.path.join(globalSettings['mediaLocation'], board, filename))
 @app.route('/newThread', methods=['POST'])
@@ -524,7 +521,6 @@ def newThread():
         if x['uri'] == request.form['board']:
             if x['captcha'] == 1:
                 if request.method == 'POST' and 'comment' in request.form and 'captcha' in request.form and 'file' in request.form:
-                    print(session['captcha'])
                     if session['captcha'] == request.form['captcha']:
                         if "name" in request.form:
                             name = request.form['name']
@@ -559,18 +555,19 @@ def newThread():
                     return "Please fill out all required forms"
             else:
                 if request.method == 'POST' and 'comment' in request.form:
-                    if "name" in request.form:
+                    print(request.form)
+                    if "name" in request.form and len(request.form['name']) > 0:
                         name = request.form['name']
                     else:
                         name = x['anonymous']
-                    if 'subject' in request.form:
+                    if 'subject' in request.form and len(request.form['subject']) > 0:
                         subject = request.form['subject']
                     else:
-                        subject = ""
-                    if 'options' in request.form:
+                        subject = "NULL"
+                    if 'options' in request.form and len(request.form['options']) > 0:
                         options = request.form['options']
                     else:
-                        options = ""
+                        options = "NULL"
                     #add max file amount exceeded here.
                     files = request.files.getlist("file")
                     curTime = time.time()
