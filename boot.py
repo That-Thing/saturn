@@ -8,11 +8,13 @@ from flask import session
 import json
 import os
 import time
+from datetime import datetime
 import pathlib
 import math
 import random
 import string
 from captcha.image import ImageCaptcha
+from PIL import Image
 with open('./config/config.json') as configFile: #global config file
     configData = json.load(configFile)
 with open('./config/database.json') as configFile: #database config
@@ -48,7 +50,13 @@ captcha = ImageCaptcha(fonts=['./static/fonts/quicksand.ttf']) #Fonts for captch
 #Invade poland
 #add more board settings
 #finish making board template
-#write thing to sell data to google for cheap >:)
+
+#add mime types and mime checking
+#add message formatting (greentext, pinktext, etc)
+#polish up thread creation
+#fix thumbnails
+#add expansion of thumbnail on click for posts
+
 
 #flask app configuration
 app = flask.Flask(__name__)
@@ -113,6 +121,18 @@ def convertToBinary(f):
 @app.route('/media/<path:path>')
 def showMedia(path):
     return send_from_directory(globalSettings['mediaLocation'], path)
+
+#filters
+
+#convert unix time to normal datetime
+@app.template_filter('ut')
+def normalizetime(timestamp):
+    return datetime.utcfromtimestamp(timestamp).strftime('%m/%d/%Y %H:%M:%S')
+@app.template_filter('splittext')
+def splittext(text):
+    return text.split('.')
+#Make local timestamps
+#add relative times
 
 #index
 @app.route('/', methods=['GET'])
@@ -507,11 +527,24 @@ def boardPage(board):
                 return render_template('board.html', data=globalSettings, board=board, boardData=x, banner=banner, threads=getThreads(board))
 
 
+#thumbnail generation
+def thumbnail(image, board, filename):
+    try:
+        image = Image.open(image)
+        size = 125, 125
+        image.thumbnail(size)
+        image.save(os.path.join(globalSettings['mediaLocation'], board, filename + "s.jpg"))
+    except IOError:
+        pass
 def uploadFile(f, board, filename):
     extention = pathlib.Path(secure_filename(f.filename)).suffix
-    filename = filename+extention
-    f.save(os.path.join(globalSettings['mediaLocation'], board, filename))
-    return str(os.path.join(globalSettings['mediaLocation'], board, filename))
+    nFilename = filename+extention
+    path = os.path.join(globalSettings['mediaLocation'], board, nFilename)
+    f.save(path)
+    thumbnail(path, board, filename) #generate thumbnail for uploaded image
+    return str(path)
+
+
 @app.route('/newThread', methods=['POST'])
 def newThread():
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
@@ -522,24 +555,24 @@ def newThread():
             if x['captcha'] == 1:
                 if request.method == 'POST' and 'comment' in request.form and 'captcha' in request.form and 'file' in request.form:
                     if session['captcha'] == request.form['captcha']:
-                        if "name" in request.form:
+                        if "name" in request.form and len(request.form['name']) > 0:
                             name = request.form['name']
                         else:
                             name = x['anonymous']
-                        if 'subject' in request.form:
+                        if 'subject' in request.form and len(request.form['subject']) > 0:
                             subject = request.form['subject']
                         else:
-                            subject = ""
-                        if 'options' in request.form:
+                            subject = "NULL"
+                        if 'options' in request.form and len(request.form['options']) > 0:
                             options = request.form['options']
                         else:
-                            options = ""
+                            options = "NULL"
                         #add max file amount exceeded here.                    
                         files = request.files.getlist("file")
                         curTime = time.time()
                         filenames = []
                         filePaths = []
-                        for f in files: #CHANGE SO THAT IT STORES FILES ON DISK BECAUSE IM FUCKING STUPID
+                        for f in files: #downloads the files and stores them on the disk
                             filename = uploadFile(f, x['uri'], str(curTime))
                             filePaths.append(filename)
                             filenames.append(secure_filename(f.filename))
@@ -555,7 +588,6 @@ def newThread():
                     return "Please fill out all required forms"
             else:
                 if request.method == 'POST' and 'comment' in request.form:
-                    print(request.form)
                     if "name" in request.form and len(request.form['name']) > 0:
                         name = request.form['name']
                     else:
@@ -563,17 +595,17 @@ def newThread():
                     if 'subject' in request.form and len(request.form['subject']) > 0:
                         subject = request.form['subject']
                     else:
-                        subject = "NULL"
+                        subject = ""
                     if 'options' in request.form and len(request.form['options']) > 0:
                         options = request.form['options']
                     else:
-                        options = "NULL"
+                        options = ""
                     #add max file amount exceeded here.
                     files = request.files.getlist("file")
                     curTime = time.time()
                     filenames = []
                     filePaths = []
-                    for f in files: #CHANGE SO THAT IT STORES FILES ON DISK BECAUSE IM FUCKING STUPID
+                    for f in files: #downloads the files and stores them on the disk
                         filename = uploadFile(f, x['uri'], str(curTime))
                         filePaths.append(filename)
                         filenames.append(secure_filename(f.filename))

@@ -233,3 +233,35 @@ p {
 .captcha {
     float: left;
 }
+
+/*posts*/
+.op {
+    font-size: 80%;
+    clear: left;
+}
+.postInfo {
+    font-weight: bold;
+}
+.subject {
+    color: #b294bb;
+}
+.name {
+    color: #81be84;
+}
+.postNumber {
+    color: #ACACAC;
+    text-decoration: none;
+}
+.comment {
+    display: block;
+}
+.linkImg {
+    float: left;
+}
+.thumbnail {
+    float: left;
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-top: 3px;
+    margin-bottom: 5px;
+}

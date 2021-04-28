@@ -18,7 +18,7 @@
         </nav>
         <div id="boardInfo">
             <img src="../{{banner}}" id="banner" alt="banner">
-            <h1 class="center">/{{board}}/ - {{boardData['name']}}</h1>
+            <h1 class="center" id="boardName">/{{board}}/ - {{boardData['name']}}</h1>
             <h4 class="center">{{boardData['description']}}</h4>
         </div>
         <div id="toggleAuthorBox">
@@ -88,8 +88,21 @@
             {% for thread in threads %}
                 <div class="op">
                     <hr>
-                    <span class="fileInfo"></span>
-                    
+                    <div class="fileInfo"></div>
+                    {%set files = thread['files'].split(',')%}
+                    {%for file in files%}
+                    <a class="linkImg" target="_blank" href="../{{file}}">
+                        <img loading="lazy" class="thumbnail" src="../{{ ((file| splittext)[:-1] | join('.')) }}s.jpg">
+                    </a>
+                    {%endfor%}
+                    <div class="postInfo">
+                        <span class="subject">{{thread['subject']}}</span>
+                        <span class="name">{{thread['name']}}</span>
+                        <span>{{thread['date'] | ut}}</span>
+                        <span><a class="postNumber">No.</a><a class="postNumber">{{thread['number']}}</a></span>
+                        <span>[<a class="reply">Reply</a>]</span>
+                    </div>
+                    <blockquote class="comment">{{thread['message']}}</blockquote>
                 </div>
             {% endfor %}
         </div>

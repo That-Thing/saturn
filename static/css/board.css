@@ -41,6 +41,10 @@
 }
 #boardInfo {
     margin-top: 5%;
+    font-size: 80%;
+}
+#boardName {
+    text-shadow: 1px 1px 1px rgb(167 170 168 / 60%);
 }
 #boardInfo h1, h4 {
     font-weight: normal;
@@ -83,3 +87,4 @@ li {
 #boardMessage span {
     white-space: pre-line;
 }
+
