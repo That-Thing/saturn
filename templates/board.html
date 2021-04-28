@@ -77,7 +77,7 @@
         <div id="boardNavigation">
             <hr>
             <span>
-              [<a href="/catalog">Catalog</a>]
+              [<a href="catalog">Catalog</a>]
             </span>
             <span>
               [<a href="#footer">Bottom</a>]
@@ -92,7 +92,7 @@
                     {%set files = thread['files'].split(',')%}
                     {%for file in files%}
                     <a class="linkImg" target="_blank" href="../{{file}}">
-                        <img loading="lazy" class="thumbnail" src="../{{ ((file| splittext)[:-1] | join('.')) }}s.jpg">
+                        <img loading="lazy" class="thumbnail" src="../{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
                     </a>
                     {%endfor%}
                     <div class="postInfo">

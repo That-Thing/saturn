@@ -54,9 +54,8 @@ captcha = ImageCaptcha(fonts=['./static/fonts/quicksand.ttf']) #Fonts for captch
 #add mime types and mime checking
 #add message formatting (greentext, pinktext, etc)
 #polish up thread creation
-#fix thumbnails
 #add expansion of thumbnail on click for posts
-
+#ADD SPOILERS!!!!
 
 #flask app configuration
 app = flask.Flask(__name__)
@@ -528,12 +527,12 @@ def boardPage(board):
 
 
 #thumbnail generation
-def thumbnail(image, board, filename):
+def thumbnail(image, board, filename, ext):
     try:
         image = Image.open(image)
         size = 125, 125
         image.thumbnail(size)
-        image.save(os.path.join(globalSettings['mediaLocation'], board, filename + "s.jpg"))
+        image.save(os.path.join(globalSettings['mediaLocation'], board, filename + "s"+ext))
     except IOError:
         pass
 def uploadFile(f, board, filename):
@@ -541,7 +540,7 @@ def uploadFile(f, board, filename):
     nFilename = filename+extention
     path = os.path.join(globalSettings['mediaLocation'], board, nFilename)
     f.save(path)
-    thumbnail(path, board, filename) #generate thumbnail for uploaded image
+    thumbnail(path, board, filename, extention) #generate thumbnail for uploaded image
     return str(path)
 
 
