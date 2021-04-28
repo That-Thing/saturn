@@ -302,6 +302,8 @@ def deleteBoard():
                         mysql.connection.commit()
                         path = os.path.join(globalSettings['bannerLocation'], uri) #path for banner folder for specific board. 
                         os.rmdir(path)#remove banner folder
+                        path = os.path.join(globalSettings['mediaLocation'], uri) #path for banner folder for specific board. 
+                        os.rmdir(path)#remove media sub-folder
                         return redirect(url_for('boardManagement', msg=uri + " successfully deleted"))
                 except Exception as e:
                     return render_template('manageBoard.html', data=globalSettings, sqlData=sqlData, msg="Please confirm board deletion") #probably could have done better
