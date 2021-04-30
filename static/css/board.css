@@ -87,4 +87,10 @@ li {
 #boardMessage span {
     white-space: pre-line;
 }
-
+#boardNavigation {
+    font-size: 80%;
+    margin: 1em;
+}
+#threadList {
+    margin: 1em;
+}

@@ -56,6 +56,7 @@ captcha = ImageCaptcha(fonts=['./static/fonts/quicksand.ttf']) #Fonts for captch
 #polish up thread creation
 #add expansion of thumbnail on click for posts
 #ADD SPOILERS!!!!
+#Add captcha deletion
 
 #flask app configuration
 app = flask.Flask(__name__)
@@ -70,7 +71,7 @@ app.config['MYSQL_DB'] = databaseConfig["name"]
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 mysql = MySQL(app)
 
-#settings for use in html
+#global site settings
 globalSettings = dict(
     port = configData["port"],
     mediaLocation = configData["mediaLocation"],
@@ -79,7 +80,8 @@ globalSettings = dict(
     faviconUrl = configData["siteFavicon"],
     enableRegistration = configData["enableRegistration"],
     requiredRole = configData["requiredRole"],
-    bannerLocation = configData["bannerLocation"]
+    bannerLocation = configData["bannerLocation"],
+    mimeTypes = configData["mimeTypes"]
 )
 def reloadSettings():
     with open('./config/config.json') as configFile: #global config file
@@ -92,7 +94,8 @@ def reloadSettings():
         faviconUrl = reloadData["siteFavicon"],
         enableRegistration = reloadData["enableRegistration"],
         requiredRole = reloadData["requiredRole"],
-        bannerLocation = reloadData["bannerLocation"]
+        bannerLocation = reloadData["bannerLocation"],
+        mimeTypes = reloadData["mimeTypes"]
     )
     return globalSettings
 
@@ -111,10 +114,17 @@ def convert_size(size_bytes):
 def randomString(size, chars=string.ascii_lowercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
-#convert file to binary data.
-def convertToBinary(f):
-    binaryData = f.read()
-    return binaryData
+#get total number of posts. 
+def getTotal():
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT * FROM boards")
+    boards = cursor.fetchall()
+    total = 0
+    for x in boards:
+        total = total + x['posts']
+    return total
+
+
 
 #allow files in the media folder to be served
 @app.route('/media/<path:path>')
@@ -137,7 +147,7 @@ def splittext(text):
 @app.route('/', methods=['GET'])
 def index():
     globalSettings = reloadSettings()
-    return render_template('index.html', data=globalSettings)
+    return render_template('index.html', data=globalSettings, total=getTotal())
 
 #boards
 @app.route('/boards', methods=['GET'])
@@ -551,8 +561,9 @@ def newThread():
     boards = cursor.fetchall()
     for x in boards:
         if x['uri'] == request.form['board']:
+            mimeTypes = globalSettings['mimeTypes'].split(',')
             if x['captcha'] == 1:
-                if request.method == 'POST' and 'comment' in request.form and 'captcha' in request.form and 'file' in request.form:
+                if request.method == 'POST' and 'comment' in request.form and 'captcha' in request.form and request.files['file'].filename != '':
                     if session['captcha'] == request.form['captcha']:
                         if "name" in request.form and len(request.form['name']) > 0:
                             name = request.form['name']
@@ -561,20 +572,23 @@ def newThread():
                         if 'subject' in request.form and len(request.form['subject']) > 0:
                             subject = request.form['subject']
                         else:
-                            subject = "NULL"
+                            subject = ""
                         if 'options' in request.form and len(request.form['options']) > 0:
                             options = request.form['options']
                         else:
-                            options = "NULL"
+                            options = ""
                         #add max file amount exceeded here.                    
                         files = request.files.getlist("file")
                         curTime = time.time()
                         filenames = []
                         filePaths = []
                         for f in files: #downloads the files and stores them on the disk
-                            filename = uploadFile(f, x['uri'], str(curTime))
-                            filePaths.append(filename)
-                            filenames.append(secure_filename(f.filename))
+                            if f.mimetype in mimeTypes:
+                                filename = uploadFile(f, x['uri'], str(curTime))
+                                filePaths.append(filename)
+                                filenames.append(secure_filename(f.filename))
+                            else:
+                                return "Incorrect file type submitted"
                         filenames = ','.join([str(x) for x in filenames])
                         filePaths = ','.join([str(x) for x in filePaths])
                         cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s)', (name, subject, options, request.form['comment'], x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames))) #parse message later
@@ -584,9 +598,9 @@ def newThread():
                     else:
                         return "Incorrect captcha"
                 else:
-                    return "Please fill out all required forms"
+                    return render_template('error.html', errorMsg="Please make sure the message, files, and captcha are present.", data=globalSettings) 
             else:
-                if request.method == 'POST' and 'comment' in request.form:
+                if request.method == 'POST' and 'comment' in request.form and request.files['file'].filename != '':
                     if "name" in request.form and len(request.form['name']) > 0:
                         name = request.form['name']
                     else:
@@ -605,14 +619,19 @@ def newThread():
                     filenames = []
                     filePaths = []
                     for f in files: #downloads the files and stores them on the disk
-                        filename = uploadFile(f, x['uri'], str(curTime))
-                        filePaths.append(filename)
-                        filenames.append(secure_filename(f.filename))
+                        if f.mimetype in mimeTypes:
+                            filename = uploadFile(f, x['uri'], str(curTime))
+                            filePaths.append(filename)
+                            filenames.append(secure_filename(f.filename))
+                        else:
+                            return "Incorrect file type submitted"
                     filenames = ','.join([str(x) for x in filenames])
                     filePaths = ','.join([str(x) for x in filePaths])
                     cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s)', (name, subject, options, request.form['comment'], x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames))) #parse message later
                     cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (x['posts']+1, x['uri']))
                     mysql.connection.commit()
                     return 'thread created' #change to something better
+                else:
+                    return render_template('error.html', errorMsg="Please make sure the message and files are present.", data=globalSettings) 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=configData["port"])

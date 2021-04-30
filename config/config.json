@@ -6,5 +6,6 @@
     "siteFavicon": "./static/images/favicon.png",
     "bannerLocation": "static/banners",
     "requiredRole": "administrator",
-    "enableRegistration": "on"
+    "enableRegistration": "on",
+    "mimeTypes": "image/jpeg,image/png,image/gif"
 }

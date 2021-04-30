@@ -43,19 +43,19 @@
                         </tr>
                         <tr>
                             <td class="authorLabel">Comment</td>
-                            <td><textarea class="authorInput" name="comment" cols="48" rows="4" wrap="soft" tabindex="4" style="width: 292px;"></textarea></td>
+                            <td><textarea class="authorInput" name="comment" cols="48" rows="4" wrap="soft" tabindex="4" style="width: 292px;" required></textarea></td>
                         </tr>
                         {% if boardData['captcha'] == 1 %}
                             <tr>
                                 <td class="authorLabel">Verification</td>
-                                <td style="display: grid;"><img src="../{{captcha}}" tabindex="5" class="captcha"><input class="authorInput" tabindex="6" type="text" name="captcha" autocomplete="off"></td>
+                                <td style="display: grid;"><img src="../{{captcha}}" tabindex="5" class="captcha"><input class="authorInput" tabindex="6" type="text" name="captcha" autocomplete="off" required></td>
                                 
                             </tr>
                         {% endif %}
                         <tr>
                             <td class="authorLabel">File</td>
                             <td>
-                                <input id="fileInput" name="file" type="file" multiple tabindex="7">
+                                <input id="fileInput" name="file" type="file" multiple tabindex="7" required>
                                 <span id="spoiler">[<label><input type="checkbox" name="spoiler" value="on" tabindex="8">Spoiler?</label>]</span>
                             </td>
                         </tr>
@@ -73,39 +73,58 @@
         <div id="boardMessage">
             <hr>
             <span>{{boardData['message']}}</span>
+            <hr>
         </div>
         <div id="boardNavigation">
-            <hr>
             <span>
               [<a href="catalog">Catalog</a>]
             </span>
             <span>
               [<a href="#footer">Bottom</a>]
             </span>
-            <hr>
         </div>
         <div id="threadList">
             {% for thread in threads %}
                 <div class="op">
                     <hr>
-                    <div class="fileInfo"></div>
-                    {%set files = thread['files'].split(',')%}
-                    {%for file in files%}
-                    <a class="linkImg" target="_blank" href="../{{file}}">
-                        <img loading="lazy" class="thumbnail" src="../{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
-                    </a>
-                    {%endfor%}
-                    <div class="postInfo">
-                        <span class="subject">{{thread['subject']}}</span>
-                        <span class="name">{{thread['name']}}</span>
-                        <span>{{thread['date'] | ut}}</span>
-                        <span><a class="postNumber">No.</a><a class="postNumber">{{thread['number']}}</a></span>
-                        <span>[<a class="reply">Reply</a>]</span>
+                    <div class="opUploadSection">
+                        {%set files = thread['files'].split(',')%}
+                        {%set filenames = thread['filenames'].split(',')%}
+                        {%for file in files%}
+                            <div class="fileDiv">
+                                <div class="fileInfo">
+                                    <a class="filename" href="{{files['file']}}">{{file}}</a>
+                                </div>
+                                <a class="linkImg" target="_blank" href="../{{file}}">
+                                    <img loading="lazy" class="thumbnail" src="../{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
+                                </a>
+                            </div>
+                        {%endfor%}
                     </div>
-                    <blockquote class="comment">{{thread['message']}}</blockquote>
+                    <div class="opPostSection">
+                        <div class="postInfo">
+                            <span class="subject">{{thread['subject']}}</span>
+                            <span class="name">{{thread['name']}}</span>
+                            <span>{{thread['date'] | ut}}</span>
+                            <span><a class="postNumber">No.</a><a class="postNumber">{{thread['number']}}</a></span>
+                            <span>[<a class="reply">Reply</a>]</span>
+                        </div>
+                        <blockquote class="comment">{{thread['message']}}</blockquote>
+                    </div>
                 </div>
             {% endfor %}
         </div>
+        <hr>
+        {% if boardData['owner'] == session['username'] or session['group'] == 'administrator' %}
+            <div id="boardManagement">
+                <span>
+                    [<a href="../manageboard?uri={{boardData['uri']}}">Board Settings</a>]
+                </span>
+            </div>
+        {%endif%}
+        <footer>
+            Any post made by a user is the responsibility of that user.
+        </footer>
         <script src="../static/js/board.js"></script>
     </body>
 </html>

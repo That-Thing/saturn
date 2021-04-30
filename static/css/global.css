@@ -28,6 +28,12 @@ nav a{
     margin-left: 5px;
     margin-right: 5px;
 }
+footer {
+    width: 100%;
+    margin: 3em 0px 2em 0px;
+    text-align: center;
+    font-size: x-small!important;
+}
 /*Links*/
 a{
     color: #81be84;
@@ -255,13 +261,25 @@ p {
 .comment {
     display: block;
 }
-.linkImg {
-    float: left;
-}
+
 .thumbnail {
     float: left;
     margin-left: 20px;
     margin-right: 20px;
     margin-top: 3px;
     margin-bottom: 5px;
+}
+.filename {
+    display: inline-block;
+    vertical-align: top;
+    max-width: 150px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.filename:hover {
+    max-width: 100%;
+}
+.fileDiv {
+    float: left
 }
