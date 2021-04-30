@@ -84,24 +84,23 @@
             </span>
         </div>
         <div id="threadList">
-            {% for thread in threads %}
-                <div class="op">
-                    <hr>
-                    <div class="opUploadSection">
+            <div id="threads"> 
+                {% for thread in threads %}
+                    <div class="op" id="{{thread['number']}}">
+                        <hr>
                         {%set files = thread['files'].split(',')%}
                         {%set filenames = thread['filenames'].split(',')%}
                         {%for file in files%}
                             <div class="fileDiv">
                                 <div class="fileInfo">
-                                    <a class="filename" href="{{files['file']}}">{{file}}</a>
+                                    <a class="filename" href="../{{file}}" target="_blank">{{filenames[files.index(file)]}}</a>
+                                    <a href="../{{file}}" download="{{filenames[files.index(file)]}}"><i class="fas fa-download textIcon"></i></a>
                                 </div>
                                 <a class="linkImg" target="_blank" href="../{{file}}">
                                     <img loading="lazy" class="thumbnail" src="../{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
                                 </a>
                             </div>
                         {%endfor%}
-                    </div>
-                    <div class="opPostSection">
                         <div class="postInfo">
                             <span class="subject">{{thread['subject']}}</span>
                             <span class="name">{{thread['name']}}</span>
@@ -111,17 +110,17 @@
                         </div>
                         <blockquote class="comment">{{thread['message']}}</blockquote>
                     </div>
-                </div>
-            {% endfor %}
-        </div>
-        <hr>
-        {% if boardData['owner'] == session['username'] or session['group'] == 'administrator' %}
-            <div id="boardManagement">
-                <span>
-                    [<a href="../manageboard?uri={{boardData['uri']}}">Board Settings</a>]
-                </span>
+                {% endfor %}
             </div>
-        {%endif%}
+            <hr>
+            {% if boardData['owner'] == session['username'] or session['group'] == 'administrator' %}
+                <div id="boardManagement">
+                    <span>
+                        [<a href="../manageboard?uri={{boardData['uri']}}">Board Settings</a>]
+                    </span>
+                </div>
+            {%endif%}
+        </div>
         <footer>
             Any post made by a user is the responsibility of that user.
         </footer>
