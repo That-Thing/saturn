@@ -100,7 +100,7 @@ def reloadSettings():
     return globalSettings
 globalSettings = reloadSettings()
 #return correct filesize name. Thanks StackOverflow
-def convert_size(size_bytes):
+def convertSize(size_bytes):
    if size_bytes == 0:
        return "0B"
    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
@@ -140,6 +140,10 @@ def normalizetime(timestamp):
 @app.template_filter('splittext')
 def splittext(text):
     return text.split('.')
+@app.template_filter('filesize')
+def fileSize(file):
+    size = os.path.getsize(file)
+    return convertSize(size)
 #Make local timestamps
 #add relative times
 
@@ -593,7 +597,7 @@ def newThread():
                                     return "Incorrect file type submitted"
                             filenames = ','.join([str(x) for x in filenames])
                             filePaths = ','.join([str(x) for x in filePaths])
-                            cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s)', (name, subject, options, request.form['comment'], x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames))) #parse message later
+                            cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s, %s)', (name, subject, options, request.form['comment'], x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames), str(request.remote_addr))) #parse message later
                             cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (x['posts']+1, x['uri']))
                             mysql.connection.commit()
                             return 'thread created' #change to something better
@@ -631,7 +635,7 @@ def newThread():
                                 return "Incorrect file type submitted"
                         filenames = ','.join([str(x) for x in filenames])
                         filePaths = ','.join([str(x) for x in filePaths])
-                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s)', (name, subject, options, request.form['comment'], x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames))) #parse message later
+                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s, %s)', (name, subject, options, request.form['comment'], x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames), str(request.remote_addr))) #parse message later
                         cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (x['posts']+1, x['uri']))
                         mysql.connection.commit()
                         return 'thread created' #change to something better
