@@ -41,22 +41,19 @@ captcha = ImageCaptcha(fonts=['./static/fonts/quicksand.ttf']) #Fonts for captch
 #ASCII Art cat to keep me sane. 
 
 
-
-
-
 #TO DO:
 #Polish server settings
 #polish user settings
 #Invade poland
 #add more board settings
 #finish making board template
-
-#add mime types and mime checking
 #add message formatting (greentext, pinktext, etc)
 #polish up thread creation
 #add expansion of thumbnail on click for posts
-#ADD SPOILERS!!!!
+#ADD SPOILERS
 #Add captcha deletion
+#add IPs to threads and posts
+
 
 #flask app configuration
 app = flask.Flask(__name__)
