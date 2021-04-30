@@ -144,6 +144,21 @@ def splittext(text):
 def fileSize(file):
     size = os.path.getsize(file)
     return convertSize(size)
+@app.template_filter('checkimage')
+def checkImage(file):
+    im = Image.open(file)
+    if str(im.verify()) == "None":
+        return True
+    else:
+        return False
+@app.template_filter('dimensions')
+def getDimensions(file):
+    im = Image.open(file)
+    if str(im.verify()) == "None":
+        width, height = im.size
+        return (f"{width}x{height}")
+    else:
+        pass
 #Make local timestamps
 #add relative times
 

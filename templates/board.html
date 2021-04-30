@@ -101,7 +101,11 @@
                                     <div class="fileInfo">
                                         <a class="filename" href="../{{file}}" target="_blank">{{filenames[files.index(file)]}}</a>
                                         <a href="../{{file}}" download="{{filenames[files.index(file)]}}"><i class="fas fa-download textIcon"></i></a>
-                                        <span class="fileSize textIcon">({{file | filesize}})</span>
+                                        {%if file | checkimage == True%}
+                                            <span class="fileSize textIcon">({{file | filesize}}, {{file | dimensions}})</span>
+                                        {%else%}
+                                            <span class="fileSize textIcon">({{file | filesize}})</span>
+                                        {%endif%}
                                     </div>
                                     <a class="linkImg" target="_blank" href="../{{file}}">
                                         <img loading="lazy" class="thumbnail" src="../{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
