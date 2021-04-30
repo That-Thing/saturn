@@ -283,3 +283,7 @@ p {
 .fileDiv {
     float: left
 }
+.multipleFiles {
+    float: left;
+    width: 100%;
+}

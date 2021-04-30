@@ -90,17 +90,23 @@
                         <hr>
                         {%set files = thread['files'].split(',')%}
                         {%set filenames = thread['filenames'].split(',')%}
+                        {%if files | length > 1%}
+                            <div class="uploads multipleFiles">
+                        {%else%}
+                            <div class="uploads ">
+                        {%endif%}
                         {%for file in files%}
-                            <div class="fileDiv">
-                                <div class="fileInfo">
-                                    <a class="filename" href="../{{file}}" target="_blank">{{filenames[files.index(file)]}}</a>
-                                    <a href="../{{file}}" download="{{filenames[files.index(file)]}}"><i class="fas fa-download textIcon"></i></a>
+                                <div class="fileDiv">
+                                    <div class="fileInfo">
+                                        <a class="filename" href="../{{file}}" target="_blank">{{filenames[files.index(file)]}}</a>
+                                        <a href="../{{file}}" download="{{filenames[files.index(file)]}}"><i class="fas fa-download textIcon"></i></a>
+                                    </div>
+                                    <a class="linkImg" target="_blank" href="../{{file}}">
+                                        <img loading="lazy" class="thumbnail" src="../{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
+                                    </a>
                                 </div>
-                                <a class="linkImg" target="_blank" href="../{{file}}">
-                                    <img loading="lazy" class="thumbnail" src="../{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
-                                </a>
-                            </div>
                         {%endfor%}
+                        </div>
                         <div class="postInfo">
                             <span class="subject">{{thread['subject']}}</span>
                             <span class="name">{{thread['name']}}</span>
