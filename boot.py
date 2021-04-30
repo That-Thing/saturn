@@ -68,18 +68,20 @@ app.config['MYSQL_DB'] = databaseConfig["name"]
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 mysql = MySQL(app)
 
-#global site settings
-globalSettings = dict(
-    port = configData["port"],
-    mediaLocation = configData["mediaLocation"],
-    siteName = configData["siteName"],
-    logoUrl = configData["siteLogo"],
-    faviconUrl = configData["siteFavicon"],
-    enableRegistration = configData["enableRegistration"],
-    requiredRole = configData["requiredRole"],
-    bannerLocation = configData["bannerLocation"],
-    mimeTypes = configData["mimeTypes"]
-)
+#global site settings 
+# globalSettings = dict(   UNUSED
+#     port = configData["port"],
+#     mediaLocation = configData["mediaLocation"],
+#     siteName = configData["siteName"],
+#     logoUrl = configData["siteLogo"],
+#     faviconUrl = configData["siteFavicon"],
+#     enableRegistration = configData["enableRegistration"],
+#     requiredRole = configData["requiredRole"],
+#     bannerLocation = configData["bannerLocation"],
+#     mimeTypes = configData["mimeTypes"],
+#     maxFiles = configData["maxFiles"]
+# )
+#global settings
 def reloadSettings():
     with open('./config/config.json') as configFile: #global config file
         reloadData = json.load(configFile)
@@ -92,10 +94,11 @@ def reloadSettings():
         enableRegistration = reloadData["enableRegistration"],
         requiredRole = reloadData["requiredRole"],
         bannerLocation = reloadData["bannerLocation"],
-        mimeTypes = reloadData["mimeTypes"]
+        mimeTypes = reloadData["mimeTypes"],
+        maxFiles = int(configData["maxFiles"])
     )
     return globalSettings
-
+globalSettings = reloadSettings()
 #return correct filesize name. Thanks StackOverflow
 def convert_size(size_bytes):
    if size_bytes == 0:
@@ -573,25 +576,27 @@ def newThread():
                         if 'options' in request.form and len(request.form['options']) > 0:
                             options = request.form['options']
                         else:
-                            options = ""
-                        #add max file amount exceeded here.                    
+                            options = ""                  
                         files = request.files.getlist("file")
-                        curTime = time.time()
-                        filenames = []
-                        filePaths = []
-                        for f in files: #downloads the files and stores them on the disk
-                            if f.mimetype in mimeTypes:
-                                filename = uploadFile(f, x['uri'], str(curTime))
-                                filePaths.append(filename)
-                                filenames.append(secure_filename(f.filename))
-                            else:
-                                return "Incorrect file type submitted"
-                        filenames = ','.join([str(x) for x in filenames])
-                        filePaths = ','.join([str(x) for x in filePaths])
-                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s)', (name, subject, options, request.form['comment'], x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames))) #parse message later
-                        cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (x['posts']+1, x['uri']))
-                        mysql.connection.commit()
-                        return 'thread created' #change to something better
+                        if len(files) > globalSettings['maxFiles']: #check if too many files are uploaded
+                            return "Maximum file limit exceeded"
+                        else:
+                            curTime = time.time()
+                            filenames = []
+                            filePaths = []
+                            for f in files: #downloads the files and stores them on the disk
+                                if f.mimetype in mimeTypes:
+                                    filename = uploadFile(f, x['uri'], str(curTime))
+                                    filePaths.append(filename)
+                                    filenames.append(secure_filename(f.filename))
+                                else:
+                                    return "Incorrect file type submitted"
+                            filenames = ','.join([str(x) for x in filenames])
+                            filePaths = ','.join([str(x) for x in filePaths])
+                            cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s)', (name, subject, options, request.form['comment'], x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames))) #parse message later
+                            cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (x['posts']+1, x['uri']))
+                            mysql.connection.commit()
+                            return 'thread created' #change to something better
                     else:
                         return "Incorrect captcha"
                 else:
@@ -610,24 +615,26 @@ def newThread():
                         options = request.form['options']
                     else:
                         options = ""
-                    #add max file amount exceeded here.
                     files = request.files.getlist("file")
-                    curTime = time.time()
-                    filenames = []
-                    filePaths = []
-                    for f in files: #downloads the files and stores them on the disk
-                        if f.mimetype in mimeTypes:
-                            filename = uploadFile(f, x['uri'], str(curTime))
-                            filePaths.append(filename)
-                            filenames.append(secure_filename(f.filename))
-                        else:
-                            return "Incorrect file type submitted"
-                    filenames = ','.join([str(x) for x in filenames])
-                    filePaths = ','.join([str(x) for x in filePaths])
-                    cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s)', (name, subject, options, request.form['comment'], x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames))) #parse message later
-                    cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (x['posts']+1, x['uri']))
-                    mysql.connection.commit()
-                    return 'thread created' #change to something better
+                    if len(files) > globalSettings['maxFiles']: #check if too many files are uploaded
+                        return "Maximum file limit exceeded"
+                    else:
+                        curTime = time.time()
+                        filenames = []
+                        filePaths = []
+                        for f in files: #downloads the files and stores them on the disk
+                            if f.mimetype in mimeTypes:
+                                filename = uploadFile(f, x['uri'], str(curTime))
+                                filePaths.append(filename)
+                                filenames.append(secure_filename(f.filename))
+                            else:
+                                return "Incorrect file type submitted"
+                        filenames = ','.join([str(x) for x in filenames])
+                        filePaths = ','.join([str(x) for x in filePaths])
+                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s)', (name, subject, options, request.form['comment'], x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames))) #parse message later
+                        cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (x['posts']+1, x['uri']))
+                        mysql.connection.commit()
+                        return 'thread created' #change to something better
                 else:
                     return render_template('error.html', errorMsg="Please make sure the message and files are present.", data=globalSettings) 
 if __name__ == "__main__":

@@ -7,5 +7,6 @@
     "bannerLocation": "static/banners",
     "requiredRole": "administrator",
     "enableRegistration": "on",
-    "mimeTypes": "image/jpeg,image/png,image/gif"
+    "mimeTypes": "image/jpeg,image/png,image/gif",
+    "maxFiles": "3"
 }
