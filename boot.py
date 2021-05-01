@@ -557,7 +557,7 @@ def boardPage(board):
 def thumbnail(image, board, filename, ext):
     try:
         image = Image.open(image)
-        size = 125, 125
+        size = 150, 150
         image.thumbnail(size)
         image.save(os.path.join(globalSettings['mediaLocation'], board, filename + "s"+ext))
     except IOError:
@@ -675,8 +675,9 @@ def thread(board, thread):
                 banner = "static/banners/defaultbanner.png"
             if x['captcha'] == 1:
                 captcha = generateCaptcha(5)
-                return render_template('thread.html', data=globalSettings, board=board, boardData=x, banner=banner, captcha=captcha, posts=posts, thread=parentThread)
+                return render_template('thread.html', data=globalSettings, board=board, boardData=x, banner=banner, captcha=captcha, posts=posts, thread=parentThread[0])
             else:
-                return render_template('thread.html', data=globalSettings, board=board, boardData=x, banner=banner, posts=posts, thread=parentThread)
+                print(parentThread)
+                return render_template('thread.html', data=globalSettings, board=board, boardData=x, banner=banner, posts=posts, thread=parentThread[0])
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=configData["port"])

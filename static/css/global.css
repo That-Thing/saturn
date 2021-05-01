@@ -282,9 +282,15 @@ p {
     max-width: 100%;
 }
 .fileDiv {
-    float: left
+    float: none
 }
 .multipleFiles {
     float: left;
     width: 100%;
+}
+.multipleFiles .fileDiv {
+    float: left;
+}
+.uploads {
+    margin: 0.25em 1em 0.25em 0.5em;
 }
