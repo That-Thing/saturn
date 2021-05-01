@@ -546,8 +546,6 @@ def boardPage(board):
                 banner = os.path.join(path, random.choice(os.listdir(path)))
             else:
                 banner = "static/banners/defaultbanner.png"
-
-            print(x['captcha'])
             if x['captcha'] == 1:
                 captcha = generateCaptcha(5)
                 return render_template('board.html', data=globalSettings, board=board, boardData=x, banner=banner, captcha=captcha, threads=getThreads(board))
@@ -656,5 +654,29 @@ def newThread():
                         return 'thread created' #change to something better
                 else:
                     return render_template('error.html', errorMsg="Please make sure the message and files are present.", data=globalSettings) 
+
+
+@app.route('/<board>/thread/<thread>', methods=['GET'])
+@app.route('/<board>/thread/<thread>', methods=['GET'])
+def thread(board, thread):
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT * FROM posts WHERE board=%s AND number=%s AND type=1", (board, thread))
+    parentThread = cursor.fetchall()
+    cursor.execute("SELECT * FROM posts WHERE board=%s AND thread=%s", (board, thread))
+    posts = cursor.fetchall()
+    cursor.execute("SELECT * FROM boards")
+    boards = cursor.fetchall()
+    for x in boards:
+        if x['uri'] == board:
+            path = os.path.join(globalSettings['bannerLocation'], board)
+            if len(os.listdir(path)) > 0:
+                banner = os.path.join(path, random.choice(os.listdir(path)))
+            else:
+                banner = "static/banners/defaultbanner.png"
+            if x['captcha'] == 1:
+                captcha = generateCaptcha(5)
+                return render_template('thread.html', data=globalSettings, board=board, boardData=x, banner=banner, captcha=captcha, posts=posts, thread=parentThread)
+            else:
+                return render_template('thread.html', data=globalSettings, board=board, boardData=x, banner=banner, posts=posts, thread=parentThread)
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=configData["port"])

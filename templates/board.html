@@ -117,7 +117,7 @@
                             <span class="subject">{{thread['subject']}}</span>
                             <span class="name">{{thread['name']}}</span>
                             <span>{{thread['date'] | ut}}</span>
-                            <span><a class="postNumber">No.</a><a class="postNumber">{{thread['number']}}</a></span>
+                            <span><a class="postNumber" href="thread/{{thread['number']}}#{{thread['number']}}">No.</a><a class="postNumber">{{thread['number']}}</a></span>
                             <span>[<a class="reply">Reply</a>]</span>
                         </div>
                         <blockquote class="comment">{{thread['message']}}</blockquote>
