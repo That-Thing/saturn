@@ -613,7 +613,7 @@ def newThread():
                             cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s, %s)', (name, subject, options, request.form['comment'], x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames), str(request.remote_addr))) #parse message later
                             cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (x['posts']+1, x['uri']))
                             mysql.connection.commit()
-                            return 'thread created' #change to something better
+                            return redirect(f"{x['uri']}/thread/{x['posts']+1}")
                     else:
                         return "Incorrect captcha"
                 else:
@@ -651,7 +651,7 @@ def newThread():
                         cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s, %s)', (name, subject, options, request.form['comment'], x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames), str(request.remote_addr))) #parse message later
                         cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (x['posts']+1, x['uri']))
                         mysql.connection.commit()
-                        return 'thread created' #change to something better
+                        return redirect(f"{x['uri']}/thread/{x['posts']+1}")
                 else:
                     return render_template('error.html', errorMsg="Please make sure the message and files are present.", data=globalSettings) 
 
