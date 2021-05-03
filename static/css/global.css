@@ -259,7 +259,10 @@ p {
     text-decoration: none;
 }
 .comment {
-    display: block;
+    margin: 1em 1em 1em 3em;
+    margin-bottom: 0.5em;
+    word-wrap: break-word;
+    white-space: pre-wrap;
 }
 
 .thumbnail {
@@ -293,4 +296,24 @@ p {
 }
 .uploads {
     margin: 0.25em 1em 0.25em 0.5em;
+}
+.replyDiv {
+    margin: 0.25em 0;
+}
+.innerPost {
+    font-size: 80%;
+    padding: 5px;
+    background: #2a3137;
+    box-shadow: 3px 5px 10px rgb(0 0 0 / 33%);
+    border-radius: 5px;
+    border: none;
+    display: inline-block;
+    overflow: hidden;
+    padding-right: 0.5em;
+    padding-left: 0.25em;
+    padding-top: 0.25em;
+    max-width: 100%;
+}
+#postList {
+    margin: 1em;
 }

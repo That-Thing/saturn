@@ -551,7 +551,7 @@ def boardPage(board):
                 return render_template('board.html', data=globalSettings, board=board, boardData=x, banner=banner, captcha=captcha, threads=getThreads(board))
             else:
                 return render_template('board.html', data=globalSettings, board=board, boardData=x, banner=banner, threads=getThreads(board))
-
+    return render_template('error.html', errorMsg="Board not found", data=globalSettings) 
 
 #thumbnail generation
 def thumbnail(image, board, filename, ext):
@@ -661,7 +661,7 @@ def newThread():
 def thread(board, thread):
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("SELECT * FROM posts WHERE board=%s AND number=%s AND type=1", (board, thread))
-    parentThread = cursor.fetchall()
+    parentPost = cursor.fetchall()
     cursor.execute("SELECT * FROM posts WHERE board=%s AND thread=%s", (board, thread))
     posts = cursor.fetchall()
     cursor.execute("SELECT * FROM boards")
@@ -675,9 +675,85 @@ def thread(board, thread):
                 banner = "static/banners/defaultbanner.png"
             if x['captcha'] == 1:
                 captcha = generateCaptcha(5)
-                return render_template('thread.html', data=globalSettings, board=board, boardData=x, banner=banner, captcha=captcha, posts=posts, thread=parentThread[0])
+                return render_template('thread.html', data=globalSettings, board=board, boardData=x, banner=banner, captcha=captcha, posts=posts, op=parentPost[0])
             else:
-                print(parentThread)
-                return render_template('thread.html', data=globalSettings, board=board, boardData=x, banner=banner, posts=posts, thread=parentThread[0])
+                print(parentPost)
+                return render_template('thread.html', data=globalSettings, board=board, boardData=x, banner=banner, posts=posts, op=parentPost[0])
+    return render_template('error.html', errorMsg="Board not found", data=globalSettings) 
+
+
+#LOOK OVER THIS CODE AND MAKE SURE IT'S NOT A MASSIVE PILE OF SHIT THAT I HAVE TO COMPLETELY RE-WRITE
+#If I have to re-write this, the shotgun is in the gun safe. 3
+@app.route('/reply', methods=['POST'])
+def reply():
+    if request.method == 'POST':
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT * FROM posts where thread=%s", [request.form['thread']])
+        posts = cursor.fetchall()
+        cursor.execute("SELECT * FROM boards where uri=%s", [request.form['board']])
+        board = cursor.fetchall()
+        board = board[0]
+        mimeTypes = globalSettings['mimeTypes'].split(',')
+        curTime = time.time()
+        if "name" in request.form and len(request.form['name']) > 0:
+            name = request.form['name']
+        else:
+            print(board['anonymous'])
+            name = board['anonymous']
+        if 'subject' in request.form and len(request.form['subject']) > 0:
+            subject = request.form['subject']
+        else:
+            subject = ""
+        if 'options' in request.form and len(request.form['options']) > 0:
+            options = request.form['options']
+        else:
+            options = ""
+        if request.files['file'].filename != '':
+            files = request.files.getlist("file")
+            if len(files) > globalSettings['maxFiles']: #check if too many files are uploaded
+                return "Maximum file limit exceeded"
+            else:
+                filenames = []
+                filePaths = []
+                for f in files: #downloads the files and stores them on the disk
+                    if f.mimetype in mimeTypes:
+                        filename = uploadFile(f, board['uri'], str(curTime))
+                        filePaths.append(filename)
+                        filenames.append(secure_filename(f.filename))
+                    else:
+                        return "Incorrect file type submitted"
+                filenames = ','.join([str(x) for x in filenames])
+                filePaths = ','.join([str(x) for x in filePaths])
+        else:
+            if 'comment' not in request.form:
+                return "A file or message is required"
+            filenames = []
+            filePaths = []
+        comment = request.form['comment']
+        if board['captcha'] == 1:
+            if 'comment' in request.form and 'captcha' in request.form:
+                if session['captcha'] == request.form['captcha']:
+                    if len(filePaths) == 0:
+                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(request.remote_addr))) #parse message later
+                    else:
+                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr))) #parse message later
+                    cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (board['posts']+1, board['uri']))
+                    mysql.connection.commit()
+                    return redirect(f"{board['uri']}/thread/{request.form['thread']}#{board['posts']+1}")
+                else:
+                    return "Incorrect Captcha"
+            else:
+                return "Please fill out all the required fields"
+        else:
+            if len(filePaths) == 0:
+                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(request.remote_addr))) #parse message later
+            else:
+                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr))) #parse message later
+            cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (board['posts']+1, board['uri']))
+            mysql.connection.commit()
+            return redirect(f"{board['uri']}/thread/{request.form['thread']}#{board['posts']+1}")
+    else:
+        return "Request must be POST"
+    
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=configData["port"])

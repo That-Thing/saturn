@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>/{{board}}/ - {{thread['message']}}</title>
+        <title>/{{board}}/ - {{op['message']}}</title>
         <meta charset="UTF-8">
         <link href="../../static/css/global.css" type="text/css" rel="stylesheet">
         <link href="../../static/css/board.css" type="text/css" rel="stylesheet">
-        <link href="../../static/css/thread.css" type="text/css" rel="stylesheet">
+        <link href="../../static/css/op.css" type="text/css" rel="stylesheet">
         <link rel="shortcut icon" type="image/png" href="../../{{data['faviconUrl']}}"/>
         <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
     </head>
@@ -27,6 +27,7 @@
             <span class="small">Reply mode</span>
             <form action="/reply" method="POST" id="authorForm" enctype="multipart/form-data">
                 <input type="hidden" name="board" value="{{board}}">
+                <input type="hidden" name="thread" value="{{op['number']}}">
                 <table>
                     <tbody>
                         <tr>
@@ -76,10 +77,10 @@
             <hr>
         </div>
         <div id="postList">
-            <div class="op" id="{{thread['number']}}">
+            <div class="op" id="{{op['number']}}">
                 <hr>
-                {%set files = thread['files'].split(',')%}
-                {%set filenames = thread['filenames'].split(',')%}
+                {%set files = op['files'].split(',')%}
+                {%set filenames = op['filenames'].split(',')%}
                 {%if files | length > 1%}
                     <div class="uploads multipleFiles">
                 {%else%}
@@ -103,14 +104,54 @@
                 {%endfor%}
                 </div>
                 <div class="postInfo">
-                    <span class="subject">{{thread['subject']}}</span>
-                    <span class="name">{{thread['name']}}</span>
-                    <span>{{thread['date'] | ut}}</span>
-                    <span><a class="postNumber" href="#{{thread['number']}}">No.</a><a class="postNumber">{{thread['number']}}</a></span>
+                    <span class="subject">{{op['subject']}}</span>
+                    <span class="name">{{op['name']}}</span>
+                    <span>{{op['date'] | ut}}</span>
+                    <span><a class="postNumber" href="#{{op['number']}}">No.</a><a class="postNumber">{{op['number']}}</a></span>
                     <span>[<a class="reply">Reply</a>]</span>
                 </div>
-                <blockquote class="comment">{{thread['message']}}</blockquote>
+                <blockquote class="comment">{{op['message']}}</blockquote>
             </div>
+            {%for post in posts%}
+                <div class="replyDiv" id="{{post['number']}}">
+                    <div class="innerPost">
+                        <div class="postInfo">
+                            <span class="subject">{{post['subject']}}</span>
+                            <span class="name">{{post['name']}}</span>
+                            <span>{{post['date'] | ut}}</span>
+                            <span><a class="postNumber" href="#{{post['number']}}">No.</a><a class="postNumber">{{post['number']}}</a></span>
+                            <span>[<a class="reply">Reply</a>]</span>
+                        </div>
+                        {%if post['files'] != None%}
+                            {%set files = post['files'].split(',')%}
+                            {%set filenames = post['filenames'].split(',')%}
+                            {%if files | length > 1%}
+                                <div class="uploads multipleFiles">
+                            {%else%}
+                                <div class="uploads">
+                            {%endif%}
+                            {%for file in files%}
+                                    <div class="fileDiv">
+                                        <div class="fileInfo">
+                                            <a class="filename" href="../../{{file}}" target="_blank">{{filenames[files.index(file)]}}</a>
+                                            <a href="../../{{file}}" download="{{filenames[files.index(file)]}}"><i class="fas fa-download textIcon"></i></a>
+                                            {%if file | checkimage == True%}
+                                                <span class="fileSize textIcon">({{file | filesize}}, {{file | dimensions}})</span>
+                                            {%else%}
+                                                <span class="fileSize textIcon">({{file | filesize}})</span>
+                                            {%endif%}
+                                        </div>
+                                        <a class="linkImg" target="_blank" href="../../{{file}}">
+                                            <img loading="lazy" class="thumbnail" src="../../{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
+                                        </a>
+                                    </div>
+                            {%endfor%}
+                            </div>
+                        {%endif%}
+                        <blockquote class="comment">{{post['message']}}</blockquote>
+                        </div>
+                    </div>
+            {%endfor%}
         </div>
     </body>
 </html>
