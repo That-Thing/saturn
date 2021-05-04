@@ -8,7 +8,7 @@ from flask import session
 import json
 import os
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 import pathlib
 import math
 import random
@@ -112,7 +112,17 @@ def getTotal():
         total = total + x['posts']
     return total
 
-
+#get the number of posts in the last hour
+def lastHour():
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT * FROM posts")
+    posts = cursor.fetchall()
+    count = 0
+    for post in posts:
+        now = datetime.now()
+        if now-timedelta(hours=24) <= datetime.utcfromtimestamp(post['date']) <= now+timedelta(hours=24):
+            count = count+1
+    return count
 
 #allow files in the media folder to be served
 @app.route('/media/<path:path>')
@@ -154,7 +164,7 @@ def getDimensions(file):
 @app.route('/', methods=['GET'])
 def index():
     globalSettings = reloadSettings()
-    return render_template('index.html', data=globalSettings, total=getTotal())
+    return render_template('index.html', data=globalSettings, total=getTotal(), lastHour=lastHour())
 
 #boards
 @app.route('/boards', methods=['GET'])
