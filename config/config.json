@@ -8,5 +8,6 @@
     "requiredRole": "administrator",
     "enableRegistration": "on",
     "mimeTypes": "image/jpeg,image/png,image/gif",
-    "maxFiles": "3"
+    "maxFiles": "3",
+    "spoilerImage": "./static/images/spoiler.png"
 }

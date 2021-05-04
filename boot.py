@@ -42,17 +42,16 @@ captcha = ImageCaptcha(fonts=['./static/fonts/quicksand.ttf']) #Fonts for captch
 
 
 #TO DO:
-#Polish server settings
-#polish user settings
-#Invade poland
 #add more board settings
 #finish making board template
 #add message formatting (greentext, pinktext, etc)
 #polish up thread creation
 #add expansion of thumbnail on click for posts
-#ADD SPOILERS
 #Add captcha deletion
-#add IPs to threads and posts
+#add posts to display following a thread in the board page
+#add password generation for posts with the password being stored in session data
+#add post deletion
+#catalog
 
 
 #flask app configuration
@@ -68,19 +67,6 @@ app.config['MYSQL_DB'] = databaseConfig["name"]
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 mysql = MySQL(app)
 
-#global site settings 
-# globalSettings = dict(   UNUSED
-#     port = configData["port"],
-#     mediaLocation = configData["mediaLocation"],
-#     siteName = configData["siteName"],
-#     logoUrl = configData["siteLogo"],
-#     faviconUrl = configData["siteFavicon"],
-#     enableRegistration = configData["enableRegistration"],
-#     requiredRole = configData["requiredRole"],
-#     bannerLocation = configData["bannerLocation"],
-#     mimeTypes = configData["mimeTypes"],
-#     maxFiles = configData["maxFiles"]
-# )
 #global settings
 def reloadSettings():
     with open('./config/config.json') as configFile: #global config file
@@ -95,7 +81,8 @@ def reloadSettings():
         requiredRole = reloadData["requiredRole"],
         bannerLocation = reloadData["bannerLocation"],
         mimeTypes = reloadData["mimeTypes"],
-        maxFiles = int(configData["maxFiles"])
+        maxFiles = int(configData["maxFiles"]),
+        spoilerImage =  reloadData["spoilerImage"]
     )
     return globalSettings
 globalSettings = reloadSettings()
@@ -562,12 +549,13 @@ def thumbnail(image, board, filename, ext):
         image.save(os.path.join(globalSettings['mediaLocation'], board, filename + "s"+ext))
     except IOError:
         pass
-def uploadFile(f, board, filename):
+def uploadFile(f, board, filename, spoiler):
     extention = pathlib.Path(secure_filename(f.filename)).suffix
     nFilename = filename+extention
     path = os.path.join(globalSettings['mediaLocation'], board, nFilename)
     f.save(path)
-    thumbnail(path, board, filename, extention) #generate thumbnail for uploaded image
+    if spoiler == 0:
+        thumbnail(path, board, filename, extention) #generate thumbnail for uploaded image
     return str(path)
 
 
@@ -579,79 +567,73 @@ def newThread():
     for x in boards:
         if x['uri'] == request.form['board']:
             mimeTypes = globalSettings['mimeTypes'].split(',')
+            curTime = time.time()
+            if "name" in request.form and len(request.form['name']) > 0:
+                name = request.form['name']
+            else:
+                name = x['anonymous']
+            if 'subject' in request.form and len(request.form['subject']) > 0:
+                subject = request.form['subject']
+            else:
+                subject = ""
+            if 'options' in request.form and len(request.form['options']) > 0:
+                options = request.form['options']
+            else:
+                options = ""     
+            if "spoiler" in request.form:
+                if request.form['spoiler'] == "on":
+                    spoiler = 1
+                else:
+                    spoiler = 0
+            else:
+                spoiler = 0
             if x['captcha'] == 1:
                 if request.method == 'POST' and 'comment' in request.form and 'captcha' in request.form and request.files['file'].filename != '':
                     if session['captcha'] == request.form['captcha']:
-                        if "name" in request.form and len(request.form['name']) > 0:
-                            name = request.form['name']
-                        else:
-                            name = x['anonymous']
-                        if 'subject' in request.form and len(request.form['subject']) > 0:
-                            subject = request.form['subject']
-                        else:
-                            subject = ""
-                        if 'options' in request.form and len(request.form['options']) > 0:
-                            options = request.form['options']
-                        else:
-                            options = ""                  
                         files = request.files.getlist("file")
                         if len(files) > globalSettings['maxFiles']: #check if too many files are uploaded
                             return "Maximum file limit exceeded"
                         else:
-                            curTime = time.time()
                             filenames = []
                             filePaths = []
                             for f in files: #downloads the files and stores them on the disk
                                 if f.mimetype in mimeTypes:
-                                    filename = uploadFile(f, x['uri'], str(curTime))
+                                    filename = uploadFile(f, x['uri'], str(curTime), spoiler)
                                     filePaths.append(filename)
                                     filenames.append(secure_filename(f.filename))
                                 else:
                                     return "Incorrect file type submitted"
                             filenames = ','.join([str(x) for x in filenames])
                             filePaths = ','.join([str(x) for x in filePaths])
-                            cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s, %s)', (name, subject, options, request.form['comment'], x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames), str(request.remote_addr))) #parse message later
-                            cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (x['posts']+1, x['uri']))
-                            mysql.connection.commit()
-                            return redirect(f"{x['uri']}/thread/{x['posts']+1}")
+                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s, %s, %s)', (name, subject, options, request.form['comment'], x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler)) #parse message later
+                        cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (x['posts']+1, x['uri']))
+                        mysql.connection.commit()
+                        return redirect(f"{x['uri']}/thread/{x['posts']+1}")
                     else:
                         return "Incorrect captcha"
                 else:
                     return render_template('error.html', errorMsg="Please make sure the message, files, and captcha are present.", data=globalSettings) 
             else:
                 if request.method == 'POST' and 'comment' in request.form and request.files['file'].filename != '':
-                    if "name" in request.form and len(request.form['name']) > 0:
-                        name = request.form['name']
-                    else:
-                        name = x['anonymous']
-                    if 'subject' in request.form and len(request.form['subject']) > 0:
-                        subject = request.form['subject']
-                    else:
-                        subject = ""
-                    if 'options' in request.form and len(request.form['options']) > 0:
-                        options = request.form['options']
-                    else:
-                        options = ""
                     files = request.files.getlist("file")
                     if len(files) > globalSettings['maxFiles']: #check if too many files are uploaded
                         return "Maximum file limit exceeded"
                     else:
-                        curTime = time.time()
                         filenames = []
                         filePaths = []
                         for f in files: #downloads the files and stores them on the disk
                             if f.mimetype in mimeTypes:
-                                filename = uploadFile(f, x['uri'], str(curTime))
+                                filename = uploadFile(f, x['uri'], str(curTime), spoiler)
                                 filePaths.append(filename)
                                 filenames.append(secure_filename(f.filename))
                             else:
                                 return "Incorrect file type submitted"
                         filenames = ','.join([str(x) for x in filenames])
                         filePaths = ','.join([str(x) for x in filePaths])
-                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s, %s)', (name, subject, options, request.form['comment'], x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames), str(request.remote_addr))) #parse message later
-                        cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (x['posts']+1, x['uri']))
-                        mysql.connection.commit()
-                        return redirect(f"{x['uri']}/thread/{x['posts']+1}")
+                    cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s, %s, %s)', (name, subject, options, request.form['comment'], x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler)) #parse message later
+                    cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (x['posts']+1, x['uri']))
+                    mysql.connection.commit()
+                    return redirect(f"{x['uri']}/thread/{x['posts']+1}")
                 else:
                     return render_template('error.html', errorMsg="Please make sure the message and files are present.", data=globalSettings) 
 
@@ -683,7 +665,7 @@ def thread(board, thread):
 
 
 #LOOK OVER THIS CODE AND MAKE SURE IT'S NOT A MASSIVE PILE OF SHIT THAT I HAVE TO COMPLETELY RE-WRITE
-#If I have to re-write this, the shotgun is in the gun safe. 3
+#If I have to re-write this, the shotgun is in the gun safe. 
 @app.route('/reply', methods=['POST'])
 def reply():
     if request.method == 'POST':
@@ -708,35 +690,42 @@ def reply():
             options = request.form['options']
         else:
             options = ""
-        if request.files['file'].filename != '':
-            files = request.files.getlist("file")
-            if len(files) > globalSettings['maxFiles']: #check if too many files are uploaded
-                return "Maximum file limit exceeded"
+        if "spoiler" in request.form:
+            if request.form['spoiler'] == "on":
+                spoiler = 1
             else:
-                filenames = []
-                filePaths = []
-                for f in files: #downloads the files and stores them on the disk
-                    if f.mimetype in mimeTypes:
-                        filename = uploadFile(f, board['uri'], str(curTime))
-                        filePaths.append(filename)
-                        filenames.append(secure_filename(f.filename))
-                    else:
-                        return "Incorrect file type submitted"
-                filenames = ','.join([str(x) for x in filenames])
-                filePaths = ','.join([str(x) for x in filePaths])
+                spoiler = 0
         else:
-            if 'comment' not in request.form:
-                return "A file or message is required"
-            filenames = []
-            filePaths = []
+            spoiler = 0
         comment = request.form['comment']
         if board['captcha'] == 1:
             if 'comment' in request.form and 'captcha' in request.form:
                 if session['captcha'] == request.form['captcha']:
-                    if len(filePaths) == 0:
-                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(request.remote_addr))) #parse message later
+                    if request.files['file'].filename != '':
+                        files = request.files.getlist("file")
+                        if len(files) > globalSettings['maxFiles']: #check if too many files are uploaded
+                            return "Maximum file limit exceeded"
+                        else:
+                            filenames = []
+                            filePaths = []
+                            for f in files: #downloads the files and stores them on the disk
+                                if f.mimetype in mimeTypes:
+                                    filename = uploadFile(f, board['uri'], str(curTime), spoiler)
+                                    filePaths.append(filename)
+                                    filenames.append(secure_filename(f.filename))
+                                else:
+                                    return "Incorrect file type submitted"
+                            filenames = ','.join([str(x) for x in filenames])
+                            filePaths = ','.join([str(x) for x in filePaths])
                     else:
-                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr))) #parse message later
+                        if 'comment' not in request.form:
+                            return "A file or message is required"
+                        filenames = []
+                        filePaths = []
+                    if len(filePaths) == 0:
+                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(request.remote_addr), spoiler)) #parse message later
+                    else:
+                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler)) #parse message later
                     cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (board['posts']+1, board['uri']))
                     mysql.connection.commit()
                     return redirect(f"{board['uri']}/thread/{request.form['thread']}#{board['posts']+1}")
@@ -745,6 +734,27 @@ def reply():
             else:
                 return "Please fill out all the required fields"
         else:
+            if request.files['file'].filename != '':
+                files = request.files.getlist("file")
+                if len(files) > globalSettings['maxFiles']: #check if too many files are uploaded
+                    return "Maximum file limit exceeded"
+                else:
+                    filenames = []
+                    filePaths = []
+                    for f in files: #downloads the files and stores them on the disk
+                        if f.mimetype in mimeTypes:
+                            filename = uploadFile(f, board['uri'], str(curTime), spoiler)
+                            filePaths.append(filename)
+                            filenames.append(secure_filename(f.filename))
+                        else:
+                            return "Incorrect file type submitted"
+                    filenames = ','.join([str(x) for x in filenames])
+                    filePaths = ','.join([str(x) for x in filePaths])
+            else:
+                if 'comment' not in request.form:
+                    return "A file or message is required"
+                filenames = []
+                filePaths = []
             if len(filePaths) == 0:
                 cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(request.remote_addr))) #parse message later
             else:

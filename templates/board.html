@@ -108,7 +108,11 @@
                                         {%endif%}
                                     </div>
                                     <a class="linkImg" target="_blank" href="../{{file}}">
-                                        <img loading="lazy" class="thumbnail" src="../{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
+                                        {%if thread['spoiler'] == 1%}
+                                            <img loading="lazy" class="thumbnail" src="../{{data['spoilerImage']}}">
+                                        {%else%}
+                                            <img loading="lazy" class="thumbnail" src="../{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
+                                        {%endif%}
                                     </a>
                                 </div>
                         {%endfor%}
