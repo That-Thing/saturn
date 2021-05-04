@@ -52,7 +52,8 @@ captcha = ImageCaptcha(fonts=['./static/fonts/quicksand.ttf']) #Fonts for captch
 #add password generation for posts with the password being stored in session data
 #add post deletion
 #catalog
-
+#add floating reply thing.
+#add replying by clicking on the post number
 
 #flask app configuration
 app = flask.Flask(__name__)
@@ -756,9 +757,9 @@ def reply():
                 filenames = []
                 filePaths = []
             if len(filePaths) == 0:
-                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(request.remote_addr))) #parse message later
+                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(request.remote_addr), spoiler)) #parse message later
             else:
-                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr))) #parse message later
+                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler)) #parse message later
             cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (board['posts']+1, board['uri']))
             mysql.connection.commit()
             return redirect(f"{board['uri']}/thread/{request.form['thread']}#{board['posts']+1}")

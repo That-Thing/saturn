@@ -101,7 +101,7 @@
                                 {%if op['spoiler'] == 1%}
                                     <img loading="lazy" class="thumbnail" src="../../{{data['spoilerImage']}}">
                                 {%else%}
-                                    <img loading="lazy" class="thumbnail" src="../{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
+                                    <img loading="lazy" class="thumbnail" src="../../{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
                                 {%endif%}
                             </a>
                         </div>
@@ -120,6 +120,7 @@
                 <div class="replyDiv" id="{{post['number']}}">
                     <div class="innerPost">
                         <div class="postInfo">
+                            <input type="checkbox" name="{{post['number']}}-{{board}}">
                             <span class="subject">{{post['subject']}}</span>
                             <span class="name">{{post['name']}}</span>
                             <span>{{post['date'] | ut}}</span>
@@ -149,7 +150,7 @@
                                             {%if post['spoiler'] == 1%}
                                                 <img loading="lazy" class="thumbnail" src="../../{{data['spoilerImage']}}">
                                             {%else%}
-                                                <img loading="lazy" class="thumbnail" src="../{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
+                                                <img loading="lazy" class="thumbnail" src="../../{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
                                             {%endif%}
                                         </a>
                                     </div>
