@@ -126,16 +126,62 @@
                         </div>
                         <blockquote class="comment">{{thread['message']}}</blockquote>
                     </div>
+                    {%set posts = thread['number'] | fivePosts(board)%}
+                    {%for post in posts%}
+                        <div class="replyDiv" id="{{post['number']}}">
+                            <div class="innerPost">
+                                <div class="postInfo">
+                                    <input type="checkbox" name="{{post['number']}}-{{board}}">
+                                    <span class="subject">{{post['subject']}}</span>
+                                    <span class="name">{{post['name']}}</span>
+                                    <span>{{post['date'] | ut}}</span>
+                                    <span><a class="postNumber" href="thread/{{thread['number']}}#{{post['number']}}">No.</a><a class="postNumber">{{post['number']}}</a></span>
+                                    <span>[<a class="reply">Reply</a>]</span>
+                                </div>
+                                {%if post['files'] != None%}
+                                    {%set files = post['files'].split(',')%}
+                                    {%set filenames = post['filenames'].split(',')%}
+                                    {%if files | length > 1%}
+                                        <div class="uploads multipleFiles">
+                                    {%else%}
+                                        <div class="uploads">
+                                    {%endif%}
+                                    {%for file in files%}
+                                            <div class="fileDiv">
+                                                <div class="fileInfo">
+                                                    <a class="filename" href="../../{{file}}" target="_blank">{{filenames[files.index(file)]}}</a>
+                                                    <a href="../../{{file}}" download="{{filenames[files.index(file)]}}"><i class="fas fa-download textIcon"></i></a>
+                                                    {%if file | checkimage == True%}
+                                                        <span class="fileSize textIcon">({{file | filesize}}, {{file | dimensions}})</span>
+                                                    {%else%}
+                                                        <span class="fileSize textIcon">({{file | filesize}})</span>
+                                                    {%endif%}
+                                                </div>
+                                                <a class="linkImg" target="_blank" href="../../{{file}}">
+                                                    {%if post['spoiler'] == 1%}
+                                                        <img loading="lazy" class="thumbnail" src="../../{{data['spoilerImage']}}">
+                                                    {%else%}
+                                                        <img loading="lazy" class="thumbnail" src="../../{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
+                                                    {%endif%}
+                                                </a>
+                                            </div>
+                                    {%endfor%}
+                                    </div>
+                                {%endif%}
+                                <blockquote class="comment">{{post['message']}}</blockquote>
+                                </div>
+                            </div>
+                    {%endfor%}
                 {% endfor %}
-            </div>
-            <hr>
-            {% if boardData['owner'] == session['username'] or session['group'] == 'administrator' %}
+                {% if boardData['owner'] == session['username'] or session['group'] == 'administrator' %}
                 <div id="boardManagement">
+                    <hr>
                     <span>
                         [<a href="../manageboard?uri={{boardData['uri']}}">Board Settings</a>]
                     </span>
                 </div>
             {%endif%}
+            </div>
         </div>
         <footer>
             Any post made by a user is the responsibility of that user.

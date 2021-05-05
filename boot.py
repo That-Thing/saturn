@@ -54,6 +54,8 @@ captcha = ImageCaptcha(fonts=['./static/fonts/quicksand.ttf']) #Fonts for captch
 #catalog
 #add floating reply thing.
 #add replying by clicking on the post number
+#display 5 latest posts in each thread on the board page
+
 
 #flask app configuration
 app = flask.Flask(__name__)
@@ -131,25 +133,25 @@ def showMedia(path):
 
 #filters
 
-#convert unix time to normal datetime
-@app.template_filter('ut')
+
+@app.template_filter('ut') #convert unix time to normal datetime
 def normalizetime(timestamp):
     return datetime.utcfromtimestamp(timestamp).strftime('%m/%d/%Y %H:%M:%S')
-@app.template_filter('splittext')
+@app.template_filter('splittext') #split text by .
 def splittext(text):
     return text.split('.')
-@app.template_filter('filesize')
+@app.template_filter('filesize') #get filesize
 def fileSize(file):
     size = os.path.getsize(file)
     return convertSize(size)
-@app.template_filter('checkimage')
+@app.template_filter('checkimage') #check if file is a valid image
 def checkImage(file):
     im = Image.open(file)
     if str(im.verify()) == "None":
         return True
     else:
         return False
-@app.template_filter('dimensions')
+@app.template_filter('dimensions') #get image dimensions
 def getDimensions(file):
     im = Image.open(file)
     if str(im.verify()) == "None":
@@ -157,6 +159,26 @@ def getDimensions(file):
         return (f"{width}x{height}")
     else:
         pass
+@app.template_filter('fivePosts') #get last 5 posts in a thread
+def fivePosts(thread, board):
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT * FROM posts WHERE board=%s AND thread=%s", (board, thread))
+    posts = cursor.fetchall()
+    numbers = []
+    for post in posts:
+        numbers.append(post['number'])
+    numbers.sort(reverse=True)
+    final = []
+    index = 0
+    for x in numbers:
+        cursor.execute("SELECT * FROM posts WHERE board=%s AND number=%s", (board, x))
+        tmp = cursor.fetchall()
+        final.append(tmp[0])
+        index += 1
+        if index == 5:
+            break
+    final.reverse()
+    return final
 #Make local timestamps
 #add relative times
 
