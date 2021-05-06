@@ -60,9 +60,6 @@ hr {
     border-style: solid none none;
     border-color: #2f3840;
 }
-.greentext {
-    color: #789922;
-}
 /*Button*/
 .btn:hover {
     background-color: #454e56
