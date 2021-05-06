@@ -629,6 +629,8 @@ def newThread():
                     spoiler = 0
             else:
                 spoiler = 0
+            if 'password' in request.form:
+                filePass = request.form['password']
             if x['captcha'] == 1:
                 if request.method == 'POST' and 'comment' in request.form and 'captcha' in request.form and request.files['file'].filename != '':
                     if session['captcha'] == request.form['captcha']:
@@ -741,6 +743,8 @@ def reply():
                 spoiler = 0
         else:
             spoiler = 0
+        if 'password' in request.form:
+            filePass = request.form['password']
         comment = request.form['comment']
         if board['captcha'] == 1:
             if 'comment' in request.form and 'captcha' in request.form:

@@ -66,7 +66,10 @@ CREATE TABLE IF NOT EXISTS `posts` (
   `thread` int(11) DEFAULT NULL,
   `board` tinytext NOT NULL,
   `files` text DEFAULT NULL,
-  `filenames` text DEFAULT NULL
+  `filenames` text DEFAULT NULL,
+  `ip` tinytext DEFAULT NULL,
+  `spoiler` int(11) NOT NULL DEFAULT 0 COMMENT '0 for normal, 1 for spoiler',
+  `password` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Data exporting was unselected.
