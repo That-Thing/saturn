@@ -54,7 +54,6 @@ captcha = ImageCaptcha(fonts=['./static/fonts/quicksand.ttf']) #Fonts for captch
 #catalog
 #add floating reply thing.
 #add replying by clicking on the post number
-#display 5 latest posts in each thread on the board page
 
 
 #flask app configuration
@@ -125,7 +124,15 @@ def lastHour():
         if now-timedelta(hours=1) <= datetime.utcfromtimestamp(post['date']) <= now+timedelta(hours=1):
             count = count+1
     return count
-
+#check if there's a file password in the session
+def checkFilePass():
+    if 'filePassword' in session:
+        return session['filePassword']
+    else:
+        characters = string.ascii_letters + string.punctuation  + string.digits
+        password =  "".join(random.choice(characters) for x in range(8))
+        session['filePassword'] = password
+        return password
 #allow files in the media folder to be served
 @app.route('/media/<path:path>')
 def showMedia(path):
@@ -556,6 +563,7 @@ def getThreads(uri):
 @app.route('/<board>/', methods=['GET'])
 @app.route('/<board>', methods=['GET'])
 def boardPage(board):
+    filePass = checkFilePass()
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("SELECT * FROM boards")
     boards = cursor.fetchall()
@@ -568,9 +576,9 @@ def boardPage(board):
                 banner = "static/banners/defaultbanner.png"
             if x['captcha'] == 1:
                 captcha = generateCaptcha(5)
-                return render_template('board.html', data=globalSettings, board=board, boardData=x, banner=banner, captcha=captcha, threads=getThreads(board))
+                return render_template('board.html', data=globalSettings, board=board, boardData=x, banner=banner, captcha=captcha, threads=getThreads(board), filePass=filePass)
             else:
-                return render_template('board.html', data=globalSettings, board=board, boardData=x, banner=banner, threads=getThreads(board))
+                return render_template('board.html', data=globalSettings, board=board, boardData=x, banner=banner, threads=getThreads(board), filePass=filePass)
     return render_template('error.html', errorMsg="Board not found", data=globalSettings) 
 
 #thumbnail generation
@@ -594,6 +602,7 @@ def uploadFile(f, board, filename, spoiler):
 
 @app.route('/newThread', methods=['POST'])
 def newThread():
+    filePass = checkFilePass()
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("SELECT * FROM boards")
     boards = cursor.fetchall()
@@ -638,7 +647,7 @@ def newThread():
                                     return "Incorrect file type submitted"
                             filenames = ','.join([str(x) for x in filenames])
                             filePaths = ','.join([str(x) for x in filePaths])
-                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s, %s, %s)', (name, subject, options, request.form['comment'], x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler)) #parse message later
+                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s, %s, %s, %s)', (name, subject, options, request.form['comment'], x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler, filePass)) #parse message later
                         cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (x['posts']+1, x['uri']))
                         mysql.connection.commit()
                         return redirect(f"{x['uri']}/thread/{x['posts']+1}")
@@ -663,7 +672,7 @@ def newThread():
                                 return "Incorrect file type submitted"
                         filenames = ','.join([str(x) for x in filenames])
                         filePaths = ','.join([str(x) for x in filePaths])
-                    cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s, %s, %s)', (name, subject, options, request.form['comment'], x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler)) #parse message later
+                    cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s, %s, %s, %s)', (name, subject, options, request.form['comment'], x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler, filePass)) #parse message later
                     cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (x['posts']+1, x['uri']))
                     mysql.connection.commit()
                     return redirect(f"{x['uri']}/thread/{x['posts']+1}")
@@ -674,6 +683,7 @@ def newThread():
 @app.route('/<board>/thread/<thread>', methods=['GET'])
 @app.route('/<board>/thread/<thread>', methods=['GET'])
 def thread(board, thread):
+    filePass = checkFilePass()
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("SELECT * FROM posts WHERE board=%s AND number=%s AND type=1", (board, thread))
     parentPost = cursor.fetchall()
@@ -690,10 +700,10 @@ def thread(board, thread):
                 banner = "static/banners/defaultbanner.png"
             if x['captcha'] == 1:
                 captcha = generateCaptcha(5)
-                return render_template('thread.html', data=globalSettings, board=board, boardData=x, banner=banner, captcha=captcha, posts=posts, op=parentPost[0])
+                return render_template('thread.html', data=globalSettings, board=board, boardData=x, banner=banner, captcha=captcha, posts=posts, op=parentPost[0], filePass=filePass)
             else:
                 print(parentPost)
-                return render_template('thread.html', data=globalSettings, board=board, boardData=x, banner=banner, posts=posts, op=parentPost[0])
+                return render_template('thread.html', data=globalSettings, board=board, boardData=x, banner=banner, posts=posts, op=parentPost[0], filePass=filePass)
     return render_template('error.html', errorMsg="Board not found", data=globalSettings) 
 
 
@@ -702,6 +712,7 @@ def thread(board, thread):
 @app.route('/reply', methods=['POST'])
 def reply():
     if request.method == 'POST':
+        filePass = checkFilePass()
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute("SELECT * FROM posts where thread=%s", [request.form['thread']])
         posts = cursor.fetchall()
@@ -756,9 +767,9 @@ def reply():
                         filenames = []
                         filePaths = []
                     if len(filePaths) == 0:
-                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(request.remote_addr), spoiler)) #parse message later
+                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(request.remote_addr), spoiler, filePass)) #parse message later
                     else:
-                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler)) #parse message later
+                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler, filePass)) #parse message later
                     cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (board['posts']+1, board['uri']))
                     mysql.connection.commit()
                     return redirect(f"{board['uri']}/thread/{request.form['thread']}#{board['posts']+1}")
@@ -789,9 +800,9 @@ def reply():
                 filenames = []
                 filePaths = []
             if len(filePaths) == 0:
-                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(request.remote_addr), spoiler)) #parse message later
+                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(request.remote_addr), spoiler, filePass)) #parse message later
             else:
-                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler)) #parse message later
+                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler, filePass)) #parse message later
             cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (board['posts']+1, board['uri']))
             mysql.connection.commit()
             return redirect(f"{board['uri']}/thread/{request.form['thread']}#{board['posts']+1}")
