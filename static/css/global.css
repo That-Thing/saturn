@@ -318,3 +318,10 @@ p {
 #postList {
     margin: 1em;
 }
+#helpBox {
+    margin-top: 5%;
+    width: 80%;
+}
+#helpBox .content {
+    padding: 1em;
+}

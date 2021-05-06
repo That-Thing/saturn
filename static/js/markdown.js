@@ -88,8 +88,8 @@ var BBCodeHTML = function() {
     me.addFormat('[i]{TEXT}[/i]', '<em>{TEXT}</em>'); //italics
     me.addFormat('[u]{TEXT}[/u]', '<u>{TEXT}</u>'); //underlined
     me.addFormat('[s]{TEXT}[/s]', '<s>{TEXT}</s>'); //strikethrough
-    me.addFormat('[color=COLOR]{TEXT}[/color]', '<span style="{COLOR}">{TEXT}</span>'); //colored text
-    me.addFormat('[highlight={COLOR}]{TEXT}[/highlight]', '<span style="background-color:{COLOR}">{TEXT}</span>'); //highlighted text
+    // me.addFormat('[color=COLOR]{TEXT}[/color]', '<span style="{COLOR}">{TEXT}</span>'); //colored text
+    // me.addFormat('[highlight={COLOR}]{TEXT}[/highlight]', '<span style="background-color:{COLOR}">{TEXT}</span>'); //highlighted text
     me.addFormat('[spoiler]{TEXT}[/spoiler]', '<span class="spoiler">{TEXT}</span>'); //spoiler
     me.addFormat('[code]{TEXT}[/code]', '<code>{TEXT}</code>'); //code
     me.addFormat('*{TEXT}*', '<em>{TEXT}</em>'); //alternative italics
