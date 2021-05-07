@@ -15,6 +15,7 @@ import random
 import string
 from captcha.image import ImageCaptcha
 from PIL import Image
+from bs4 import BeautifulSoup
 with open('./config/config.json') as configFile: #global config file
     configData = json.load(configFile)
 with open('./config/database.json') as configFile: #database config
@@ -137,7 +138,12 @@ def checkFilePass():
 @app.route('/media/<path:path>')
 def showMedia(path):
     return send_from_directory(globalSettings['mediaLocation'], path)
-
+#strip HTML tags from entered text. 
+def stripHTML(text):
+    text.replace('<','&lt;')
+    text.replace('>','&gt;')
+    text.replace('&','&amp;')
+    return text
 #filters
 
 
@@ -612,14 +618,17 @@ def newThread():
             curTime = time.time()
             if "name" in request.form and len(request.form['name']) > 0:
                 name = request.form['name']
+                name = stripHTML(name)
             else:
                 name = x['anonymous']
             if 'subject' in request.form and len(request.form['subject']) > 0:
                 subject = request.form['subject']
+                subject = stripHTML(subject)
             else:
                 subject = ""
             if 'options' in request.form and len(request.form['options']) > 0:
                 options = request.form['options']
+                options = stripHTML(options)
             else:
                 options = ""     
             if "spoiler" in request.form:
@@ -629,6 +638,8 @@ def newThread():
                     spoiler = 0
             else:
                 spoiler = 0
+            comment = request.form['comment']
+            comment = stripHTML(comment)
             if 'password' in request.form:
                 filePass = request.form['password']
             if x['captcha'] == 1:
@@ -649,7 +660,7 @@ def newThread():
                                     return "Incorrect file type submitted"
                             filenames = ','.join([str(x) for x in filenames])
                             filePaths = ','.join([str(x) for x in filePaths])
-                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s, %s, %s, %s)', (name, subject, options, request.form['comment'], x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler, filePass)) #parse message later
+                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s, %s, %s, %s)', (name, subject, options, comment, x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler, filePass)) #parse message later
                         cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (x['posts']+1, x['uri']))
                         mysql.connection.commit()
                         return redirect(f"{x['uri']}/thread/{x['posts']+1}")
@@ -674,7 +685,7 @@ def newThread():
                                 return "Incorrect file type submitted"
                         filenames = ','.join([str(x) for x in filenames])
                         filePaths = ','.join([str(x) for x in filePaths])
-                    cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s, %s, %s, %s)', (name, subject, options, request.form['comment'], x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler, filePass)) #parse message later
+                    cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s, %s, %s, %s)', (name, subject, options, comment, x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler, filePass)) #parse message later
                     cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (x['posts']+1, x['uri']))
                     mysql.connection.commit()
                     return redirect(f"{x['uri']}/thread/{x['posts']+1}")
@@ -725,15 +736,17 @@ def reply():
         curTime = time.time()
         if "name" in request.form and len(request.form['name']) > 0:
             name = request.form['name']
+            name = stripHTML(name)
         else:
-            print(board['anonymous'])
             name = board['anonymous']
         if 'subject' in request.form and len(request.form['subject']) > 0:
             subject = request.form['subject']
+            subject = stripHTML(subject)
         else:
             subject = ""
         if 'options' in request.form and len(request.form['options']) > 0:
             options = request.form['options']
+            options = stripHTML(options)
         else:
             options = ""
         if "spoiler" in request.form:
@@ -746,6 +759,7 @@ def reply():
         if 'password' in request.form:
             filePass = request.form['password']
         comment = request.form['comment']
+        comment = stripHTML(comment)
         if board['captcha'] == 1:
             if 'comment' in request.form and 'captcha' in request.form:
                 if session['captcha'] == request.form['captcha']:
