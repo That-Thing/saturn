@@ -131,10 +131,10 @@ function checkPinktext(str) {
 function formatText() {
     var posts = document.getElementsByClassName("comment");
     for (var i = 0; i < posts.length; i++) {
-        var text = posts[i].textContent;
-        posts[i].innerHTML=textParser.bbcodeToHtml(text);
-        lines = text.match(/[^\r\n]+/g);
-        console.log(lines)
+      var text = posts[i].textContent;
+      posts[i].innerHTML=textParser.bbcodeToHtml(text);
+      lines = text.match(/[^\r\n]+/g);
+      if(lines) {
         for (var x = 0; x < lines.length; x++) { //this is an incredibly broken and stupid way to do this. For anyone using this code as an example..DON'T
           if(checkPinktext(lines[x]) == true) {
             lines[x] = lines[x].substring(1);
@@ -145,7 +145,7 @@ function formatText() {
           }
         }
         posts[i].innerHTML = lines.join("\n")
-
+      }
     }
 };
 formatText();
