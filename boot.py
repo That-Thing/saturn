@@ -207,7 +207,6 @@ def checkMarkdown(text):
             x = f"<span class='greentext'>{x}</span>"
         if bool(re.match(ptRegex, x)):
             x = f"<span class='pinktext'>{x}</span>"
-            print(x)
         result = result+x
     return result
 #Make local timestamps
@@ -733,7 +732,6 @@ def thread(board, thread):
                 captcha = generateCaptcha(5)
                 return render_template('thread.html', data=globalSettings, board=board, boardData=x, banner=banner, captcha=captcha, posts=posts, op=parentPost[0], filePass=filePass)
             else:
-                print(parentPost)
                 return render_template('thread.html', data=globalSettings, board=board, boardData=x, banner=banner, posts=posts, op=parentPost[0], filePass=filePass)
     return render_template('error.html', errorMsg="Board not found", data=globalSettings) 
 
@@ -777,9 +775,7 @@ def reply():
         if 'password' in request.form:
             filePass = request.form['password']
         comment = request.form['comment']
-        print(comment)
         comment = stripHTML(comment)
-        print(comment)
         if board['captcha'] == 1:
             if 'comment' in request.form and 'captcha' in request.form:
                 if session['captcha'] == request.form['captcha']:
