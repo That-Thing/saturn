@@ -350,11 +350,13 @@ def manageBoard():
     msg=""
     cursor.execute("SELECT * FROM banners WHERE board=%s", [uri])
     bannerData = cursor.fetchall()
-    # try:
-    if session['group'] == 'administrator' or sqlData['owner'] == session['username']:
-        return render_template('manageBoard.html', data=globalSettings, sqlData=sqlData, bannerData=bannerData, msg=msg)
-    # except Exception as e:
-    #     return render_template('error.html', errorMsg="Not logged in", data=globalSettings)
+    try:
+        if session['group'] == 'administrator' or sqlData['owner'] == session['username']:
+            return render_template('manageBoard.html', data=globalSettings, sqlData=sqlData, bannerData=bannerData, msg=msg)
+        else:
+            return render_template('error.html', errorMsg="Not logged in", data=globalSettings)
+    except Exception as e:
+        print(e)
 #create board
 @app.route('/createboard', methods=['POST'])
 def createBoard():
@@ -379,7 +381,6 @@ def createBoard():
                 return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings) 
         except Exception as e:
             print(e)
-            return render_template('error.html', errorMsg="Not logged in", data=globalSettings) 
 #delete board
 @app.route('/deleteboard', methods=['POST'])
 def deleteBoard():
@@ -397,16 +398,25 @@ def deleteBoard():
                 try:
                     if request.form["deleteBoard"] == "on":
                         cursor.execute("DELETE FROM boards WHERE  uri=%s AND owner=%s LIMIT 1", (uri, session['username']))
+                        cursor.execute("DELETE FROM posts WHERE board=%s", [uri])
                         mysql.connection.commit()
                         path = os.path.join(globalSettings['bannerLocation'], uri) #path for banner folder for specific board. 
                         os.rmdir(path)#remove banner folder
                         path = os.path.join(globalSettings['mediaLocation'], uri) #path for banner folder for specific board. 
+                        for x in os.listdir(path):
+                            os.remove(os.path.join(path, x))
+                        print(path)
                         os.rmdir(path)#remove media sub-folder
                         return redirect(url_for('boardManagement', msg=uri + " successfully deleted"))
+                    else:
+                        return redirect(url_for('manageboard', uri=uri, msg="Please confirm board deletion"))
                 except Exception as e:
+                    print(e)
                     return render_template('manageBoard.html', data=globalSettings, sqlData=sqlData, msg="Please confirm board deletion") #probably could have done better
+            else:
+                return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings)
         except Exception as e:
-            return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings) 
+             print(e)
 
 @app.route('/updateBoard', methods=['POST'])
 def updateBoard():
@@ -427,8 +437,10 @@ def updateBoard():
                 cursor.execute("UPDATE boards SET name=%s, description=%s, anonymous=%s, message=%s, captcha=%s WHERE uri=%s", (name, desc, anonymous, message, captcha, uri))
                 mysql.connection.commit()
                 return redirect(url_for('manageBoard', uri=uri))
+            else:
+                return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings)
         except Exception as e:
-            return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings) 
+            print(e)
 #banner management
 
 #upload banner and create sql entry

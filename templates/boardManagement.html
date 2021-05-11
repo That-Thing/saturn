@@ -31,6 +31,7 @@
                 {% endfor %}
             </div>
         </div>
+        <div class="msg center">{{msg}}</div>
         {% if data['requiredRole'] == session['group'] or session['group'] == 'administrator' %}
             <div class="box" style="width: 40%;">
                 <h2 class="boxHeader">Create board</h2>
@@ -49,7 +50,6 @@
                     </label>
                     <input class="btn btn-primary" type="submit" value="Create Board">
                 </form>
-                <div class="msg center">{{msg}}</div>
             </div>  
         {% endif %}
     </body>
