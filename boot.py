@@ -244,7 +244,8 @@ def siteSettings():
         else:
             return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings)    
     except Exception as e:
-        return render_template('error.html', errorMsg="Not logged in", data=globalSettings)    
+        print(e)
+        return render_template('error.html', errorMsg=e, data=globalSettings)    
 #Save global settings
 @app.route('/saveSettings', methods=['POST'])
 def saveSettings():
@@ -259,7 +260,10 @@ def saveSettings():
             else:
                 return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings)   
         except Exception as e:
-            return render_template('error.html', errorMsg="Not logged in", data=globalSettings)   
+            print(e)
+            return render_template('error.html', errorMsg=e, data=globalSettings) 
+    else:
+        return render_template('error.html', errorMsg="Request must be POST", data=globalSettings)       
 
 
 
@@ -275,7 +279,8 @@ def accountSettings():
         else:
             return render_template('error.html', errorMsg="Not logged in", data=globalSettings) 
     except Exception as e:
-        return render_template('error.html', errorMsg="Not logged in", data=globalSettings)   
+        print(e)
+        return render_template('error.html', errorMsg=e, data=globalSettings)   
 @app.route('/updatePassword', methods=['POST'])
 def updatePassword():
     if request.method == 'POST':
@@ -300,23 +305,29 @@ def updatePassword():
                     return render_template('error.html', errorMsg="New passwords don't match.", data=globalSettings)  
             else:
                 return render_template('error.html', errorMsg="Current password is incorrect.", data=globalSettings)  
-
+    else:
+        return render_template('error.html', errorMsg="Request must be POST", data=globalSettings)   
             
 
 
 @app.route('/updateemail', methods=['POST'])
 def updateEmail():
-    try:
-        if session['loggedin'] == True:
-            email = request.form['email']
-            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            cursor.execute("UPDATE accounts SET email=%s WHERE username=%s", (email, session['username']))
-            session.pop('email', None)
-            mysql.connection.commit()
-            return redirect(url_for('accountSettings'))
-    except Exception as e:
-        return render_template('error.html', errorMsg="Not logged in", data=globalSettings)  
-
+    if request.method == 'POST':
+        try:
+            if session['loggedin'] == True:
+                email = request.form['email']
+                cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+                cursor.execute("UPDATE accounts SET email=%s WHERE username=%s", (email, session['username']))
+                session.pop('email', None)
+                mysql.connection.commit()
+                return redirect(url_for('accountSettings'))
+            else:
+                return render_template('error.html', errorMsg="Not logged in", data=globalSettings) 
+        except Exception as e:
+            print(e)
+            return render_template('error.html', errorMsg=e, data=globalSettings) 
+    else:
+        return render_template('error.html', errorMsg="Request must be POST", data=globalSettings)   
 
 
 
@@ -335,7 +346,8 @@ def boardManagement():
         else:
             return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings)   
     except Exception as e:
-        return render_template('error.html', errorMsg="Not logged in", data=globalSettings)  
+        print(e)
+        return render_template('error.html', errorMsg=e, data=globalSettings) 
 
 
 #Individual board management
@@ -356,6 +368,7 @@ def manageBoard():
         else:
             return render_template('error.html', errorMsg="Not logged in", data=globalSettings)
     except Exception as e:
+        return render_template('error.html', errorMsg=e, data=globalSettings) 
         print(e)
 #create board
 @app.route('/createboard', methods=['POST'])
@@ -370,7 +383,7 @@ def createBoard():
                 if board:
                     return redirect(url_for('boardManagement', msg="Board already exists"))
                 else:    
-                    cursor.execute("INSERT INTO boards VALUES (%s, %s, %s, %s, 'Anonymous', '', 0, 0, 0, 0)",(request.form['uri'], request.form['name'], request.form['description'], session['username'])) #create the board in the MySQL database
+                    cursor.execute("INSERT INTO boards VALUES (%s, %s, %s, %s, 'Anonymous', '', 0, 0, 0, 0)",(request.form['uri'].lower(), request.form['name'], request.form['description'], session['username'])) #create the board in the MySQL database
                     mysql.connection.commit()
                     path = os.path.join(globalSettings['bannerLocation'], request.form['uri']) #make folder for banner. 
                     os.mkdir(path) 
@@ -380,6 +393,7 @@ def createBoard():
             else:
                 return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings) 
         except Exception as e:
+            return render_template('error.html', errorMsg=e, data=globalSettings) 
             print(e)
 #delete board
 @app.route('/deleteboard', methods=['POST'])
@@ -417,7 +431,8 @@ def deleteBoard():
                 return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings)
         except Exception as e:
              print(e)
-
+    else:
+        return render_template('error.html', errorMsg="Request must be POST", data=globalSettings)   
 @app.route('/updateBoard', methods=['POST'])
 def updateBoard():
     if request.method == 'POST':
@@ -441,6 +456,8 @@ def updateBoard():
                 return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings)
         except Exception as e:
             print(e)
+    else:
+        return render_template('error.html', errorMsg="Request must be POST", data=globalSettings)   
 #banner management
 
 #upload banner and create sql entry
@@ -468,7 +485,10 @@ def uploadBanner():
                 bannerData = cursor.fetchall()
                 return redirect(url_for('manageBoard', uri=uri)) #Find a better solution for this. 
         except Exception as e:
-            return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings) 
+            print(e)
+            return render_template('error.html', errorMsg=e, data=globalSettings) 
+    else:
+        return render_template('error.html', errorMsg="Request must be POST", data=globalSettings)    
 @app.route('/deletebanner', methods=['POST'])
 def deleteBanner():
     globalSettings = reloadSettings()
@@ -839,7 +859,7 @@ def reply():
             mysql.connection.commit()
             return redirect(f"{board['uri']}/thread/{request.form['thread']}#{board['posts']+1}")
     else:
-        return "Request must be POST"
+        return render_template('error.html', errorMsg="Request must be POST", data=globalSettings)   
     
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=configData["port"])
