@@ -103,49 +103,11 @@ var BBCodeHTML = function() {
   };
   var textParser = new BBCodeHTML();
 
-//checks if given string is greentext. 
-function checkGreentext(str) {
-  const regex = /^>.*$/gm;
-  let m;
-  while ((m = regex.exec(str)) !== null) {
-    if (m.index === regex.lastIndex) {
-        regex.lastIndex++;
-    }
-    if(m.length > 0) {
-        return true;
-    }
-  }
-}
-function checkPinktext(str) {
-  const regex = /^<.*$/gm;
-  let m;
-  while ((m = regex.exec(str)) !== null) {
-    if (m.index === regex.lastIndex) {
-        regex.lastIndex++;
-    }
-    if(m.length > 0) {
-        return true;
-    }
-  }
-}
 function formatText() {
     var posts = document.getElementsByClassName("comment");
     for (var i = 0; i < posts.length; i++) {
       var text = posts[i].textContent;
       posts[i].innerHTML=textParser.bbcodeToHtml(text);
-      lines = text.match(/[^\r\n]+/g);
-      if(lines) {
-        for (var x = 0; x < lines.length; x++) { //this is an incredibly broken and stupid way to do this. For anyone using this code as an example..DON'T
-          if(checkPinktext(lines[x]) == true) {
-            lines[x] = lines[x].substring(1);
-            lines[x] = "<span class='pinktext'>&lt;"+lines[x]+"</span>"
-          }
-          if(checkGreentext(lines[x]) == true) {
-            lines[x] = "<span class='greentext'>"+lines[x]+"</span>"
-          }
-        }
-        posts[i].innerHTML = lines.join("\n")
-      }
     }
 };
 formatText();

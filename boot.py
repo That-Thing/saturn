@@ -15,7 +15,7 @@ import random
 import string
 from captcha.image import ImageCaptcha
 from PIL import Image
-from bs4 import BeautifulSoup
+import re
 with open('./config/config.json') as configFile: #global config file
     configData = json.load(configFile)
 with open('./config/database.json') as configFile: #database config
@@ -140,10 +140,13 @@ def showMedia(path):
     return send_from_directory(globalSettings['mediaLocation'], path)
 #strip HTML tags from entered text. 
 def stripHTML(text):
-    text.replace('<','&lt;')
-    text.replace('>','&gt;')
-    text.replace('&','&amp;')
+    text = text.replace('<','&lt;')
+    text = text.replace('>','&gt;')
     return text
+
+
+        
+
 #filters
 
 
@@ -192,6 +195,21 @@ def fivePosts(thread, board):
             break
     final.reverse()
     return final
+@app.template_filter('checkMarkdown') #checks if post has greentext. 
+def checkMarkdown(text):
+    gtRegex = r"^&gt;.*$"
+    ptRegex = r"^&lt;.*$"
+    text = stripHTML(text)
+    lines = text.splitlines(True)
+    result = ""
+    for x in lines:
+        if bool(re.match(gtRegex, x)) == True:
+            x = f"<span class='greentext'>{x}</span>"
+        if bool(re.match(ptRegex, x)):
+            x = f"<span class='pinktext'>{x}</span>"
+            print(x)
+        result = result+x
+    return result
 #Make local timestamps
 #add relative times
 
@@ -759,7 +777,9 @@ def reply():
         if 'password' in request.form:
             filePass = request.form['password']
         comment = request.form['comment']
+        print(comment)
         comment = stripHTML(comment)
+        print(comment)
         if board['captcha'] == 1:
             if 'comment' in request.form and 'captcha' in request.form:
                 if session['captcha'] == request.form['captcha']:
