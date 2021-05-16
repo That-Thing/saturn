@@ -143,8 +143,29 @@ def stripHTML(text):
     text = text.replace('<','&lt;')
     text = text.replace('>','&gt;')
     return text
-
-
+#bump order
+def bumpOrder(board):
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    #long and drawn out sql query to get bump order.
+    cursor.execute('''
+        SELECT parent.*, child.number, (SELECT MAX(c1.number) FROM posts c1 WHERE c1.thread = parent.number) AS threadNum FROM posts parent,
+        posts child
+        WHERE child.thread = parent.number AND parent.board=%s
+        AND child.number = (SELECT MAX(c1.number) FROM posts c1
+        WHERE c1.thread = parent.number)
+        UNION 
+        SELECT parent.*, parent.number, parent.number AS threadNum
+        FROM posts parent
+        WHERE parent.board=%s AND
+            NOT EXISTS (SELECT * FROM posts c2
+            WHERE c2.thread = parent.number)
+            AND NOT EXISTS (SELECT * FROM posts c3
+            WHERE parent.thread = c3.number)
+        ORDER BY threadNum desc
+        ;
+    ''', (board, board))
+    posts = cursor.fetchall()
+    return posts
         
 
 #filters
@@ -188,8 +209,8 @@ def fivePosts(thread, board):
     index = 0
     for x in numbers:
         cursor.execute("SELECT * FROM posts WHERE board=%s AND number=%s", (board, x))
-        tmp = cursor.fetchall()
-        final.append(tmp[0])
+        tmp = cursor.fetchone()
+        final.append(tmp)
         index += 1
         if index == 5:
             break
@@ -209,6 +230,16 @@ def checkMarkdown(text):
             x = f"<span class='pinktext'>{x}</span>"
         result = result+x
     return result
+
+#MAKE QUOTES WORK
+@app.template_filter('checkQuote') #checks if post has a quoted post. 
+def checkQuote(text):
+    text = stripHTML(text)
+    lines = text.splitlines(True)
+    result = ""
+    for x in lines:
+        if x.startswith("gt;gt;"):
+            x = f'<a href="">{x}</a>'
 #Make local timestamps
 #add relative times
 
@@ -610,6 +641,7 @@ def boardPage(board):
     boards = cursor.fetchall()
     for x in boards:
         if x['uri'] == board:
+            posts = bumpOrder(board)
             path = os.path.join(globalSettings['bannerLocation'], board)
             if len(os.listdir(path)) > 0:
                 banner = os.path.join(path, random.choice(os.listdir(path)))
@@ -617,9 +649,9 @@ def boardPage(board):
                 banner = "static/banners/defaultbanner.png"
             if x['captcha'] == 1:
                 captcha = generateCaptcha(5)
-                return render_template('board.html', data=globalSettings, board=board, boardData=x, banner=banner, captcha=captcha, threads=getThreads(board), filePass=filePass)
+                return render_template('board.html', data=globalSettings, board=board, boardData=x, banner=banner, captcha=captcha, threads=posts, filePass=filePass)
             else:
-                return render_template('board.html', data=globalSettings, board=board, boardData=x, banner=banner, threads=getThreads(board), filePass=filePass)
+                return render_template('board.html', data=globalSettings, board=board, boardData=x, banner=banner, threads=posts, filePass=filePass)
     return render_template('error.html', errorMsg="Board not found", data=globalSettings) 
 
 #thumbnail generation
