@@ -4,10 +4,10 @@
     "siteName": "Saturn",
     "siteLogo": "static/images/logoS.png",
     "siteFavicon": "./static/images/favicon.png",
+    "spoilerImage": "./static/images/spoiler.png",
     "bannerLocation": "static/banners",
     "requiredRole": "administrator",
     "enableRegistration": "on",
     "mimeTypes": "image/jpeg,image/png,image/gif",
-    "maxFiles": "3",
-    "spoilerImage": "./static/images/spoiler.png"
+    "maxFiles": "3"
 }

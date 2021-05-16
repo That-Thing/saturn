@@ -16,6 +16,7 @@ import string
 from captcha.image import ImageCaptcha
 from PIL import Image
 import re
+import hashlib
 with open('./config/config.json') as configFile: #global config file
     configData = json.load(configFile)
 with open('./config/database.json') as configFile: #database config
@@ -89,6 +90,9 @@ def reloadSettings():
     )
     return globalSettings
 globalSettings = reloadSettings()
+salt = "b9bd1af1c98f474fbcdaca25b9590cbb"
+
+
 #return correct filesize name. Thanks StackOverflow
 def convertSize(size_bytes):
    if size_bytes == 0:
@@ -147,6 +151,8 @@ def stripHTML(text):
 def bumpOrder(board):
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     #long and drawn out sql query to get bump order.
+
+    #add checks for sage in options
     cursor.execute('''
         SELECT parent.*, child.number, (SELECT MAX(c1.number) FROM posts c1 WHERE c1.thread = parent.number) AS threadNum FROM posts parent,
         posts child
@@ -548,11 +554,16 @@ def login():
     globalSettings = reloadSettings()
     msg = ''
     if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
+        password = request.form['password'] + salt
+        passwordHash = hashlib.sha512(password.encode("UTF-8")).hexdigest()
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM accounts WHERE username = %s AND password = %s', (request.form['username'], request.form['password']))
+        cursor.execute('SELECT * FROM accounts WHERE username = %s AND password = %s', (request.form['username'], passwordHash))
         account = cursor.fetchone()
+
+        print(passwordHash)
+        print(account)
         if account:
-            if account['password'] == request.form['password'] and account['username'] == request.form['username']:
+            if account['password'] == passwordHash and account['username'] == request.form['username']:
                 session['loggedin'] = True
                 session['id'] = account['id']
                 session['username'] = account['username']
@@ -580,7 +591,7 @@ def register():
         msg = ''
         if request.method == 'POST' and 'username' in request.form and 'password' in request.form and 'email' in request.form:
             username = request.form['username']
-            password = request.form['password']
+            password = request.form['password'] + salt
             email = request.form['email']
             # Check if account exists
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
@@ -597,6 +608,7 @@ def register():
                 msg = 'Please fill out the form!'
             else:
                 # Account doesnt exists and the form data is valid, now insert new account into accounts table
+                password = hashlib.sha512(password.encode("UTF-8")).hexdigest()
                 cursor.execute('INSERT INTO accounts VALUES (NULL, %s, %s, %s, "user")', (username, password, email))
                 mysql.connection.commit()
                 msg = 'You have successfully registered!'
