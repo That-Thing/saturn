@@ -321,13 +321,15 @@ def updatePassword():
         if session['loggedin'] == True:
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
             cursor.execute("SELECT * FROM accounts WHERE username=%s", [session['username']])
-            accountData = cursor.fetchall()
-            accountData = accountData[0]
-            currentPassword = request.form['currentPassword']
+            accountData = cursor.fetchone()
+            saltedPass = request.form['currentPassword'] + salt
+            passwordHash = hashlib.sha512(saltedPass.encode("UTF-8")).hexdigest()
             newPassword = request.form['newPassword']
             confirmPassword = request.form['confirmPassword']
-            if currentPassword == accountData['password']:
+            if passwordHash == accountData['password']:
                 if newPassword == confirmPassword:
+                    newPassword = newPassword + salt
+                    newPassword = hashlib.sha512(newPassword.encode("UTF-8")).hexdigest()
                     cursor.execute("UPDATE accounts SET password=%s WHERE username=%s", (newPassword, session['username']))
                     mysql.connection.commit()
                     session.pop('loggedin', None)
