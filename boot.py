@@ -111,12 +111,9 @@ def randomString(size, chars=string.ascii_lowercase + string.digits):
 #get total number of posts. 
 def getTotal():
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT * FROM boards")
-    boards = cursor.fetchall()
-    total = 0
-    for x in boards:
-        total = total + x['posts']
-    return total
+    cursor.execute("SELECT * FROM server")
+    serverInfo = cursor.fetchone()
+    return serverInfo['posts']
 
 #get the number of posts in the last hour
 def lastHour():
@@ -741,6 +738,9 @@ def newThread():
                             filePaths = ','.join([str(x) for x in filePaths])
                         cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s, %s, %s, %s)', (name, subject, options, comment, x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler, filePass)) #parse message later
                         cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (x['posts']+1, x['uri']))
+                        cursor.execute("SELECT * FROM server")
+                        serverInfo = cursor.fetchone()
+                        cursor.execute("UPDATE server SET posts=%s", [serverInfo['posts']+1])
                         mysql.connection.commit()
                         return redirect(f"{x['uri']}/thread/{x['posts']+1}")
                     else:
@@ -766,6 +766,9 @@ def newThread():
                         filePaths = ','.join([str(x) for x in filePaths])
                     cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s, %s, %s, %s)', (name, subject, options, comment, x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler, filePass)) #parse message later
                     cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (x['posts']+1, x['uri']))
+                    cursor.execute("SELECT * FROM server")
+                    serverInfo = cursor.fetchone()
+                    cursor.execute("UPDATE server SET posts=%s", [serverInfo['posts']+1])
                     mysql.connection.commit()
                     return redirect(f"{x['uri']}/thread/{x['posts']+1}")
                 else:
@@ -867,6 +870,9 @@ def reply():
                     else:
                         cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler, filePass)) #parse message later
                     cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (board['posts']+1, board['uri']))
+                    cursor.execute("SELECT * FROM server")
+                    serverInfo = cursor.fetchone()
+                    cursor.execute("UPDATE server SET posts=%s", [serverInfo['posts']+1])
                     mysql.connection.commit()
                     return redirect(f"{board['uri']}/thread/{request.form['thread']}#{board['posts']+1}")
                 else:
@@ -900,6 +906,9 @@ def reply():
             else:
                 cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler, filePass)) #parse message later
             cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (board['posts']+1, board['uri']))
+            cursor.execute("SELECT * FROM server")
+            serverInfo = cursor.fetchone()
+            cursor.execute("UPDATE server SET posts=%s", [serverInfo['posts']+1])
             mysql.connection.commit()
             return redirect(f"{board['uri']}/thread/{request.form['thread']}#{board['posts']+1}")
     else:
