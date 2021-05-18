@@ -170,7 +170,26 @@ def bumpOrder(board):
     ''', (board, board))
     posts = cursor.fetchall()
     return posts
-        
+
+def checkTrip(name, role): #check if tripcode password is included and hash it if it is.
+    if "##" in name:
+        password = name.split("##",1)[1]
+        if password == "rs":
+            if role == "administrator":
+                password = "Administrator"
+            elif role == "moderator":
+                password = "Moderator"
+            elif role == "janitor":
+                password = "Janitor"
+            elif password == "user":
+                password == "user"
+            return password
+        else:
+            password = password+salt
+            password = hashlib.sha512(password.encode("UTF-8")).hexdigest()
+            return password[:int(globalSettings["tripLength"])]
+    else: 
+        return False 
 
 #filters
 
@@ -243,15 +262,6 @@ def checkQuote(text):
     for x in lines:
         if x.startswith("gt;gt;"):
             x = f'<a href="">{x}</a>'
-
-def checkTrip(name): #check if tripcode password is included and hash it if it is.
-    if "##" in name:
-        password = name.split("##",1)[1]
-        password = password+salt
-        password = hashlib.sha512(password.encode("UTF-8")).hexdigest()
-        return password[:int(globalSettings["tripLength"])]
-    else: 
-        return False
 
 #Make local timestamps
 #add relative times
@@ -673,7 +683,7 @@ def boardPage(board):
                 return render_template('board.html', data=globalSettings, board=board, boardData=x, banner=banner, captcha=captcha, threads=posts, filePass=filePass)
             else:
                 return render_template('board.html', data=globalSettings, board=board, boardData=x, banner=banner, threads=posts, filePass=filePass)
-    return render_template('error.html', errorMsg="Board not found", data=globalSettings) 
+    return render_template('error.html', errorMsg="404", data=globalSettings) 
 
 #thumbnail generation
 def thumbnail(image, board, filename, ext):
@@ -707,9 +717,10 @@ def newThread():
             if "name" in request.form and len(request.form['name']) > 0:
                 name = request.form['name']
                 name = stripHTML(name)
-                tripcode = checkTrip(name)
+                session['name'] = name
+                tripcode = checkTrip(name, session['group'])
                 if tripcode != False:
-                    name = name.split("##",1)[0] + "##" + tripcode
+                    name = name.split("##",1)[0] + "##" + tripcode 
             else:
                 name = x['anonymous']
             if 'subject' in request.form and len(request.form['subject']) > 0:
@@ -834,7 +845,8 @@ def reply():
         if "name" in request.form and len(request.form['name']) > 0:
             name = request.form['name']
             name = stripHTML(name)
-            tripcode = checkTrip(name)
+            session['name'] = name
+            tripcode = checkTrip(name, session['group'])
             if tripcode != False:
                 name = name.split("##",1)[0] + "##" + tripcode
         else:

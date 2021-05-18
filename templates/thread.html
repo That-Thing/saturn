@@ -32,7 +32,11 @@
                     <tbody>
                         <tr>
                             <td class="authorLabel">Name</td>
-                            <td><input class="authorInput" type="text" tabindex="1" name="name" autocomplete="off" placeholder="{{boardData['anonymous']}}"></td>
+                            {%if session['name']%}
+                                <td><input class="authorInput" type="text" tabindex="1" name="name" autocomplete="off" value="{{session['name']}}"></td>
+                            {%else%}
+                                <td><input class="authorInput" type="text" tabindex="1" name="name" autocomplete="off" placeholder="{{boardData['anonymous']}}"></td>
+                            {%endif%}
                         </tr>
                         <tr>
                             <td class="authorLabel">Options</td>

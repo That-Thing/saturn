@@ -5,6 +5,7 @@
         <meta charset="UTF-8">
         <link href="../static/css/global.css" type="text/css" rel="stylesheet">
         <link href="../../static/css/markdown.css" type="text/css" rel="stylesheet">
+        <link href="../../static/css/help.css" type="text/css" rel="stylesheet">
         <link rel="shortcut icon" type="image/png" href="../{{data['faviconUrl']}}"/>
         <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
     </head>
@@ -20,34 +21,39 @@
         <div class="box" id="helpBox">
             <h2 class="boxHeader center">Posting Help</h2>
             <div class="content">
+                <h3>Posting:</h3>
+                <h4>Tripcodes</h4>
+                <p>Entering ## followed by a password will result in a hashed <a href="https://en.wikipedia.org/wiki/Imageboard#Tripcodes" target="_blank">tripcode</a> being added after your name.</p>
+                <p>Example: <span class="name">Anonymous##example</span> → <span class="name">Anonymous##00fb39c28d</span></p>
+                <hr>
                 <h3>Text Markdown:</h3>
                 <h4>Italics</h4>
-                <p>[i]italicized text[/i] -> <em>italicized text</em></p>
-                <p>*italicized* -> <em>italicized text</em></p>
+                <p>[i]italicized text[/i] → <em>italicized text</em></p>
+                <p>*italicized* → <em>italicized text</em></p>
                 <h4>Bold Text</h4>
-                <p>[b]bold text[/b] -> <b>bold text</b></p>
-                <p>**bold text** -> <b>bold text</b></p>
+                <p>[b]bold text[/b] → <b>bold text</b></p>
+                <p>**bold text** → <b>bold text</b></p>
                 <h4>Underlined Text</h4>
-                <p>[u]underlined text[/u] -> <u>underlined text</u></p>
-                <p>__underlined text__ -> <u>underlined text</u></p>
+                <p>[u]underlined text[/u] → <u>underlined text</u></p>
+                <p>__underlined text__ → <u>underlined text</u></p>
                 <h4>Strikethrough</h4>
-                <p>[s]strikethrough[/s] -> <s>strikethrough</s></p>
-                <p>~~strikethrough~~ -> <s>strikethrough</s></p>
+                <p>[s]strikethrough[/s] → <s>strikethrough</s></p>
+                <p>~~strikethrough~~ → <s>strikethrough</s></p>
                 <h4>Spoiler</h4>
-                <p>[spoiler]spoiler[/spoiler] -> <span class="spoiler">spoiler</span></p>
-                <p>||spoiler|| -> <span class="spoiler">spoiler</span></p>
+                <p>[spoiler]spoiler[/spoiler] → <span class="spoiler">spoiler</span></p>
+                <p>||spoiler|| → <span class="spoiler">spoiler</span></p>
                 <h4>Greentext</h4>
-                <p>&gt;greentext -> <span class="greentext">&gt;greentext</span></p>
+                <p>&gt;greentext → <span class="greentext">&gt;greentext</span></p>
                 <h4>Pinktext</h4>
-                <p>&lt;pinktext -> <span class="pinktext">&lt;pinktext</span></p>
+                <p>&lt;pinktext → <span class="pinktext">&lt;pinktext</span></p>
                 <h4>Code</h4>
-                <p>[code]code[/code] -> <code>code</code></p>
+                <p>[code]code[/code] → <code>code</code></p>
                 <h4>Rainbow Text</h4>
-                <p>##rainbow text## -> <span class="rainbow">rainbow text</span></p>
+                <p>##rainbow text## → <span class="rainbow">rainbow text</span></p>
                 <h4>Red Test</h4>
-                <p>==red text== -> <span class="redText">red text</span></p>
+                <p>==red text== → <span class="redText">red text</span></p>
                 <h4>Detected Text</h4>
-                <p>(((detected))) -> <span class="detected">detected</span></p>
+                <p>(((detected))) → <span class="detected">detected</span></p>
             </div>
         </div>
     </body>
