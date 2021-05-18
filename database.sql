@@ -21,11 +21,11 @@ USE `saturn`;
 CREATE TABLE IF NOT EXISTS `accounts` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `username` varchar(50) NOT NULL,
-  `password` varchar(255) NOT NULL,
+  `password` text NOT NULL,
   `email` varchar(100) NOT NULL,
   `group` varchar(100) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=73 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=74 DEFAULT CHARSET=utf8;
 
 -- Data exporting was unselected.
 
@@ -70,6 +70,14 @@ CREATE TABLE IF NOT EXISTS `posts` (
   `ip` tinytext DEFAULT NULL,
   `spoiler` int(11) NOT NULL DEFAULT 0 COMMENT '0 for normal, 1 for spoiler',
   `password` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Data exporting was unselected.
+
+-- Dumping structure for table saturn.server
+CREATE TABLE IF NOT EXISTS `server` (
+  `posts` int(11) NOT NULL DEFAULT 0,
+  `salt` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Data exporting was unselected.

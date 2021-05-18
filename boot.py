@@ -150,8 +150,8 @@ def bumpOrder(board):
     #long and drawn out sql query to get bump order.
 
     #add checks for sage in options
-    cursor.execute('''
-        SELECT parent.*, child.number, (SELECT MAX(c1.number) FROM posts c1 WHERE c1.thread = parent.number) AS threadNum FROM posts parent,
+    cursor.execute(''' 
+        SELECT parent.*, child.number, (SELECT MAX(c1.number) FROM posts c1 WHERE c1.thread = parent.number AND c1.options != "sage") AS threadNum FROM posts parent,
         posts child
         WHERE child.thread = parent.number AND parent.board=%s
         AND child.number = (SELECT MAX(c1.number) FROM posts c1
@@ -707,6 +707,7 @@ def newThread():
             if 'options' in request.form and len(request.form['options']) > 0:
                 options = request.form['options']
                 options = stripHTML(options)
+                options = options.lower()
             else:
                 options = ""     
             if "spoiler" in request.form:
@@ -824,12 +825,13 @@ def reply():
             name = board['anonymous']
         if 'subject' in request.form and len(request.form['subject']) > 0:
             subject = request.form['subject']
-            subject = stripHTML(subject)
+            subject = stripHTML(subject) #strip any html tags
         else:
             subject = ""
         if 'options' in request.form and len(request.form['options']) > 0:
-            options = request.form['options']
-            options = stripHTML(options)
+            options = request.form['options'] #get options from the form
+            options = stripHTML(options) #strip any html tags
+            options = options.lower() #lowecase the entered text
         else:
             options = ""
         if "spoiler" in request.form:
