@@ -124,7 +124,11 @@
                         </div>
                         <div class="postInfo">
                             <span class="subject">{{thread['subject']}}</span>
-                            <span class="name">{{thread['name']}}</span>
+                            {%if thread['options'] | length > 0%}
+                                <a class="name" href="mailto:{{thread['options']}}" target="_blank">{{thread['name']}}</a>
+                            {%else%}
+                                <span class="name">{{thread['name']}}</span>
+                            {%endif%}
                             <span>{{thread['date'] | ut}}</span>
                             <span><a class="postNumber" href="thread/{{thread['number']}}#{{thread['number']}}">No.</a><a class="postNumber">{{thread['number']}}</a></span>
                             <span>[<a class="reply">Reply</a>]</span>
@@ -138,7 +142,11 @@
                                 <div class="postInfo">
                                     <input type="checkbox" name="{{post['number']}}-{{board}}">
                                     <span class="subject">{{post['subject']}}</span>
-                                    <span class="name">{{post['name']}}</span>
+                                    {%if post['options'] | length > 0%}
+                                        <a class="name" href="mailto:{{post['options']}}" target="_blank">{{post['name']}}</a>
+                                    {%else%}
+                                        <span class="name">{{post['name']}}</span>
+                                    {%endif%}
                                     <span>{{post['date'] | ut}}</span>
                                     <span><a class="postNumber" href="thread/{{thread['number']}}#{{post['number']}}">No.</a><a class="postNumber">{{post['number']}}</a></span>
                                     <span>[<a class="reply">Reply</a>]</span>
