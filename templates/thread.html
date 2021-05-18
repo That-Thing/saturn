@@ -114,7 +114,7 @@
                 <div class="postInfo">
                     <span class="subject">{{op['subject']}}</span>
                     {%if op['options'] | length > 0%}
-                        <a class="name" href="mailto:{{op['options']}}" target="_blank">{{op['name']}}</a>
+                        <a class="name optionsName" href="mailto:{{op['options']}}" target="_blank">{{op['name']}}</a>
                     {%else%}
                         <span class="name">{{op['name']}}</span>
                     {%endif%}
@@ -131,7 +131,7 @@
                             <input type="checkbox" name="{{post['number']}}-{{board}}">
                             <span class="subject">{{post['subject']}}</span>
                             {%if post['options'] | length > 0%}
-                                <a class="name" href="mailto:{{post['options']}}" target="_blank">{{post['name']}}</a>
+                                <a class="name optionsName" href="mailto:{{post['options']}}" target="_blank">{{post['name']}}</a>
                             {%else%}
                                 <span class="name">{{post['name']}}</span>
                             {%endif%}

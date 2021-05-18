@@ -86,7 +86,8 @@ def reloadSettings():
         bannerLocation = reloadData["bannerLocation"],
         mimeTypes = reloadData["mimeTypes"],
         maxFiles = int(configData["maxFiles"]),
-        spoilerImage =  reloadData["spoilerImage"]
+        spoilerImage =  reloadData["spoilerImage"],
+        tripLength = reloadData["tripLength"]
     )
     return globalSettings
 globalSettings = reloadSettings()
@@ -234,7 +235,6 @@ def checkMarkdown(text):
         result = result+x
     return result
 
-#MAKE QUOTES WORK
 @app.template_filter('checkQuote') #checks if post has a quoted post. 
 def checkQuote(text):
     text = stripHTML(text)
@@ -243,6 +243,16 @@ def checkQuote(text):
     for x in lines:
         if x.startswith("gt;gt;"):
             x = f'<a href="">{x}</a>'
+
+def checkTrip(name): #check if tripcode password is included and hash it if it is.
+    if "##" in name:
+        password = name.split("##",1)[1]
+        password = password+salt
+        password = hashlib.sha512(password.encode("UTF-8")).hexdigest()
+        return password[:int(globalSettings["tripLength"])]
+    else: 
+        return False
+
 #Make local timestamps
 #add relative times
 
@@ -697,6 +707,9 @@ def newThread():
             if "name" in request.form and len(request.form['name']) > 0:
                 name = request.form['name']
                 name = stripHTML(name)
+                tripcode = checkTrip(name)
+                if tripcode != False:
+                    name = name.split("##",1)[0] + "##" + tripcode
             else:
                 name = x['anonymous']
             if 'subject' in request.form and len(request.form['subject']) > 0:
@@ -821,6 +834,9 @@ def reply():
         if "name" in request.form and len(request.form['name']) > 0:
             name = request.form['name']
             name = stripHTML(name)
+            tripcode = checkTrip(name)
+            if tripcode != False:
+                name = name.split("##",1)[0] + "##" + tripcode
         else:
             name = board['anonymous']
         if 'subject' in request.form and len(request.form['subject']) > 0:
