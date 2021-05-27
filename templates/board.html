@@ -144,6 +144,16 @@
                         <div class="replyDiv" id="{{post['number']}}">
                             <div class="innerPost">
                                 <div class="postInfo">
+                                    <span class="postDropdown">
+                                        <button class="dropdownBtn dropdown-button-marker" onClick="dropdownFunction(this)"><i class="fas fa-caret-right dropdown-button-marker"></i></button>
+                                        <div class="dropdown-content">
+                                          <a href="#">Link 1</a>
+                                          <hr>
+                                          <a href="#">Link 2</a>
+                                          <hr>  
+                                          <a href="#">Link 3</a>
+                                        </div>
+                                    </span>
                                     <input type="checkbox" name="{{post['number']}}-{{board}}">
                                     <span class="subject">{{post['subject']}}</span>
                                     {%if post['options'] | length > 0%}
@@ -203,7 +213,7 @@
         <footer>
             Any post made by a user is the responsibility of that user.
         </footer>
-        <script src="../static/js/board.js"></script>
+        <script src="../static/js/posting.js"></script>
         <script src="../../static/js/markdown.js"></script>
     </body>
 </html>

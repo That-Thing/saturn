@@ -1,0 +1,17 @@
+:root {
+    --text-color: #ACACAC;
+    --page-background: #1e2327;
+    --background-2: #2a3137;
+    --border-color: #353535;
+    --font-family: arial,helvetica,sans-serif;
+    --link-color: #81be84;
+    --link-hover: #5b8c5d;
+    --input: #32393f;
+    --hr: #2f3840;
+    --small-text: #767676;
+    --nav-color: #131618e0;
+    --button-background: ;
+    --button-hover: #454e56;
+    --settings-input: #35414b99;
+    --post-subject: #b294bb;
+}

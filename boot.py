@@ -170,6 +170,10 @@ def bumpOrder(board):
     ''', (board, board))
     posts = cursor.fetchall()
     return posts
+def returnHash(password):
+    password = password+salt
+    password = hashlib.sha512(password.encode("UTF-8")).hexdigest()
+    return password
 
 def checkTrip(name, role): #check if tripcode password is included and hash it if it is.
     if "##" in name:
@@ -185,8 +189,7 @@ def checkTrip(name, role): #check if tripcode password is included and hash it i
                 password == "user"
             return password
         else:
-            password = password+salt
-            password = hashlib.sha512(password.encode("UTF-8")).hexdigest()
+            password = returnHash(password)
             return password[:int(globalSettings["tripLength"])]
     else: 
         return False 
@@ -262,7 +265,6 @@ def checkQuote(text):
     for x in lines:
         if x.startswith("gt;gt;"):
             x = f'<a href="">{x}</a>'
-
 #Make local timestamps
 #add relative times
 
@@ -573,8 +575,7 @@ def login():
     globalSettings = reloadSettings()
     msg = ''
     if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
-        password = request.form['password'] + salt
-        passwordHash = hashlib.sha512(password.encode("UTF-8")).hexdigest()
+        passwordHash = returnHash(request.form['password'])
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute('SELECT * FROM accounts WHERE username = %s AND password = %s', (request.form['username'], passwordHash))
         account = cursor.fetchone()
@@ -627,7 +628,7 @@ def register():
                 msg = 'Please fill out the form!'
             else:
                 # Account doesnt exists and the form data is valid, now insert new account into accounts table
-                password = hashlib.sha512(password.encode("UTF-8")).hexdigest()
+                password = returnHash(password)
                 cursor.execute('INSERT INTO accounts VALUES (NULL, %s, %s, %s, "user")', (username, password, email))
                 mysql.connection.commit()
                 msg = 'You have successfully registered!'
@@ -763,7 +764,7 @@ def newThread():
                                     return "Incorrect file type submitted"
                             filenames = ','.join([str(x) for x in filenames])
                             filePaths = ','.join([str(x) for x in filePaths])
-                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s, %s, %s, %s)', (name, subject, options, comment, x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler, filePass)) #parse message later
+                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s, %s, %s, %s)', (name, subject, options, comment, x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler, returnHash(filePass))) #parse message later
                         cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (x['posts']+1, x['uri']))
                         cursor.execute("SELECT * FROM server")
                         serverInfo = cursor.fetchone()
@@ -791,7 +792,7 @@ def newThread():
                                 return "Incorrect file type submitted"
                         filenames = ','.join([str(x) for x in filenames])
                         filePaths = ','.join([str(x) for x in filePaths])
-                    cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s, %s, %s, %s)', (name, subject, options, comment, x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler, filePass)) #parse message later
+                    cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s, %s, %s, %s)', (name, subject, options, comment, x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler, returnHash(filePass))) #parse message later
                     cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (x['posts']+1, x['uri']))
                     cursor.execute("SELECT * FROM server")
                     serverInfo = cursor.fetchone()
@@ -898,9 +899,9 @@ def reply():
                         filenames = []
                         filePaths = []
                     if len(filePaths) == 0:
-                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(request.remote_addr), spoiler, filePass)) #parse message later
+                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(request.remote_addr), spoiler, returnHash(filePass))) #parse message later
                     else:
-                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler, filePass)) #parse message later
+                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler, returnHash(filePass))) #parse message later
                     cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (board['posts']+1, board['uri']))
                     cursor.execute("SELECT * FROM server")
                     serverInfo = cursor.fetchone()
@@ -934,9 +935,9 @@ def reply():
                 filenames = []
                 filePaths = []
             if len(filePaths) == 0:
-                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(request.remote_addr), spoiler, filePass)) #parse message later
+                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(request.remote_addr), spoiler, returnHash(filePass))) #parse message later
             else:
-                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler, filePass)) #parse message later
+                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler, returnHash(filePass))) #parse message later
             cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (board['posts']+1, board['uri']))
             cursor.execute("SELECT * FROM server")
             serverInfo = cursor.fetchone()
@@ -946,5 +947,17 @@ def reply():
     else:
         return render_template('error.html', errorMsg="Request must be POST", data=globalSettings)   
     
+@app.route('/deletePost', methods=['POST'])
+def deletePost():
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    if request.method == 'POST':
+        for post in request.form['posts']:
+            cursor.execute("SELECT FROM posts WHERE number=%s AND board=%s", post, request.form['board'])
+            currentPost = cursor.fetchone()
+            if returnHash(currentPost['password']) == returnHash(request.form["password"]):
+                cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", post, request.form['board'])
+        mysql.connection.commit()
+    else:
+        return "Request must be POST"
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=configData["port"])

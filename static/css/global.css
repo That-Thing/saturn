@@ -1,7 +1,8 @@
+@import url("./themes.css");
 body {
-    color: #ACACAC;
-    background-color: #1e2327;
-    font-family: arial,helvetica,sans-serif;
+    color: var(--text-color);
+    background-color: var(--page-background);
+    font-family: var(--font-family);
     font-size: 100%;
     margin: 0px;
 }
@@ -15,7 +16,7 @@ nav {
     height: auto;
     padding-top: 15px;
     padding-bottom: 15px;
-    background-color: #131618e0;
+    background-color: var(--nav-color);
     font-size: 80%;
 }
 nav span{
@@ -36,12 +37,12 @@ footer {
 }
 /*Links*/
 a{
-    color: #81be84;
+    color: var(--link-color);
     text-decoration: none;
 }
   
 a:hover{
-    color: #5b8c5d;
+    color: var(--link-hover);
 }
 /*Text decorations*/
 u{
@@ -58,16 +59,16 @@ hr {
     height: 0px;
     border-width: 1px medium medium;
     border-style: solid none none;
-    border-color: #2f3840;
+    border-color: var(--hr);
 }
 /*Button*/
 .btn:hover {
-    background-color: #454e56
+    background-color: var(--button-hover);
 }
 /*small text*/
 .small {
     font-size: 70%;
-    color: #767676;
+    color: var(--small-text);
     user-select: none;
 }
 /*Error Messages*/
@@ -78,8 +79,8 @@ hr {
 /*Inputs and text boxes*/
 input, select, textarea {
     border: 0px solid;
-    background: #32393f;
-    color: #ACACAC;
+    background: var(--input);
+    color: var(--text-color);
     font-size: 100%;
     max-width: 100%;
 }
@@ -93,7 +94,7 @@ input, select, textarea {
 }
 /*Boxes containing content*/
 .box {
-    background-color: #2a3137;
+    background-color: var(--background-2);
     border-radius: 5px;
     border: none;
     margin-bottom: 16px;
@@ -102,7 +103,7 @@ input, select, textarea {
     border-top: none;
     border-left: none;
     border-right: none;
-    border-color: #353535;
+    border-color: var(--border-color);
     /* text-align: center; */
     margin: auto;
 }
@@ -117,7 +118,7 @@ input, select, textarea {
 }
 /*Box label*/
 .boxHeader {
-    background-color: #131618e0;
+    background-color: var(--nav-color);
     border: none;
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
@@ -140,14 +141,14 @@ input, select, textarea {
     margin-left: 10px;
 }
 .settingsCategory input{
-    border: 1px #35414b99 solid;
+    border: 1px var(--settings-input) solid;
 }
 .settingsCategory label {
     display: block;
     margin: 5px;
 }
 .settingsInput {
-    border: 1px #35414b99 solid;
+    border: 1px var(--settings-input) solid;
 }
 
 .boardManagementLabel {
@@ -186,16 +187,16 @@ input, select, textarea {
 } 
 /*stuff for the drag and drop file upload. Not mine.*/
 #drop-area {
-    border: 1px dashed #ACACAC;
+    border: 1px dashed var(--text-color);
     width: 40%;
     height: 5%;
     margin: auto;
 }
 #drop-area.highlight {
-    border-color: #81be84;
+    border-color: var(--link-color);
 }
 #drop-area.highlight label{
-    color: #81be84;
+    color: var(--link-color);
 }
 p {
     margin-top: 0;
@@ -219,7 +220,7 @@ p {
     width: 100%;
 }
 .button:hover {
-    background: #32393f;
+    background: var(--button-hover);
 }
 #fileElem {
     display: none;
@@ -250,13 +251,13 @@ p {
     font-weight: bold;
 }
 .subject {
-    color: #b294bb;
+    color: var(--subject);
 }
 .name {
-    color: #81be84;
+    color: var(--link-color);
 }
 .postNumber {
-    color: #ACACAC;
+    color: var(--text-color);
     text-decoration: none;
 }
 .comment {
@@ -304,7 +305,7 @@ p {
 .innerPost {
     font-size: 80%;
     padding: 5px;
-    background: #2a3137;
+    background: var(--background-2);
     box-shadow: 3px 5px 10px rgb(0 0 0 / 33%);
     border-radius: 5px;
     border: none;
@@ -324,4 +325,24 @@ p {
 }
 #helpBox .content {
     padding: 1em;
+}
+.dropdownbtn {
+    font-size: 150%;
+    color: var(--link-color);
+} 
+.postDropdown {
+    position: relative;
+    display: inline-block;
+} 
+.dropdown-content {
+    display: none;
+    position: static;
+    background-color: var(--nav-color);
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    padding: 3px;
+    font-size: 80%;
+} 
+.showDropdown {
+    display: block!important;
 }
