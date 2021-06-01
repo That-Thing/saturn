@@ -9,15 +9,15 @@
     <body>
         <nav>
             <span id="navMain">
-                <a href="{{ url_for('index') }}"><i class="fas fa-home textIcon"></i>Home</a>
-                <a href="{{ url_for('boards') }}"><i class="fas fa-stream textIcon"></i>Boards</a>
-                <a href="{{ url_for('help') }}"><i class="fas fa-question textIcon"></i>Help</a>
-                <a href="settings"><i class="fas fa-cog textIcon"></i>Settings</a>
+                <a href="{{ url_for('index') }}"><i class="fas fa-home text-icon"></i>Home</a>
+                <a href="{{ url_for('boards') }}"><i class="fas fa-stream text-icon"></i>Boards</a>
+                <a href="{{ url_for('help') }}"><i class="fas fa-question text-icon"></i>Help</a>
+                <a href="settings"><i class="fas fa-cog text-icon"></i>Settings</a>
             </span>
         </nav>
-        <div id="settingsDiv" class="box">
-            <h2 class="boxHeader">{{data['siteName']}} Global Settings</h2>
-            <div id="serverSettings" class="settingsCategory">
+        <div id="settings-div" class="box">
+            <h2 class="box-header">{{data['siteName']}} Global Settings</h2>
+            <div id="serverSettings" class="settings-category">
                 <form action="/saveSettings" method="POST">
                     <h3>Server Settings</h3>
                     <hr>

@@ -1,6 +1,6 @@
 function showAuthor() {
-  var container = document.getElementById("authorContainer");
-  var button = document.getElementById("toggleAuthorBox");
+  var container = document.getElementById("author-container");
+  var button = document.getElementById("toggle-author-box");
   if (container.style.display === "none") {
     container.style.display = "block";
     button.style.display = "none";
@@ -9,22 +9,42 @@ function showAuthor() {
   }
 }
 function dropdownFunction(a) {
-  a.parentNode.getElementsByClassName("dropdown-content")[0].classList.toggle("showDropdown");
-  console.log("button pressed")
+  a.parentNode.getElementsByClassName("dropdown-content")[0].classList.toggle("show-dropdown");
 }
 window.onclick = function(event) {
   if (!event.target.classList.contains('dropdown-button-marker')) {
-    console.log("clicked elsewhere")
     var dropdowns = document.getElementsByClassName("dropdown-content");
     var i;
     for (i = 0; i < dropdowns.length; i++) {
       var openDropdown = dropdowns[i];
-      if (openDropdown.classList.contains('showDropdown')) {
-        openDropdown.classList.remove('showDropdown');
+      if (openDropdown.classList.contains('show-dropdown')) {
+        openDropdown.classList.remove('show-dropdown');
       }
     }
-  } else {
-    console.log("clicked on dropdownbutton")
-    console.log(event.target)
   }
+}
+
+function hidePostReply(post) {
+  post = post.parentNode.parentNode.parentNode.parentNode.parentNode;//this is such a stupid way of doing this.
+  post.classList.add("hide");
+  console.log(post.id)
+  let hidden = sessionStorage.getItem('hidden')
+  if (hidden == null) {
+    hidden = "";
+  }
+  hidden = hidden + ","+post.id;
+  sessionStorage.setItem('hidden', hidden)
+  console.log(hidden)
+}
+function hidePostThread(post) {
+  post = post.parentNode.parentNode.parentNode.parentNode.parentNode;
+  console.log(post.id)
+  post.classList.add("hide");
+  let hidden = sessionStorage.getItem('hidden')
+  if (hidden == null) {
+    hidden = "";
+  }
+  console.log(hidden)
+  hidden = hidden + ","+post.id;
+  sessionStorage.setItem('hidden', hidden)
 }

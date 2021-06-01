@@ -72,9 +72,13 @@ hr {
     user-select: none;
 }
 /*Error Messages*/
-.errorText {
+.error-text {
     text-align: center;
     margin-top: 20%;
+}
+/*hide things*/
+.hide {
+    display: none!important;
 }
 /*Inputs and text boxes*/
 input, select, textarea {
@@ -85,7 +89,7 @@ input, select, textarea {
     max-width: 100%;
 }
 /*Fontawesome icons next to text*/
-.textIcon {
+.text-icon {
     margin-right: 5px;
 }
 
@@ -117,7 +121,7 @@ input, select, textarea {
     padding-bottom: 5px;
 }
 /*Box label*/
-.boxHeader {
+.box-header {
     background-color: var(--nav-color);
     border: none;
     border-top-left-radius: 5px;
@@ -129,29 +133,29 @@ input, select, textarea {
     text-align: center;
 }
 /*Settings box*/
-#settingsDiv {
+#settings-div {
     margin-top: 10%;
     width: 50%;
     display: table;
 }
 /*Category in settings*/
-.settingsCategory {
+.settings-category {
     text-align: left;
     margin: 5px;
     margin-left: 10px;
 }
-.settingsCategory input{
+.settings-category input{
     border: 1px var(--settings-input) solid;
 }
-.settingsCategory label {
+.settings-category label {
     display: block;
     margin: 5px;
 }
-.settingsInput {
+.settings-input {
     border: 1px var(--settings-input) solid;
 }
 
-.boardManagementLabel {
+.boardManagement-label {
     float: right;
     margin-right: 15px;
     width: 6%;
@@ -161,12 +165,12 @@ input, select, textarea {
 
 
 /*boards*/
-#boardLabel {
+#board-label {
     text-align: left;
     margin: 5px;
     margin-left: 10px;
 }
-.boardEntry {
+.board-entry {
     text-align: left;
     margin: 5px;
     margin-left: 10px;
@@ -175,13 +179,13 @@ input, select, textarea {
     padding-bottom: 5px;
     clear: left;
 }
-#createBoard {
+#create-board {
     display: grid;
 }
-#createBoard label{
+#create-board label{
     margin-bottom: 10px;
 }
-#createBoard .btn {
+#create-board .btn {
     width: 40%;
     margin: auto;
 } 
@@ -227,11 +231,11 @@ p {
 }
 
 /*banner stuff*/
-.bannerList {
+.banner-list {
     margin: auto;
     margin-top: 5px;
 }
-.bannerOptions{
+.banner-options{
     margin: auto;
 }
 .bannerEntry {
@@ -289,11 +293,11 @@ p {
 .fileDiv {
     float: none
 }
-.multipleFiles {
+.multiple-files {
     float: left;
     width: 100%;
 }
-.multipleFiles .fileDiv {
+.multiple-files .fileDiv {
     float: left;
 }
 .uploads {
@@ -319,18 +323,19 @@ p {
 #postList {
     margin: 1em;
 }
-#helpBox {
+#help-box {
     margin-top: 5%;
     width: 80%;
 }
-#helpBox .content {
+#help-box .content {
     padding: 1em;
 }
-.dropdownbtn {
+.dropdown-button {
     font-size: 150%;
     color: var(--link-color);
+    padding: 4px;
 } 
-.postDropdown {
+.post-dropdown {
     position: relative;
     display: inline-block;
 } 
@@ -343,6 +348,6 @@ p {
     padding: 3px;
     font-size: 80%;
 } 
-.showDropdown {
+.show-dropdown {
     display: block!important;
 }

@@ -9,19 +9,19 @@
     <body>
         <nav>
             <span id="navMain">
-                <a href="{{ url_for('index') }}"><i class="fas fa-home textIcon"></i>Home</a>
-                <a href="{{ url_for('help') }}"><i class="fas fa-question textIcon"></i>Help</a>
-                <a href="settings"><i class="fas fa-cog textIcon"></i>Settings</a>
+                <a href="{{ url_for('index') }}"><i class="fas fa-home text-icon"></i>Home</a>
+                <a href="{{ url_for('help') }}"><i class="fas fa-question text-icon"></i>Help</a>
+                <a href="settings"><i class="fas fa-cog text-icon"></i>Settings</a>
             </span>
         </nav>
         <div id="boardsDiv" class="box alligned">
-            <h2 class="boxHeader">Boards</h2>
-             <div id="boardContainer" class="settingsCategory"></div>
-                 <span id="boardLabel">Board</span><span class="boardManagementLabel">Posts</span><span class="boardManagementLabel">PPH</span><span class="boardManagementLabel">Users</span>
+            <h2 class="box-header">Boards</h2>
+             <div id="boardContainer" class="settings-category"></div>
+                 <span id="board-label">Board</span><span class="boardManagement-label">Posts</span><span class="boardManagement-label">PPH</span><span class="boardManagement-label">Users</span>
                 {% for board in sqlData %}
                     <hr>
-                    <div class="boardEntry">
-                        <a href="/{{board['uri']}}/">/{{board['uri']}}/ - {{board['name']}}</a><span class="boardManagementLabel">{{board['posts']}}</span><span class="boardManagementLabel">{{board['PPH']}}</span><span class="boardManagementLabel">{{board['users']}}</span><br>
+                    <div class="board-entry">
+                        <a href="/{{board['uri']}}/">/{{board['uri']}}/ - {{board['name']}}</a><span class="boardManagement-label">{{board['posts']}}</span><span class="boardManagement-label">{{board['PPH']}}</span><span class="boardManagement-label">{{board['users']}}</span><br>
                         <span>{{board['description']}}</span>
                         
                     </div>

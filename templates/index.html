@@ -10,17 +10,17 @@
     <body>
         <nav>
             <span id="navMain">
-                <a href="{{ url_for('boards') }}"><i class="fas fa-stream textIcon"></i>Boards</a>
-                <a href="{{ url_for('help') }}"><i class="fas fa-question textIcon"></i>Help</a>
-                <a href="settings"><i class="fas fa-cog textIcon"></i>Settings</a>
+                <a href="{{ url_for('boards') }}"><i class="fas fa-stream text-icon"></i>Boards</a>
+                <a href="{{ url_for('help') }}"><i class="fas fa-question text-icon"></i>Help</a>
+                <a href="settings"><i class="fas fa-cog text-icon"></i>Settings</a>
             </span>
         </nav>
         <div class="box center" id="logoBox">
-            <h2 class="boxHeader">{{data['siteName']}}</h2>
+            <h2 class="box-header">{{data['siteName']}}</h2>
             <img src="../{{data['logoUrl']}}" alt="Logo" id="logo">
         </div>
         <div class="box center" id="statisticsBox">
-            <h2 class="boxHeader">Global Statistics</h2>
+            <h2 class="box-header">Global Statistics</h2>
             <div id="statistics">
                 <span>
                     Total Posts:
@@ -34,20 +34,20 @@
             </div>
         </div>
         <div class="box center" id="accountBox">
-            <h2 class="boxHeader">Account</h2>
+            <h2 class="box-header">Account</h2>
             {% if session['username']%}
                 <span>Logged in as: {{session['username']}} [{{session['group']}}]</span><br>
                 <span id="userOptions">  
-                    <a href="{{ url_for('accountSettings') }}"><i class="fas fa-user textIcon"></i>Account</a>
+                    <a href="{{ url_for('accountSettings') }}"><i class="fas fa-user text-icon"></i>Account</a>
                     {% if session['group']=='administrator'%}
-                        <a href="{{ url_for('siteSettings') }}"><i class="fas fa-cog textIcon"></i>Global Settings</a>
-                        <a href="{{ url_for('boardManagement') }}"><i class="fas fa-stream textIcon"></i>Board Management</a>
+                        <a href="{{ url_for('siteSettings') }}"><i class="fas fa-cog text-icon"></i>Global Settings</a>
+                        <a href="{{ url_for('boardManagement') }}"><i class="fas fa-stream text-icon"></i>Board Management</a>
                     {% endif %}
                 </span><br>
-                <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt textIcon"></i>Log Out</a>
+                <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt text-icon"></i>Log Out</a>
             {% else %}
                 <span>Not logged in</span><br>
-                <a href="login"><i class="fas fa-user textIcon"></i>Log in</a> / <a href="register">Register</a>
+                <a href="login"><i class="fas fa-user text-icon"></i>Log in</a> / <a href="register">Register</a>
 
             {% endif %}     
         </div>

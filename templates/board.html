@@ -12,62 +12,62 @@
     <body>
         <nav>
             <span id="navMain">
-                <a href="{{ url_for('index') }}"><i class="fas fa-home textIcon"></i>Home</a>
-                <a href="{{ url_for('boards') }}"><i class="fas fa-stream textIcon"></i>Boards</a>
-                <a href="{{ url_for('help') }}"><i class="fas fa-question textIcon"></i>Help</a>
-                <a href="settings"><i class="fas fa-cog textIcon"></i>Settings</a>
+                <a href="{{ url_for('index') }}"><i class="fas fa-home text-icon"></i>Home</a>
+                <a href="{{ url_for('boards') }}"><i class="fas fa-stream text-icon"></i>Boards</a>
+                <a href="{{ url_for('help') }}"><i class="fas fa-question text-icon"></i>Help</a>
+                <a href="settings"><i class="fas fa-cog text-icon"></i>Settings</a>
             </span>
         </nav>
-        <div id="boardInfo">
+        <div id="board-info">
             <img src="../{{banner}}" id="banner" alt="banner">
-            <h1 class="center" id="boardName">/{{board}}/ - {{boardData['name']}}</h1>
+            <h1 class="center" id="board-name">/{{board}}/ - {{boardData['name']}}</h1>
             <h4 class="center">{{boardData['description']}}</h4>
         </div>
-        <div id="toggleAuthorBox">
+        <div id="toggle-author-box">
             <button onclick="showAuthor()">Start a new thread</button>
         </div>
-        <div id="authorContainer" style="display: none;">  
+        <div id="author-container" style="display: none;">  
             <form action="/newThread" method="POST" id="authorForm" enctype="multipart/form-data">
                 <input type="hidden" name="board" value="{{board}}">
                 <table>
                     <tbody>
                         <tr>
-                            <td class="authorLabel">Name</td>
+                            <td class="author-label">Name</td>
                             {%if session['name']%}
-                                <td><input class="authorInput" type="text" tabindex="1" name="name" autocomplete="off" value="{{session['name']}}"></td>
+                                <td><input class="author-input" type="text" tabindex="1" name="name" autocomplete="off" value="{{session['name']}}"></td>
                             {%else%}
-                                <td><input class="authorInput" type="text" tabindex="1" name="name" autocomplete="off" placeholder="{{boardData['anonymous']}}"></td>
+                                <td><input class="author-input" type="text" tabindex="1" name="name" autocomplete="off" placeholder="{{boardData['anonymous']}}"></td>
                             {%endif%}
                         </tr>
                         <tr>
-                            <td class="authorLabel">Options</td>
-                            <td><input class="authorInput" tabindex="2" type="text" name="options" autocomplete="off"></td>
+                            <td class="author-label">Options</td>
+                            <td><input class="author-input" tabindex="2" type="text" name="options" autocomplete="off"></td>
                         </tr>
                         <tr>
-                            <td class="authorLabel">Subject</td>
-                            <td><input class="authorInput" tabindex="3" type="text" name="subject" autocomplete="off"><input id="postButton" type="submit" value="Post" tabindex="6"></td>
+                            <td class="author-label">Subject</td>
+                            <td><input class="author-input" tabindex="3" type="text" name="subject" autocomplete="off"><input id="post-button" type="submit" value="Post" tabindex="6"></td>
                         </tr>
                         <tr>
-                            <td class="authorLabel">Comment</td>
-                            <td><textarea class="authorInput" name="comment" cols="48" rows="4" wrap="soft" tabindex="4" style="width: 292px;" required></textarea></td>
+                            <td class="author-label">Comment</td>
+                            <td><textarea class="author-input" name="comment" cols="48" rows="4" wrap="soft" tabindex="4" style="width: 292px;" required></textarea></td>
                         </tr>
                         {% if boardData['captcha'] == 1 %}
                             <tr>
-                                <td class="authorLabel">Verification</td>
-                                <td style="display: grid;"><img src="../{{captcha}}" tabindex="5" class="captcha"><input class="authorInput" tabindex="6" type="text" name="captcha" autocomplete="off" required></td>
+                                <td class="author-label">Verification</td>
+                                <td style="display: grid;"><img src="../{{captcha}}" tabindex="5" class="captcha"><input class="author-input" tabindex="6" type="text" name="captcha" autocomplete="off" required></td>
                                 
                             </tr>
                         {% endif %}
                         <tr>
-                            <td class="authorLabel">File</td>
+                            <td class="author-label">File</td>
                             <td>
-                                <input id="fileInput" name="file" type="file" multiple tabindex="7" required accept="{{data['mimeTypes']}}">
+                                <input id="file-input" name="file" type="file" multiple tabindex="7" required accept="{{data['mimeTypes']}}">
                                 <span id="spoiler">[<label><input type="checkbox" name="spoiler" value="on" tabindex="8">Spoiler?</label>]</span>
                             </td>
                         </tr>
                         <tr>
-                            <td class="authorLabel">Password</td>
-                            <td><input class="authorInput" tabindex="9" type="text" name="password" autocomplete="off" value="{{filePass}}"><span class="small">(For post deletion)</span>
+                            <td class="author-label">Password</td>
+                            <td><input class="author-input" tabindex="9" type="text" name="password" autocomplete="off" value="{{filePass}}"><span class="small">(For post deletion)</span>
                         </tr>
                         <tr id="rules">
                             <td colspan="2">
@@ -80,7 +80,7 @@
                 </table>
             </form>
         </div>
-        <div id="boardMessage">
+        <div id="board-message">
             <hr>
             <span>{{boardData['message']}}</span>
             <hr>
@@ -93,112 +93,124 @@
               [<a href="#footer">Bottom</a>]
             </span>
         </div>
-        <div id="threadList">
+        <div id="thread-list">
             <div id="threads"> 
                 {% for thread in threads %}
-                    <div class="op" id="{{thread['number']}}">
-                        <hr>
-                        {%set files = thread['files'].split(',')%}
-                        {%set filenames = thread['filenames'].split(',')%}
-                        {%if files | length > 1%}
-                            <div class="uploads multipleFiles">
-                        {%else%}
-                            <div class="uploads ">
-                        {%endif%}
-                        {%for file in files%}
-                                <div class="fileDiv">
-                                    <div class="fileInfo">
-                                        <a class="filename" href="../{{file}}" target="_blank">{{filenames[files.index(file)]}}</a>
-                                        <a href="../{{file}}" download="{{filenames[files.index(file)]}}"><i class="fas fa-download textIcon"></i></a>
-                                        {%if file | checkimage == True%}
-                                            <span class="fileSize textIcon">({{file | filesize}}, {{file | dimensions}})</span>
-                                        {%else%}
-                                            <span class="fileSize textIcon">({{file | filesize}})</span>
-                                        {%endif%}
+                    <div class="thread" id="t-{{thread['number']}}">
+                        <div class="op" id="{{thread['number']}}">
+                            <hr>
+                            {%set files = thread['files'].split(',')%}
+                            {%set filenames = thread['filenames'].split(',')%}
+                            {%if files | length > 1%}
+                                <div class="uploads multiple-files">
+                            {%else%}
+                                <div class="uploads ">
+                            {%endif%}
+                            {%for file in files%}
+                                    <div class="fileDiv">
+                                        <div class="file-info">
+                                            <a class="filename" href="../{{file}}" target="_blank">{{filenames[files.index(file)]}}</a>
+                                            <a href="../{{file}}" download="{{filenames[files.index(file)]}}"><i class="fas fa-download text-icon"></i></a>
+                                            {%if file | checkimage == True%}
+                                                <span class="fileSize text-icon">({{file | filesize}}, {{file | dimensions}})</span>
+                                            {%else%}
+                                                <span class="fileSize text-icon">({{file | filesize}})</span>
+                                            {%endif%}
+                                        </div>
+                                        <a class="linkImg" target="_blank" href="../{{file}}">
+                                            {%if thread['spoiler'] == 1%}
+                                                <img loading="lazy" class="thumbnail" src="../{{data['spoilerImage']}}">
+                                            {%else%}
+                                                <img loading="lazy" class="thumbnail" src="../{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
+                                            {%endif%}
+                                        </a>
                                     </div>
-                                    <a class="linkImg" target="_blank" href="../{{file}}">
-                                        {%if thread['spoiler'] == 1%}
-                                            <img loading="lazy" class="thumbnail" src="../{{data['spoilerImage']}}">
+                            {%endfor%}
+                            </div>
+                            <div class="postInfo">
+                                <span class="post-dropdown">
+                                    <span class="dropdown-button dropdown-button-marker" onclick="dropdownFunction(this)"><i class="fas fa-caret-right dropdown-button-marker"></i></span>
+                                    <div class="dropdown-content">
+                                    <div onclick="hidePostThread(this)">Link 1</div>
+                                    <hr>
+                                    <a href="#">Link 2</a>
+                                    <hr>  
+                                    <a href="#">Link 3</a>
+                                    </div>
+                                </span>
+                                <span class="subject">{{thread['subject']}}</span>
+                                {%if thread['options'] | length > 0%}
+                                    <a class="name optionsName" href="mailto:{{thread['options']}}" target="_blank">{{thread['name']}}</a>
+                                {%else%}
+                                    <span class="name">{{thread['name']}}</span>
+                                {%endif%}
+                                <span>{{thread['date'] | ut}}</span>
+                                <span><a class="postNumber" href="thread/{{thread['number']}}#{{thread['number']}}">No.</a><a class="postNumber">{{thread['number']}}</a></span>
+                                <span>[<a class="reply">Reply</a>]</span>
+                            </div>
+                            <blockquote class="comment">{{thread['message']}}</blockquote>
+                        </div>
+                        {%set posts = thread['number'] | fivePosts(board)%}
+                        {%for post in posts%}
+                            <div class="replyDiv" id="{{post['number']}}">
+                                <div class="innerPost">
+                                    <div class="postInfo">
+                                        <span class="post-dropdown">
+                                            <span class="dropdown-button dropdown-button-marker" onclick="dropdownFunction(this)"><i class="fas fa-caret-right dropdown-button-marker"></i></span>
+                                            <div class="dropdown-content">
+                                            <div onclick="hidePostReply(this)">Link 1</div>
+                                            <hr>
+                                            <a href="#">Link 2</a>
+                                            <hr>  
+                                            <a href="#">Link 3</a>
+                                            </div>
+                                        </span>
+                                        <input type="checkbox" name="{{post['number']}}-{{board}}">
+                                        <span class="subject">{{post['subject']}}</span>
+                                        {%if post['options'] | length > 0%}
+                                            <a class="name optionsName" href="mailto:{{post['options']}}" target="_blank">{{post['name']}}</a>
                                         {%else%}
-                                            <img loading="lazy" class="thumbnail" src="../{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
+                                            <span class="name">{{post['name']}}</span>
                                         {%endif%}
-                                    </a>
+                                        <span>{{post['date'] | ut}}</span>
+                                        <span><a class="postNumber" href="thread/{{thread['number']}}#{{post['number']}}">No.</a><a class="postNumber">{{post['number']}}</a></span>
+                                        <span>[<a class="reply">Reply</a>]</span>
+                                    </div>
+                                    {%if post['files'] != None%}
+                                        {%set files = post['files'].split(',')%}
+                                        {%set filenames = post['filenames'].split(',')%}
+                                        {%if files | length > 1%}
+                                            <div class="uploads multiple-files">
+                                        {%else%}
+                                            <div class="uploads">
+                                        {%endif%}
+                                        {%for file in files%}
+                                                <div class="fileDiv">
+                                                    <div class="file-info">
+                                                        <a class="filename" href="../../{{file}}" target="_blank">{{filenames[files.index(file)]}}</a>
+                                                        <a href="../../{{file}}" download="{{filenames[files.index(file)]}}"><i class="fas fa-download text-icon"></i></a>
+                                                        {%if file | checkimage == True%}
+                                                            <span class="fileSize text-icon">({{file | filesize}}, {{file | dimensions}})</span>
+                                                        {%else%}
+                                                            <span class="fileSize text-icon">({{file | filesize}})</span>
+                                                        {%endif%}
+                                                    </div>
+                                                    <a class="linkImg" target="_blank" href="../../{{file}}">
+                                                        {%if post['spoiler'] == 1%}
+                                                            <img loading="lazy" class="thumbnail" src="../../{{data['spoilerImage']}}">
+                                                        {%else%}
+                                                            <img loading="lazy" class="thumbnail" src="../../{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
+                                                        {%endif%}
+                                                    </a>
+                                                </div>
+                                        {%endfor%}
+                                        </div>
+                                    {%endif%}
+                                    <blockquote class="comment">{{post['message']}}</blockquote>
+                                    </div>
                                 </div>
                         {%endfor%}
-                        </div>
-                        <div class="postInfo">
-                            <span class="subject">{{thread['subject']}}</span>
-                            {%if thread['options'] | length > 0%}
-                                <a class="name optionsName" href="mailto:{{thread['options']}}" target="_blank">{{thread['name']}}</a>
-                            {%else%}
-                                <span class="name">{{thread['name']}}</span>
-                            {%endif%}
-                            <span>{{thread['date'] | ut}}</span>
-                            <span><a class="postNumber" href="thread/{{thread['number']}}#{{thread['number']}}">No.</a><a class="postNumber">{{thread['number']}}</a></span>
-                            <span>[<a class="reply">Reply</a>]</span>
-                        </div>
-                        <blockquote class="comment">{{thread['message']}}</blockquote>
                     </div>
-                    {%set posts = thread['number'] | fivePosts(board)%}
-                    {%for post in posts%}
-                        <div class="replyDiv" id="{{post['number']}}">
-                            <div class="innerPost">
-                                <div class="postInfo">
-                                    <span class="postDropdown">
-                                        <button class="dropdownBtn dropdown-button-marker" onClick="dropdownFunction(this)"><i class="fas fa-caret-right dropdown-button-marker"></i></button>
-                                        <div class="dropdown-content">
-                                          <a href="#">Link 1</a>
-                                          <hr>
-                                          <a href="#">Link 2</a>
-                                          <hr>  
-                                          <a href="#">Link 3</a>
-                                        </div>
-                                    </span>
-                                    <input type="checkbox" name="{{post['number']}}-{{board}}">
-                                    <span class="subject">{{post['subject']}}</span>
-                                    {%if post['options'] | length > 0%}
-                                        <a class="name optionsName" href="mailto:{{post['options']}}" target="_blank">{{post['name']}}</a>
-                                    {%else%}
-                                        <span class="name">{{post['name']}}</span>
-                                    {%endif%}
-                                    <span>{{post['date'] | ut}}</span>
-                                    <span><a class="postNumber" href="thread/{{thread['number']}}#{{post['number']}}">No.</a><a class="postNumber">{{post['number']}}</a></span>
-                                    <span>[<a class="reply">Reply</a>]</span>
-                                </div>
-                                {%if post['files'] != None%}
-                                    {%set files = post['files'].split(',')%}
-                                    {%set filenames = post['filenames'].split(',')%}
-                                    {%if files | length > 1%}
-                                        <div class="uploads multipleFiles">
-                                    {%else%}
-                                        <div class="uploads">
-                                    {%endif%}
-                                    {%for file in files%}
-                                            <div class="fileDiv">
-                                                <div class="fileInfo">
-                                                    <a class="filename" href="../../{{file}}" target="_blank">{{filenames[files.index(file)]}}</a>
-                                                    <a href="../../{{file}}" download="{{filenames[files.index(file)]}}"><i class="fas fa-download textIcon"></i></a>
-                                                    {%if file | checkimage == True%}
-                                                        <span class="fileSize textIcon">({{file | filesize}}, {{file | dimensions}})</span>
-                                                    {%else%}
-                                                        <span class="fileSize textIcon">({{file | filesize}})</span>
-                                                    {%endif%}
-                                                </div>
-                                                <a class="linkImg" target="_blank" href="../../{{file}}">
-                                                    {%if post['spoiler'] == 1%}
-                                                        <img loading="lazy" class="thumbnail" src="../../{{data['spoilerImage']}}">
-                                                    {%else%}
-                                                        <img loading="lazy" class="thumbnail" src="../../{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
-                                                    {%endif%}
-                                                </a>
-                                            </div>
-                                    {%endfor%}
-                                    </div>
-                                {%endif%}
-                                <blockquote class="comment">{{post['message']}}</blockquote>
-                                </div>
-                            </div>
-                    {%endfor%}
                 {% endfor %}
                 {% if boardData['owner'] == session['username'] or session['group'] == 'administrator' %}
                 <div id="boardManagement">

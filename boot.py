@@ -192,8 +192,7 @@ def checkTrip(name, role): #check if tripcode password is included and hash it i
             password = returnHash(password)
             return password[:int(globalSettings["tripLength"])]
     else: 
-        return False 
-
+        return False
 #filters
 
 

@@ -1,12 +1,12 @@
-#authorContainer {
+#author-container {
     margin: auto;
     width: auto;
     text-align:center;
 }
-#authorContainer table {
+#author-container table {
     margin: auto;
 }
-.authorLabel {
+.author-label {
     font-weight: normal;
     text-align: left;
     width: 100px;
@@ -14,22 +14,22 @@
     background-color: #32393f;
     border: 1px solid #464f57;
 }
-.authorInput {
+.author-input {
     float: left;
     border: 1px solid #464f57;
     width: 244px;
 }
-#postButton {
+#post-button {
     float: left;
     margin: 0 5px;
     background: #32393f;
     color: #ACACAC;
     border: 1px solid #2f373d;
 }
-#postButton:hover {
+#post-button:hover {
     background: #2a3137;
 }
-#toggleAuthorBox {
+#toggle-author-box {
     margin: auto;
     width: 50%;
     text-align:center;
@@ -39,14 +39,14 @@
     margin-left: auto;
     margin-right: auto;
 }
-#boardInfo {
+#board-info {
     margin-top: 5%;
     font-size: 80%;
 }
-#boardName {
+#board-name {
     text-shadow: 1px 1px 1px rgb(167 170 168 / 60%);
 }
-#boardInfo h1, h4 {
+#board-info h1, h4 {
     font-weight: normal;
 }
 button {
@@ -62,7 +62,7 @@ button:hover {
 .captcha {
     margin-bottom: 2px;
 }
-#fileInput {
+#file-input {
     margin-right: 10px;
     width: 200px;
     float: left;
@@ -79,18 +79,18 @@ li {
 #spoiler {
     font-size: 80%;
 }
-#boardMessage {
+#board-message {
     font-size: 80%;
     margin: 1em;
     text-align: center;
 }
-#boardMessage span {
+#board-message span {
     white-space: pre-line;
 }
 #boardNavigation {
     font-size: 80%;
     margin: 1em;
 }
-#threadList {
+#thread-list {
     margin: 1em;
 }
