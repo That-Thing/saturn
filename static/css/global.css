@@ -92,7 +92,9 @@ input, select, textarea {
 .text-icon {
     margin-right: 5px;
 }
-
+.text-icon-l {
+    margin-left: 5px;
+}
 .msg {
     color: #767676;
 }
@@ -347,7 +349,44 @@ p {
     box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
     padding: 3px;
     font-size: 80%;
+    cursor: pointer;
 } 
 .show-dropdown {
     display: block!important;
+}
+.hide-post {
+    color: var(--link-color);
+}
+.hide-post:hover {
+    color: var(--link-hover);
+}
+.floating-menu {
+    background-color: var(--nav-color);
+    width: 25%;
+    position: absolute;
+    z-index: 9;
+    padding: 5px;
+    border-radius: 5px;
+}
+.floating-menu-header {
+    border-bottom: 1px solid var(--hr);
+}
+.floating-menu-inner {
+    padding: 5px;
+}
+.close-menu {
+    float: right;
+    color: var(--link-color);
+}
+.close-menu:hover {
+    color: var(--link-hover);
+}
+.hidden-entry {
+    display: inline-flex;
+}
+.remove-hidden {
+    color: var(--link-color);
+}
+.remove-hidden:hover {
+    color: var(--link-hover);
 }
