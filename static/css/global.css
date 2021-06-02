@@ -29,6 +29,16 @@ nav a{
     margin-left: 5px;
     margin-right: 5px;
 }
+.nav-button {
+    color: var(--link-color);
+}
+.nav-button:hover {
+    color: var(--link-hover);
+}
+#nav-secondary {
+    float: right;
+    margin-right: 5px;
+}
 footer {
     width: 100%;
     margin: 3em 0px 2em 0px;
@@ -367,6 +377,8 @@ p {
     z-index: 9;
     padding: 5px;
     border-radius: 5px;
+    top: 10%;
+    left: 70%;
 }
 .floating-menu-header {
     border-bottom: 1px solid var(--hr);

@@ -71,7 +71,6 @@ function showHiddenMenu() {
     hidden.forEach(element => {
       console.log(element)
       if (element != null && element != undefined) {
-        //No need for null in the array
         divs = divs + '<div class="hidden-entry" id="hidden-'+ element +'"><span>'+ element +'</span> <i class="fas fa-times text-icon-l remove-hidden" onclick="removeHidden(this)"></i></div><br>';
       }
     });

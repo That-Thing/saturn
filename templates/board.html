@@ -17,6 +17,9 @@
                 <a href="{{ url_for('help') }}"><i class="fas fa-question text-icon"></i>Help</a>
                 <a href="settings"><i class="fas fa-cog text-icon"></i>Settings</a>
             </span>
+            <span id="nav-secondary">
+                <div class="nav-button" onclick="showHiddenMenu()"><i class="fas fa-eye-slash text-icon"></i><label>Hidden Posts</label></div>
+            </span>
         </nav>
         <div id="board-info">
             <img src="../{{banner}}" id="banner" alt="banner">
