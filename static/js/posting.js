@@ -23,28 +23,25 @@ window.onclick = function(event) {
     }
   }
 }
-
+//hide reply to thread
 function hidePostReply(post) {
   post = post.parentNode.parentNode.parentNode.parentNode.parentNode;//this is such a stupid way of doing this.
   post.classList.add("hide");
-  console.log(post.id)
   let hidden = sessionStorage.getItem('hidden');
   if (hidden == null) {
     hidden = "";
   }
   hidden = hidden + ","+post.id;
   sessionStorage.setItem('hidden', hidden)
-  console.log(hidden)
 }
+//hide entire thread
 function hidePostThread(post) {
   post = post.parentNode.parentNode.parentNode.parentNode.parentNode;
-  console.log(post.id)
   post.classList.add("hide");
   let hidden = sessionStorage.getItem('hidden');
   if (hidden == null) {
     hidden = "";
   }
-  console.log(hidden)
   hidden = hidden + ","+post.id;
   sessionStorage.setItem('hidden', hidden)
 }
@@ -57,12 +54,13 @@ function showHiddenMenu() {
   hiddenMenu.className = "floating-menu";
   hiddenMenu.id = "hidden-menu";
   try {
-    var hidden = sessionStorage.getItem('hidden').replace('t-','');
+    var hidden = sessionStorage.getItem('hidden');
   } catch (e) {
     var hidden;
   }
   try {
     hidden = hidden.split(",");
+    hidden.slice(0);
   } catch (e) {
     //do nothing
   }
@@ -137,18 +135,34 @@ function dragElement(elmnt) {
 
 //Hide all threads/posts that are marked as hidden in the session
 function checkHidden() {
-  var threads = document.getElementsByClassName('thread');
-  var posts = document.getElementsByClassName('replyDiv');
-  var hiddenPosts = sessionStorage.getItem('hidden').split(",");
-  for( i=0; i< threads.length; i++ ) {
-    if (hiddenPosts.includes(threads[i].id)) {
-      threads[i].classList.add("hide");  
+  if (sessionStorage.getItem('hidden') != null) {
+    var threads = document.getElementsByClassName('thread');
+    var posts = document.getElementsByClassName('replyDiv');
+    var hiddenPosts = sessionStorage.getItem('hidden').split(",");
+    hiddenPosts.slice(0);
+    for( i=0; i< threads.length; i++ ) {
+      if (hiddenPosts.includes(threads[i].id)) {
+        threads[i].classList.add("hide");  
+      }
     }
-  }
-  for( i=0; i< posts.length; i++ ) {
-    if (hiddenPosts.includes(posts[i].id)) {
-      posts[i].classList.add("hide");  
+    for( i=0; i< posts.length; i++ ) {
+      if (hiddenPosts.includes(posts[i].id)) {
+        posts[i].classList.add("hide");  
+      }
     }
   }
 }
 checkHidden()
+
+//Remove hidden thread or post
+function removeHidden(id) {
+  document.getElementById(id.parentNode.remove());
+  id = id.parentNode.id.replace('hidden-','');
+  var hidden = sessionStorage.getItem('hidden').replace(','+id,'');
+  var hidden = sessionStorage.getItem('hidden').replace(id,'');
+  sessionStorage.setItem('hidden', hidden);
+  document.getElementById(id).classList.remove('hide');
+}
+
+//TODO:
+//Add a letter for board URI so it doesn't hide threads on other boards with the same number.
