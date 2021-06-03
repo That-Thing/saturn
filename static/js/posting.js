@@ -134,3 +134,21 @@ function dragElement(elmnt) {
     document.onmousemove = null;
   }
 }
+
+//Hide all threads/posts that are marked as hidden in the session
+function checkHidden() {
+  var threads = document.getElementsByClassName('thread');
+  var posts = document.getElementsByClassName('replyDiv');
+  var hiddenPosts = sessionStorage.getItem('hidden').split(",");
+  for( i=0; i< threads.length; i++ ) {
+    if (hiddenPosts.includes(threads[i].id)) {
+      threads[i].classList.add("hide");  
+    }
+  }
+  for( i=0; i< posts.length; i++ ) {
+    if (hiddenPosts.includes(posts[i].id)) {
+      posts[i].classList.add("hide");  
+    }
+  }
+}
+checkHidden()
