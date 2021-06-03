@@ -373,7 +373,7 @@ p {
 .floating-menu {
     background-color: var(--nav-color);
     width: 25%;
-    position: absolute;
+    position: fixed;
     z-index: 9;
     padding: 5px;
     border-radius: 5px;

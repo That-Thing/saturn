@@ -80,7 +80,7 @@ function showHiddenMenu() {
   menuTemplate = `
     <div class="drag-header floating-menu-header">
         <label>Hidden Posts</label>
-        <i class="fas fa-times text-icon text-icon-l close-menu"></i>
+        <i class="fas fa-times text-icon text-icon-l close-menu" onclick='closeHidden()'></i>
     </div>
     <div class="floating-menu-inner">
   ` + divs +  `
@@ -90,7 +90,9 @@ function showHiddenMenu() {
   document.body.appendChild(hiddenMenu);
   dragElement(document.getElementById("hidden-menu"));
 }
-//dragElement(document.getElementById("mydiv"));
+function closeHidden() {
+  document.getElementById("hidden-menu").remove();
+}
 
 function dragElement(elmnt) {
   var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
