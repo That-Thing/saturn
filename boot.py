@@ -267,6 +267,17 @@ def checkQuote(text):
 #Make local timestamps
 #add relative times
 
+@app.errorhandler(404)
+def page_not_found(e):
+    path = './static/images/404'
+    image = os.path.join(path, random.choice(os.listdir(path)))
+    return render_template('404.html', image=image, data=globalSettings), 404
+
+
+
+
+
+
 #index
 @app.route('/', methods=['GET'])
 def index():
@@ -683,7 +694,9 @@ def boardPage(board):
                 return render_template('board.html', data=globalSettings, board=board, boardData=x, banner=banner, captcha=captcha, threads=posts, filePass=filePass)
             else:
                 return render_template('board.html', data=globalSettings, board=board, boardData=x, banner=banner, threads=posts, filePass=filePass)
-    return render_template('error.html', errorMsg="404", data=globalSettings) 
+    path = './static/images/404'
+    image = os.path.join(path, random.choice(os.listdir(path)))
+    return render_template('404.html', image=image, data=globalSettings), 404
 
 #thumbnail generation
 def thumbnail(image, board, filename, ext):

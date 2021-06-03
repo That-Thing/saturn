@@ -342,6 +342,9 @@ p {
 #help-box .content {
     padding: 1em;
 }
+#error-box {
+    margin-top: 15%;
+}
 .dropdown-button {
     font-size: 150%;
     color: var(--link-color);
