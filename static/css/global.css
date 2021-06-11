@@ -111,7 +111,7 @@ input, select, textarea {
 /*Boxes containing content*/
 .box {
     background-color: var(--background-2);
-    border-radius: 5px;
+    border-radius: var(--border-radius);
     border: none;
     margin-bottom: 16px;
     vertical-align: middle;
@@ -136,8 +136,8 @@ input, select, textarea {
 .box-header {
     background-color: var(--nav-color);
     border: none;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
+    border-top-left-radius: var(--border-radius);
+    border-top-right-radius: var(--border-radius);
     margin-bottom: 0px;
     text-align: center;
 }
@@ -157,14 +157,14 @@ input, select, textarea {
     margin-left: 10px;
 }
 .settings-category input{
-    border: 1px var(--settings-input) solid;
+    border: 1px var(--input) solid;
 }
 .settings-category label {
     display: block;
     margin: 5px;
 }
 .settings-input {
-    border: 1px var(--settings-input) solid;
+    border: 1px var(--input) solid;
 }
 
 .boardManagement-label {
@@ -316,17 +316,16 @@ p {
     margin: 0.25em 1em 0.25em 0.5em;
 }
 .replyDiv {
-    margin: 0.25em 0;
+    margin: 0.5em 0;
 }
 .innerPost {
     font-size: 80%;
     padding: 5px;
     background: var(--background-2);
-    box-shadow: 3px 5px 10px rgb(0 0 0 / 33%);
-    border-radius: 5px;
+    box-shadow: var(--post-shadow);
+    border-radius: var(--border-radius);
     border: none;
     display: inline-block;
-    overflow: hidden;
     padding-right: 0.5em;
     padding-left: 0.25em;
     padding-top: 0.25em;
@@ -356,21 +355,22 @@ p {
 } 
 .dropdown-content {
     display: none;
-    position: static;
     background-color: var(--nav-color);
     min-width: 160px;
     box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-    padding: 3px;
+    padding: 5px;
     font-size: 80%;
     cursor: pointer;
-} 
-.show-dropdown {
-    display: block!important;
+    position: absolute;
+    z-index: 10;
 }
-.hide-post {
+.show-dropdown {
+    display: inline-block!important;
+}
+.dropdown-link {
     color: var(--link-color);
 }
-.hide-post:hover {
+.dropdown-link:hover {
     color: var(--link-hover);
 }
 .floating-menu {
@@ -379,7 +379,7 @@ p {
     position: fixed;
     z-index: 9;
     padding: 5px;
-    border-radius: 5px;
+    border-radius: var(--border-radius);
     top: 10%;
     left: 70%;
 }

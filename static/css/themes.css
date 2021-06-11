@@ -1,17 +1,20 @@
+/*Defualt theme*/
 :root {
-    --text-color: #ACACAC;
-    --page-background: #1e2327;
-    --background-2: #2a3137;
-    --border-color: #353535;
-    --font-family: arial,helvetica,sans-serif;
-    --link-color: #81be84;
-    --link-hover: #5b8c5d;
-    --input: #32393f;
-    --hr: #2f3840;
-    --small-text: #767676;
-    --nav-color: #131618e0;
+    --text-color: #ACACAC; /*Text color*/
+    --page-background: #1e2327; /*Background color for the entire page*/
+    --background-2: #2a3137; /*Background color for posts, boxes, etc*/
+    --nav-color: #131618e0; /*background color of nav bar*/
+    --border-color: #353535; /*color for things such as button borders */
+    --border-radius: 5px; /*Border radius for things like boxes, posts, etc.*/
+    --font-family: arial,helvetica,sans-serif; /*Default font*/
+    --link-color: #81be84; /*Links*/
+    --link-hover: #5b8c5d; /*Link hover color*/
+    --input: #32393f; /*Background for input fields*/
+    --hr: #2f3840; /*divider tags*/
+    --small-text: #767676; /*color of small text*/
     --button-background: ;
-    --button-hover: #454e56;
-    --settings-input: #35414b99;
-    --post-subject: #b294bb;
+    --button-hover: #454e56; /*Hover color of buttons*/
+    --post-subject: #b294bb; /*Color of the post subject text*/
+    --post-shadow: 3px 5px 10px rgb(0 0 0 / 33%);
+    
 }
