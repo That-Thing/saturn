@@ -60,7 +60,7 @@ function showHiddenMenu() {
   }
   try {
     hidden = hidden.split(",");
-    hidden.slice(0);
+    hidden.splice(0, 1);
   } catch (e) {
     //do nothing
   }
@@ -139,7 +139,7 @@ function checkHidden() {
     var threads = document.getElementsByClassName('thread');
     var posts = document.getElementsByClassName('replyDiv');
     var hiddenPosts = sessionStorage.getItem('hidden').split(",");
-    hiddenPosts.slice(0);
+    hiddenPosts.splice(0, 1);
     for( i=0; i< threads.length; i++ ) {
       if (hiddenPosts.includes(threads[i].id)) {
         threads[i].classList.add("hide");  
