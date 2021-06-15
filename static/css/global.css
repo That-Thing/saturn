@@ -265,13 +265,14 @@ p {
     clear: left;
 }
 .postInfo {
-    font-weight: bold;
+    /*font-weight: bold;*/
 }
 .subject {
     color: var(--subject);
 }
 .name {
-    color: var(--name-color);
+    color: var(--post-name);
+    font-weight: bold;
 }
 .postNumber {
     color: var(--text-color);

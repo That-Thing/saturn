@@ -13,6 +13,11 @@
                 <a href="{{ url_for('boards') }}"><i class="fas fa-stream text-icon"></i>Boards</a>
                 <a href="{{ url_for('help') }}"><i class="fas fa-question text-icon"></i>Help</a>
                 <a href="settings"><i class="fas fa-cog text-icon"></i>Settings</a>
+                <select onchange="changeTheme(this.value, {{themes}})" id="theme-select">
+                    {% for theme in themes %}
+                        <option id="{{themes[theme]['class']}}" value="{{themes[theme]['id']}}">{{themes[theme]['name']}}</option>
+                    {% endfor %}
+                </select>
             </span>
         </nav>
         <div id="settings-div" class="box">
@@ -92,5 +97,6 @@
                 </form>
             </div>
         </div>
+        <script src="../static/js/themes.js"></script>
     </body>
 </html>

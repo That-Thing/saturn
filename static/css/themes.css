@@ -89,6 +89,19 @@ body.theme-yotsuba {
     color: #7d7d7d;
     border: 1px solid #aaa;
 }
+.theme-yotsuba .btn {
+    background: linear-gradient(to bottom, #F8F8F8, #DCDCDC) no-repeat!important;
+    border: 1px solid #BBB!important;
+    border-radius: 2px;
+    color: black!important;
+}
+.theme-yotsuba .btn:active {
+    background: linear-gradient(to bottom, #dcdcdc, #b8b8b8) no-repeat!important;   
+}
+.theme-yotsuba .dropdown-content {
+    border: 1px solid
+}
+/*Stuff for the login/register page*/
 .theme-yotsuba .login, .theme-yotsuba .register{
     background-color: white;
     border: 1px solid;
