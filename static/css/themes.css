@@ -124,3 +124,104 @@ body.theme-yotsuba {
     background-color: #828282;
     transition: background-color 0.2s;
 }
+
+
+
+
+/*
+###########
+#Yotsuba B#
+###########
+*/
+
+.theme-yotsuba-b {
+    --text-color: black; /*Text color*/
+    --page-background: #eef2ff url(../images/fade-blue.png) top center repeat-x; /*Background color for the entire page*/
+    --background-2: #d6daf0; /*Background color for posts, boxes, etc*/
+    --nav-color: rgba(214,218,240,0.98); /*background color of nav bar*/
+    --border-color: #b7c5d9; /*color for things such as button borders */
+    --border-radius: 0px; /*Border radius for things like boxes, posts, etc.*/
+    --font-family: arial,helvetica,sans-serif; /*Default font*/
+    --link-color: #34345c; /*Links*/
+    --link-hover: #d00; /*Link hover color*/
+    --input: #ffffff; /*Background for input fields*/
+    --hr: #D6DAF0; /*divider tags*/
+    --small-text: #767676; /*color of small text*/
+    --button-background: #d0d0d0;
+    --button-hover: #dcdcdc; /*Hover color of buttons*/
+    --button-border: #666666; /*border for buttons*/
+    --post-subject: #cc1105; /*Color of the post subject text*/
+    --post-name: #117743; /*Color of the name attatched to a post*/
+    --post-shadow: none; /*Shadow behind objects like posts*/
+    --header-color: #98e;
+}
+body.theme-yotsuba-b {
+    -webkit-animation: none;
+    background-size: auto;
+    background: var(--page-background);
+}
+.theme-yotsuba-b nav {
+    font-size: 70%;
+    border-bottom: 1px solid #D6DAF0;
+    box-shadow: -5px 1px 10px rgb(0 0 0 / 20%);
+}
+.theme-yotsuba-b .box {
+    background-color: white;
+    border: 1px solid;
+}
+.theme-yotsuba-b .box-header {
+    background-color: var(--header-color);
+}
+.theme-yotsuba-b .innerPost {
+    border: 1px solid var(--border-color);
+    border-left: none;
+    border-top: none;
+}
+.theme-yotsuba-b .author-label {
+    background-color: #98e;
+    border: 1px solid;
+}
+.theme-yotsuba-b input, .theme-yotsuba-b textarea, .theme-yotsuba-b select, .theme-yotsuba-b .settings-category input {
+    color: #7d7d7d;
+    border: 1px solid #aaa;
+}
+.theme-yotsuba-b .btn {
+    background: linear-gradient(to bottom, #F8F8F8, #DCDCDC) no-repeat!important;
+    border: 1px solid #BBB!important;
+    border-radius: 2px;
+    color: black!important;
+}
+.theme-yotsuba-b .btn:active {
+    background: linear-gradient(to bottom, #dcdcdc, #b8b8b8) no-repeat!important;   
+}
+.theme-yotsuba-b .dropdown-content {
+    border: 1px solid
+}
+.theme-yotsuba-b #board-info h1, .theme-yotsuba-b #board-info h4 {
+    font-weight: normal;
+    text-shadow: 1px 1px 1px rgb(105 10 15 / 60%);
+    color: #af0a0f;
+}
+/*Stuff for the login/register page*/
+.theme-yotsuba-b .login, .theme-yotsuba-b .register{
+    background-color: white;
+    border: 1px solid;
+}
+.theme-yotsuba-b .login h1, .theme-yotsuba-b .register h1 {
+    background-color: var(--header-color);
+    margin-top: 0;
+}
+.theme-yotsuba-b .login form label, .theme-yotsuba-b .register form label {
+    background-color: #98e;
+}
+.theme-yotsuba-b .login form input, .theme-yotsuba-b .register form input {
+    color: #7d7d7d;
+    border: 1px solid #aaa;
+}
+.theme-yotsuba-b .login form input[type="submit"], .theme-yotsuba-b .register form input[type="submit"] {
+    background-color: var(--button-border);
+}
+.theme-yotsuba-b .login form input[type="submit"]:hover, .theme-yotsuba-b .register form input[type="submit"]:hover {
+    background-color: #828282;
+    transition: background-color 0.2s;
+}
