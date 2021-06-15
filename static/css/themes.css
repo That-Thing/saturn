@@ -32,7 +32,12 @@
 
 
 
-/*Yotsuba*/
+/*
+#########
+#Yotsuba#
+#########
+*/
+
 .theme-yotsuba {
     --text-color: #800000; /*Text color*/
     --page-background: #ffe url(../images/fade.png) top center repeat-x; /*Background color for the entire page*/
@@ -58,8 +63,17 @@ body.theme-yotsuba {
     background-size: auto;
     background: var(--page-background);
 }
+.theme-yotsuba nav {
+    font-size: 70%;
+    border-bottom: 1px solid #b0790a00;
+    box-shadow: -5px 1px 10px rgb(0 0 0 / 20%);
+}
 .theme-yotsuba .box {
-    /*border: 1px solid var(--border-color);*/
+    background-color: white;
+    border: 1px solid;
+}
+.theme-yotsuba .box-header {
+    background-color: #fca;
 }
 .theme-yotsuba .innerPost {
     border: 1px solid var(--border-color);

@@ -276,7 +276,7 @@ def checkQuote(text):
 def page_not_found(e):
     path = './static/images/404'
     image = os.path.join(path, random.choice(os.listdir(path)))
-    return render_template('404.html', image=image, data=globalSettings, themes=themes), 404
+    return render_template('404.html', image=image, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
 
 
 
@@ -287,7 +287,7 @@ def page_not_found(e):
 @app.route('/', methods=['GET'])
 def index():
     globalSettings = reloadSettings()
-    return render_template('index.html', data=globalSettings, total=getTotal(), lastHour=lastHour(), themes=themes)
+    return render_template('index.html', data=globalSettings, currentTheme=request.cookies.get('theme'), total=getTotal(), lastHour=lastHour(), themes=themes)
 
 #boards
 @app.route('/boards', methods=['GET'])
@@ -296,13 +296,13 @@ def boards():
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("SELECT * FROM boards")
     sqlData = cursor.fetchall()
-    return render_template('boards.html', data=globalSettings, sqlData=sqlData, themes=themes)
+    return render_template('boards.html', data=globalSettings, currentTheme=request.cookies.get('theme'), sqlData=sqlData, themes=themes)
 
 #help page
 @app.route('/help', methods=['GET'])
 def help():
     globalSettings = reloadSettings()
-    return render_template('help.html', data=globalSettings, themes=themes)
+    return render_template('help.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 
 
 #global settings redirect
@@ -311,12 +311,12 @@ def siteSettings():
     globalSettings = reloadSettings()
     try:
         if session['group'] == 'administrator':
-            return render_template('siteSettings.html', data=globalSettings, themes=themes)
+            return render_template('siteSettings.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         else:
-            return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings, themes=themes)
+            return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     except Exception as e:
         print(e)
-        return render_template('error.html', errorMsg=e, data=globalSettings, themes=themes)
+        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 #Save global settings
 @app.route('/saveSettings', methods=['POST'])
 def saveSettings():
@@ -329,12 +329,12 @@ def saveSettings():
                     json.dump(result, f, indent=4)
                 return redirect(url_for('siteSettings'))
             else:
-                return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings, themes=themes)
+                return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         except Exception as e:
             print(e)
-            return render_template('error.html', errorMsg=e, data=globalSettings, themes=themes) 
+            return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
     else:
-        return render_template('error.html', errorMsg="Request must be POST", data=globalSettings, themes=themes)
+        return render_template('error.html', errorMsg="Request must be POST", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 
 
 
@@ -346,12 +346,12 @@ def accountSettings():
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
             cursor.execute("SELECT * FROM boards")
             sqlData = cursor.fetchall()
-            return render_template('accountSettings.html', data=globalSettings, sqlData=sqlData, themes=themes)
+            return render_template('accountSettings.html', data=globalSettings, currentTheme=request.cookies.get('theme'), sqlData=sqlData, themes=themes)
         else:
-            return render_template('error.html', errorMsg="Not logged in", data=globalSettings, themes=themes) 
+            return render_template('error.html', errorMsg="Not logged in", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
     except Exception as e:
         print(e)
-        return render_template('error.html', errorMsg=e, data=globalSettings, themes=themes)   
+        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)   
 @app.route('/updatePassword', methods=['POST'])
 def updatePassword():
     if request.method == 'POST':
@@ -373,13 +373,13 @@ def updatePassword():
                     session.pop('id', None)
                     session.pop('username', None)
                     session.pop('group', None)
-                    return render_template('login.html', msg="Password successfully updated, please log in.", data=globalSettings, themes=themes)
+                    return render_template('login.html', msg="Password successfully updated, please log in.", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
                 else:
-                    return render_template('error.html', errorMsg="New passwords don't match.", data=globalSettings, themes=themes)
+                    return render_template('error.html', errorMsg="New passwords don't match.", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
             else:
-                return render_template('error.html', errorMsg="Current password is incorrect.", data=globalSettings, themes=themes)
+                return render_template('error.html', errorMsg="Current password is incorrect.", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     else:
-        return render_template('error.html', errorMsg="Request must be POST", data=globalSettings, themes=themes)
+        return render_template('error.html', errorMsg="Request must be POST", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
             
 
 
@@ -395,12 +395,12 @@ def updateEmail():
                 mysql.connection.commit()
                 return redirect(url_for('accountSettings'))
             else:
-                return render_template('error.html', errorMsg="Not logged in", data=globalSettings, themes=themes)
+                return render_template('error.html', errorMsg="Not logged in", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         except Exception as e:
             print(e)
-            return render_template('error.html', errorMsg=e, data=globalSettings, themes=themes)
+            return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     else:
-        return render_template('error.html', errorMsg="Request must be POST", data=globalSettings, themes=themes)
+        return render_template('error.html', errorMsg="Request must be POST", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 
 
 
@@ -415,12 +415,12 @@ def boardManagement():
             cursor.execute("SELECT * FROM boards")
             sqlData = cursor.fetchall()
             msg=""
-            return render_template('boardManagement.html', data=globalSettings, sqlData=sqlData, msg="", themes=themes)
+            return render_template('boardManagement.html', data=globalSettings, currentTheme=request.cookies.get('theme'), sqlData=sqlData, msg="", themes=themes)
         else:
-            return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings, themes=themes)
+            return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     except Exception as e:
         print(e)
-        return render_template('error.html', errorMsg=e, data=globalSettings, themes=themes)
+        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 
 
 #Individual board management
@@ -437,11 +437,11 @@ def manageBoard():
     bannerData = cursor.fetchall()
     try:
         if session['group'] == 'administrator' or sqlData['owner'] == session['username']:
-            return render_template('manageBoard.html', data=globalSettings, sqlData=sqlData, bannerData=bannerData, msg=msg, themes=themes)
+            return render_template('manageBoard.html', data=globalSettings, currentTheme=request.cookies.get('theme'), sqlData=sqlData, bannerData=bannerData, msg=msg, themes=themes)
         else:
-            return render_template('error.html', errorMsg="Not logged in", data=globalSettings, themes=themes)
+            return render_template('error.html', errorMsg="Not logged in", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     except Exception as e:
-        return render_template('error.html', errorMsg=e, data=globalSettings, themes=themes)
+        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         print(e)
 #create board
 @app.route('/createboard', methods=['POST'])
@@ -464,9 +464,9 @@ def createBoard():
                     os.mkdir(path) 
                     return redirect(url_for('boardManagement'))
             else:
-                return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings, themes=themes)
+                return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         except Exception as e:
-            return render_template('error.html', errorMsg=e, data=globalSettings, themes=themes)
+            return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
             print(e)
 #delete board
 @app.route('/deleteboard', methods=['POST'])
@@ -499,13 +499,13 @@ def deleteBoard():
                         return redirect(url_for('manageboard', uri=uri, msg="Please confirm board deletion"))
                 except Exception as e:
                     print(e)
-                    return render_template('manageBoard.html', data=globalSettings, sqlData=sqlData, msg="Please confirm board deletion") #probably could have done better, themes=themes
+                    return render_template('manageBoard.html', data=globalSettings, currentTheme=request.cookies.get('theme'), sqlData=sqlData, msg="Please confirm board deletion") #probably could have done better, themes=themes
             else:
-                return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings, themes=themes)
+                return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         except Exception as e:
              print(e)
     else:
-        return render_template('error.html', errorMsg="Request must be POST", data=globalSettings, themes=themes)
+        return render_template('error.html', errorMsg="Request must be POST", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 @app.route('/updateBoard', methods=['POST'])
 def updateBoard():
     if request.method == 'POST':
@@ -526,11 +526,11 @@ def updateBoard():
                 mysql.connection.commit()
                 return redirect(url_for('manageBoard', uri=uri))
             else:
-                return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings, themes=themes)
+                return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         except Exception as e:
             print(e)
     else:
-        return render_template('error.html', errorMsg="Request must be POST", data=globalSettings, themes=themes)   
+        return render_template('error.html', errorMsg="Request must be POST", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)   
 #banner management
 
 #upload banner and create sql entry
@@ -559,9 +559,9 @@ def uploadBanner():
                 return redirect(url_for('manageBoard', uri=uri)) #Find a better solution for this. 
         except Exception as e:
             print(e)
-            return render_template('error.html', errorMsg=e, data=globalSettings, themes=themes) 
+            return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
     else:
-        return render_template('error.html', errorMsg="Request must be POST", data=globalSettings, themes=themes)    
+        return render_template('error.html', errorMsg="Request must be POST", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)    
 @app.route('/deletebanner', methods=['POST'])
 def deleteBanner():
     globalSettings = reloadSettings()
@@ -582,7 +582,7 @@ def deleteBanner():
                 os.remove(os.path.join(path, name))
                 return redirect(url_for('manageBoard', uri=uri)) #Find a better solution for this. 
         except Exception as e:
-            return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings, themes=themes) 
+            return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
 
 #Account stuff  Most of it isn't mine lol. 
 @app.route('/login/', methods=['GET', 'POST'])
@@ -609,7 +609,7 @@ def login():
                 msg = 'Incorrect username or password'
         else:
             msg = 'Incorrect username or password'
-    return render_template('login.html', msg=msg, data=globalSettings, themes=themes)
+    return render_template('login.html', msg=msg, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 
 @app.route('/logout')
 def logout():
@@ -647,14 +647,14 @@ def register():
                 cursor.execute('INSERT INTO accounts VALUES (NULL, %s, %s, %s, "user")', (username, password, email))
                 mysql.connection.commit()
                 msg = 'You have successfully registered!'
-                return render_template('login.html', msg="Registration complete, please log in", data=globalSettings, themes=themes)
+                return render_template('login.html', msg="Registration complete, please log in", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         elif request.method == 'POST':
             # Form is empty... (no POST data)
             msg = 'Please fill out the form!'
         # Show registration form with message (if any)
-        return render_template('register.html', msg=msg, data=globalSettings, themes=themes)
+        return render_template('register.html', msg=msg, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     else:
-        return render_template('register.html', msg="Registrations are currently disabled.", data=globalSettings, themes=themes)
+        return render_template('register.html', msg="Registrations are currently disabled.", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 
 
 
@@ -696,12 +696,12 @@ def boardPage(board):
                 banner = "static/banners/defaultbanner.png"
             if x['captcha'] == 1:
                 captcha = generateCaptcha(5)
-                return render_template('board.html', data=globalSettings, board=board, boardData=x, banner=banner, captcha=captcha, threads=posts, filePass=filePass, themes=themes)
+                return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, captcha=captcha, threads=posts, filePass=filePass, themes=themes)
             else:
-                return render_template('board.html', data=globalSettings, board=board, boardData=x, banner=banner, threads=posts, filePass=filePass, themes=themes)
+                return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, threads=posts, filePass=filePass, themes=themes)
     path = './static/images/404'
     image = os.path.join(path, random.choice(os.listdir(path)))
-    return render_template('404.html', image=image, data=globalSettings, themes=themes), 404
+    return render_template('404.html', image=image, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
 
 #thumbnail generation
 def thumbnail(image, board, filename, ext):
@@ -791,7 +791,7 @@ def newThread():
                     else:
                         return "Incorrect captcha"
                 else:
-                    return render_template('error.html', errorMsg="Please make sure the message, files, and captcha are present.", data=globalSettings, themes=themes) 
+                    return render_template('error.html', errorMsg="Please make sure the message, files, and captcha are present.", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
             else:
                 if request.method == 'POST' and 'comment' in request.form and request.files['file'].filename != '':
                     files = request.files.getlist("file")
@@ -817,7 +817,7 @@ def newThread():
                     mysql.connection.commit()
                     return redirect(f"{x['uri']}/thread/{x['posts']+1}")
                 else:
-                    return render_template('error.html', errorMsg="Please make sure the message and files are present.", data=globalSettings, themes=themes) 
+                    return render_template('error.html', errorMsg="Please make sure the message and files are present.", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
 
 
 @app.route('/<board>/thread/<thread>', methods=['GET'])
@@ -840,10 +840,10 @@ def thread(board, thread):
                 banner = "static/banners/defaultbanner.png"
             if x['captcha'] == 1:
                 captcha = generateCaptcha(5)
-                return render_template('thread.html', data=globalSettings, board=board, boardData=x, banner=banner, captcha=captcha, posts=posts, op=parentPost[0], filePass=filePass, themes=themes)
+                return render_template('thread.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, captcha=captcha, posts=posts, op=parentPost[0], filePass=filePass, themes=themes)
             else:
-                return render_template('thread.html', data=globalSettings, board=board, boardData=x, banner=banner, posts=posts, op=parentPost[0], filePass=filePass, themes=themes)
-    return render_template('error.html', errorMsg="Board not found", data=globalSettings, themes=themes) 
+                return render_template('thread.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, posts=posts, op=parentPost[0], filePass=filePass, themes=themes)
+    return render_template('error.html', errorMsg="Board not found", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
 
 
 #LOOK OVER THIS CODE AND MAKE SURE IT'S NOT A MASSIVE PILE OF SHIT THAT I HAVE TO COMPLETELY RE-WRITE
@@ -962,7 +962,7 @@ def reply():
             mysql.connection.commit()
             return redirect(f"{board['uri']}/thread/{request.form['thread']}#{board['posts']+1}")
     else:
-        return render_template('error.html', errorMsg="Request must be POST", data=globalSettings, themes=themes)   
+        return render_template('error.html', errorMsg="Request must be POST", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)   
     
 @app.route('/deletePost', methods=['POST'])
 def deletePost():

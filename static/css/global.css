@@ -120,8 +120,8 @@ input, select, textarea {
     border-left: none;
     border-right: none;
     border-color: var(--border-color);
-    /* text-align: center; */
-    margin: auto;
+    margin-left: auto;
+    margin-right: auto;
 }
 .box form {
     margin: 5px;
@@ -140,6 +140,7 @@ input, select, textarea {
     border-top-right-radius: var(--border-radius);
     margin-bottom: 0px;
     text-align: center;
+    margin-top: 0px;
 }
 .center {
     text-align: center;
