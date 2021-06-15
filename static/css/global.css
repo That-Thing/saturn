@@ -1,7 +1,7 @@
 @import url("./themes.css");
 body {
     color: var(--text-color);
-    background-color: var(--page-background);
+    background: var(--page-background);
     font-family: var(--font-family);
     font-size: 100%;
     margin: 0px;
@@ -270,7 +270,7 @@ p {
     color: var(--subject);
 }
 .name {
-    color: var(--link-color);
+    color: var(--name-color);
 }
 .postNumber {
     color: var(--text-color);

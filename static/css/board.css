@@ -1,3 +1,4 @@
+@import url("./themes.css");
 #author-container {
     margin: auto;
     width: auto;
@@ -11,23 +12,23 @@
     text-align: left;
     width: 100px;
     padding: 0 5px;
-    background-color: #32393f;
-    border: 1px solid #464f57;
+    background-color: var(--input);
+    border: 1px solid var(--border-2);
 }
 .author-input {
     float: left;
-    border: 1px solid #464f57;
+    border: 1px solid var(--border-2);
     width: 244px;
 }
 #post-button {
     float: left;
     margin: 0 5px;
-    background: #32393f;
+    background: var(--button-background);
     color: #ACACAC;
-    border: 1px solid #2f373d;
+    border: 1px solid var(--button-border);
 }
 #post-button:hover {
-    background: #2a3137;
+    background: var(--button-hover);
 }
 #toggle-author-box {
     margin: auto;
@@ -50,14 +51,14 @@
     font-weight: normal;
 }
 button {
-    background: #1e2327;
+    background: var(--button-background);;
     color: #ACACAC;
-    border: 1px solid #2f373d;
+    border: 1px solid var(--button-border);
     padding: 3px 5px;
 
 }
 button:hover {
-    background: #2a3137;
+    background: var(--button-hover);
 }
 .captcha {
     margin-bottom: 2px;

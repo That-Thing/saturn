@@ -1,9 +1,10 @@
+@import url("./themes.css");
 @-webkit-keyframes slide {
     from { background-position: 0 0; }
     to { background-position: -400px 0; }
 }
 body {
-    color: #ACACAC;
+    color: var(--text-color);
     background: #1e2327 url(../images/clouds.svg);
     font-family: arial,helvetica,sans-serif;
     font-size: 100%;

@@ -5,6 +5,7 @@
     --background-2: #2a3137; /*Background color for posts, boxes, etc*/
     --nav-color: #131618e0; /*background color of nav bar*/
     --border-color: #353535; /*color for things such as button borders */
+    --border-2: #464f57; /*Alternative border color for things such as thread/reply boxes*/
     --border-radius: 5px; /*Border radius for things like boxes, posts, etc.*/
     --font-family: arial,helvetica,sans-serif; /*Default font*/
     --link-color: #81be84; /*Links*/
@@ -12,9 +13,63 @@
     --input: #32393f; /*Background for input fields*/
     --hr: #2f3840; /*divider tags*/
     --small-text: #767676; /*color of small text*/
-    --button-background: ;
+    --button-background: #2f373d ;
     --button-hover: #454e56; /*Hover color of buttons*/
+    --button-border: #2f373d; /*border for buttons*/
     --post-subject: #b294bb; /*Color of the post subject text*/
-    --post-shadow: 3px 5px 10px rgb(0 0 0 / 33%);
-    
+    --post-name: #81be84; /*Color of the name attatched to a post*/
+    --post-shadow: 3px 5px 10px rgb(0 0 0 / 33%); /*Shadow behind objects like posts*/
+}
+
+
+/*
+##########################
+#                        # 
+#  Add custom CSS below  #
+#                        # 
+##########################  
+*/
+
+
+
+/*Yotsuba*/
+.theme-yotsuba {
+    --text-color: #800000; /*Text color*/
+    --page-background: #ffe url(../images/fade.png) top center repeat-x; /*Background color for the entire page*/
+    --background-2: #f0e0d6; /*Background color for posts, boxes, etc*/
+    --nav-color: rgba(240,224,214,0.98); /*background color of nav bar*/
+    --border-color: #d9bfb7; /*color for things such as button borders */
+    --border-radius: 0px; /*Border radius for things like boxes, posts, etc.*/
+    --font-family: arial,helvetica,sans-serif; /*Default font*/
+    --link-color: #0000EE; /*Links*/
+    --link-hover: #d00; /*Link hover color*/
+    --input: #ffffff; /*Background for input fields*/
+    --hr: #d9bfb7; /*divider tags*/
+    --small-text: #767676; /*color of small text*/
+    --button-background: #d0d0d0;
+    --button-hover: #dcdcdc; /*Hover color of buttons*/
+    --button-border: #666666; /*border for buttons*/
+    --post-subject: #cc1105; /*Color of the post subject text*/
+    --post-name: #117743; /*Color of the name attatched to a post*/
+    --post-shadow: none; /*Shadow behind objects like posts*/
+}
+body.theme-yotsuba {
+    -webkit-animation: none;
+    background-size: auto;
+    background: var(--page-background);
+}
+.theme-yotsuba .box {
+    /*border: 1px solid var(--border-color);*/
+}
+.theme-yotsuba .innerPost {
+    border: 1px solid var(--border-color);
+    border-left: none;
+    border-top: none;
+}
+.theme-yotsuba .author-label {
+    background-color: #ea8;
+    border: none;
+}
+.theme-yotsuba input, .theme-yotsuba textarea, .theme-yotsuba select {
+    color: #7d7d7d;
 }
