@@ -37,7 +37,7 @@
 				</label>
 				<input type="email" name="email" placeholder="Email" id="email" required>
 				<div class="msg">{{ msg }}</div>
-				{% if data['enableRegistration'] == "1" %}
+				{% if data['enableRegistration'] == "on" %}
 					<input type="submit" value="Register">
 				{% else %}
 					<input type="submit" value="Register" id="disabled">

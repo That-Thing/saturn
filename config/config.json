@@ -7,7 +7,7 @@
     "spoilerImage": "./static/images/spoiler.png",
     "bannerLocation": "static/banners",
     "requiredRole": "administrator",
-    "enableRegistration": "on",
+    "enableRegistration": "off",
     "mimeTypes": "image/jpeg,image/png,image/gif",
     "maxFiles": "3",
     "tripLength": "10"

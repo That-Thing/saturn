@@ -1,22 +1,22 @@
+@import url("./themes.css");
 * {
     box-sizing: border-box;
-    font-size: 16px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 a{
-    color: #81be84;
+    color: var(--link-color);
     text-decoration: none;
 }
 a:hover{
-    color: #5b8c5d;
+    color: var(--link-hover);
 }
 #backButton {
     text-align: center;
 }
 body {
-    color: #ACACAC;
-    background: #1e2327 url(https://files.catbox.moe/qbigs0.svg);
+    color: var(--text-color);
+    background: var(--page-background) url(https://files.catbox.moe/qbigs0.svg);
     font-family: arial,helvetica,sans-serif;
     font-size: 100%;
     margin: 0px;
@@ -26,20 +26,20 @@ body {
 }
 .login, .register {
     width: 400px;
-    background-color: #2a3137;
+    background-color: var(--background-2);
     box-shadow: 0 0 9px 0 rgb(0 0 0 / 30%);
     margin: 100px auto;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
+    border-top-left-radius: var(--border-radius);
+    border-top-right-radius: var(--border-radius);
 }
 .login h1, .register h1 {
     text-align: center;
-    color: #ACACAC;
-    background-color: #131618e0;
+    color: var(--text-color);
+    background-color: var(--nav-color);
     font-size: 24px;
     padding: 20px 0 20px 0;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
+    border-top-left-radius: var(--border-radius);
+    border-top-right-radius: var(--border-radius);
 }
 .login .links, .register .links {
     display: flex;
@@ -56,8 +56,8 @@ body {
     color: #9da3ac;
 }
 .login .links a.active, .register .links a.active {
-    border-bottom: 3px solid #81be84;
-    color: #81be84;
+    border-bottom: 3px solid var(--link-color);
+    color: var(--link-color);
 }
 .login form, .register form {
     display: flex;
@@ -71,35 +71,36 @@ body {
     align-items: center;
     width: 50px;
     height: 50px;
-    background-color: #81be84;
+    background-color: var(--link-color);
     color: #ffffff;
 }
-.login form input[type="password"], .login form input[type="text"], .login form input[type="email"], .register form input[type="password"], .register form input[type="text"], .register form input[type="email"] {
+.login form input, .register form input{
     width: 310px;
     height: 50px;
     border: none;
     margin-bottom: 20px;
     padding: 0 15px;
-    background-color: #32393f;
-    color: #ACACAC;
+    background-color: var(--input);
+    color: var(--text-color);
 }
 .login form input[type="submit"], .register form input[type="submit"] {
     width: 100%;
     padding: 15px;
     margin-top: 20px;
-    background-color: #81be84;
+    background-color: var(--link-color);
     border: 0;
     cursor: pointer;
     font-weight: bold;
     color: #ffffff;
     transition: background-color 0.2s;
+    margin-bottom: 0;
 }
 .login form input[type="submit"]:hover, .register form input[type="submit"]:hover {
-    background-color: #5b8c5d;
+    background-color: var(--link-hover);
     transition: background-color 0.2s;
 }
 .navtop {
-    background-color: #2f3947;
+    background-color: var(--nav-color);
     height: 60px;
     width: 100%;
     border: 0;
@@ -118,21 +119,16 @@ body {
     flex: 1;
     font-size: 24px;
     padding: 0;
-   margin: 0;
-    color: #eaebed;
+    margin: 0;
     font-weight: normal;
 }
 .navtop div a {
     padding: 0 20px;
     text-decoration: none;
-    color: #c1c4c8;
     font-weight: bold;
 }
 .navtop div a i {
     padding: 2px 8px 0 0;
-}
-.navtop div a:hover {
-    color: #eaebed;
 }
 body.loggedin {
     background-color: #f3f4f7;
@@ -146,20 +142,17 @@ body.loggedin {
     padding: 25px 0;
     font-size: 22px;
     border-bottom: 1px solid #e0e0e3;
-    color: #4a536e;
 }
 .content > p, .content > div {
     box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.1);
     margin: 25px 0;
     padding: 25px;
-  background-color: #fff;
 }
 .content > p table td, .content > div table td {
   padding: 5px;
 }
 .content > p table td:first-child, .content > div table td:first-child {
   font-weight: bold;
-  color: #4a536e;
   padding-right: 15px;
 }
 .content > div p {
@@ -171,4 +164,7 @@ body.loggedin {
 }
 #disabled:hover {
     background-color: #4b4b4b;
+}
+nav {
+    font-size: 80%;
 }
