@@ -98,6 +98,9 @@ body.theme-yotsuba {
 .theme-yotsuba .btn:active {
     background: linear-gradient(to bottom, #dcdcdc, #b8b8b8) no-repeat!important;   
 }
+.theme-yotsuba .btn:hover {
+    background: linear-gradient(to bottom, #eaeaea, #c1c1c1) no-repeat!important; 
+}
 .theme-yotsuba .dropdown-content {
     border: 1px solid
 }
@@ -193,6 +196,9 @@ body.theme-yotsuba-b {
 }
 .theme-yotsuba-b .btn:active {
     background: linear-gradient(to bottom, #dcdcdc, #b8b8b8) no-repeat!important;   
+}
+.theme-yotsuba-b .btn:hover {
+    background: linear-gradient(to bottom, #eaeaea, #c1c1c1) no-repeat!important; 
 }
 .theme-yotsuba-b .dropdown-content {
     border: 1px solid

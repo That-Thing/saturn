@@ -23,9 +23,9 @@ CREATE TABLE IF NOT EXISTS `accounts` (
   `username` varchar(50) NOT NULL,
   `password` text NOT NULL,
   `email` varchar(100) NOT NULL,
-  `group` varchar(100) NOT NULL,
+  `group` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=74 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=82 DEFAULT CHARSET=utf8;
 
 -- Data exporting was unselected.
 
@@ -44,13 +44,21 @@ CREATE TABLE IF NOT EXISTS `boards` (
   `name` varchar(100) NOT NULL,
   `description` varchar(250) NOT NULL,
   `owner` varchar(250) NOT NULL,
-  `anonymous` tinytext NOT NULL DEFAULT 'Anonymous',
+  `anonymous` tinytext NOT NULL,
   `message` tinytext DEFAULT '',
   `posts` int(250) DEFAULT NULL,
   `PPH` int(250) DEFAULT NULL,
   `users` int(250) DEFAULT NULL,
   `captcha` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='The list of boards. ';
+
+-- Data exporting was unselected.
+
+-- Dumping structure for table saturn.groups
+CREATE TABLE IF NOT EXISTS `groups` (
+  `id` int(11) NOT NULL,
+  `name` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Data exporting was unselected.
 

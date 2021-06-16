@@ -70,7 +70,6 @@ app.config['MYSQL_PASSWORD'] = databaseConfig["password"]
 app.config['MYSQL_DB'] = databaseConfig["name"]
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 mysql = MySQL(app)
-
 #global settings
 def reloadSettings():
     with open('./config/config.json') as configFile: #global config file
@@ -91,8 +90,24 @@ def reloadSettings():
     )
     return globalSettings
 globalSettings = reloadSettings()
-salt = "b9bd1af1c98f474fbcdaca25b9590cbb"
 
+#gets user groups from the groups table. 
+def getUserGroups():
+    with app.app_context():
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT * FROM groups")
+        groups = cursor.fetchall()
+        return groups
+groups = getUserGroups()
+#This gets the salt from the server table in the database
+def getSalt():
+    with app.app_context():
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT * FROM server")
+        server = cursor.fetchone()
+        return server['salt']
+salt = getSalt()
+groups = getUserGroups()
 def getThemes():
     with open('./config/themes.json') as themes:
         themeData = json.load(themes)
@@ -120,7 +135,6 @@ def getTotal():
     cursor.execute("SELECT * FROM server")
     serverInfo = cursor.fetchone()
     return serverInfo['posts']
-
 #get the number of posts in the last hour
 def lastHour():
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
@@ -184,13 +198,13 @@ def checkTrip(name, role): #check if tripcode password is included and hash it i
     if "##" in name:
         password = name.split("##",1)[1]
         if password == "rs":
-            if role == "administrator":
+            if role == 1:
                 password = "Administrator"
-            elif role == "moderator":
+            elif role == 2:
                 password = "Moderator"
-            elif role == "janitor":
+            elif role == 3:
                 password = "Janitor"
-            elif password == "user":
+            elif password == 4:
                 password == "user"
             return password
         else:
@@ -269,6 +283,11 @@ def checkQuote(text):
     for x in lines:
         if x.startswith("gt;gt;"):
             x = f'<a href="">{x}</a>'
+@app.template_filter('checkRole') #check if file is a valid image
+def checkRole(role):
+    for group in groups:
+        if group['id'] == int(role):
+            return group['name']
 #Make local timestamps
 #add relative times
 
@@ -287,7 +306,6 @@ def page_not_found(e):
 @app.route('/', methods=['GET'])
 def index():
     globalSettings = reloadSettings()
-    print(request.cookies.get('theme'))
     return render_template('index.html', data=globalSettings, currentTheme=request.cookies.get('theme'), total=getTotal(), lastHour=lastHour(), themes=themes)
 
 #boards
@@ -311,7 +329,7 @@ def help():
 def siteSettings():
     globalSettings = reloadSettings()
     try:
-        if session['group'] == 'administrator':
+        if int(session['group']) <= 1:
             return render_template('siteSettings.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         else:
             return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
@@ -324,7 +342,7 @@ def saveSettings():
     globalSettings = reloadSettings()
     if request.method == 'POST':
         try:
-            if session['group'] == 'administrator':
+            if int(session['group']) <= 1:
                 result = request.form.to_dict()
                 with open('./config/config.json', 'w') as f:
                     json.dump(result, f, indent=4)
@@ -411,7 +429,7 @@ def updateEmail():
 def boardManagement():
     globalSettings = reloadSettings()
     try:
-        if session['group'] == 'administrator':
+        if int(session['group']) <= 1:
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
             cursor.execute("SELECT * FROM boards")
             sqlData = cursor.fetchall()
@@ -437,7 +455,7 @@ def manageBoard():
     cursor.execute("SELECT * FROM banners WHERE board=%s", [uri])
     bannerData = cursor.fetchall()
     try:
-        if session['group'] == 'administrator' or sqlData['owner'] == session['username']:
+        if int(session['group']) <= 1 or sqlData['owner'] == session['username']:
             return render_template('manageBoard.html', data=globalSettings, currentTheme=request.cookies.get('theme'), sqlData=sqlData, bannerData=bannerData, msg=msg, themes=themes)
         else:
             return render_template('error.html', errorMsg="Not logged in", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
@@ -450,7 +468,7 @@ def createBoard():
     globalSettings = reloadSettings()
     if request.method == 'POST':
         try:
-            if session['group'] == 'administrator' or globalSettings['requiredRole'] == session['group']:
+            if int(session['group']) <= 1 or globalSettings['requiredRole'] <= int(session['group']):
                 cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
                 cursor.execute("SELECT * FROM boards WHERE uri=%s", [request.form['uri']])
                 board = cursor.fetchone()
@@ -482,7 +500,7 @@ def deleteBoard():
         sqlData = cursor.fetchall()
         sqlData = sqlData[0]
         try:
-            if boardData['owner'] == session['username'] or session['group'] == 'administrator':
+            if boardData['owner'] == session['username'] or int(session['group']) <= 1:
                 try:
                     if request.form["deleteBoard"] == "on":
                         cursor.execute("DELETE FROM boards WHERE  uri=%s AND owner=%s LIMIT 1", (uri, session['username']))
@@ -516,7 +534,7 @@ def updateBoard():
         boardData = cursor.fetchall()
         boardData = boardData[0]
         try:
-            if boardData['owner'] == session['username'] or session['group'] == 'administrator':
+            if boardData['owner'] == session['username'] or int(session['group']) <= 1:
 
                 name = request.form['name']
                 desc = request.form['description']
@@ -546,7 +564,7 @@ def uploadBanner():
         sqlData = cursor.fetchall()
         sqlData = sqlData[0]
         try:
-            if sqlData['owner'] == session['username'] or session['group'] == 'administrator':
+            if sqlData['owner'] == session['username'] or int(session['group']) <= 1:
                 path = os.path.join(globalSettings['bannerLocation'], uri)
                 filename = secure_filename(banner.filename)
                 extention = pathlib.Path(filename).suffix
@@ -574,7 +592,7 @@ def deleteBanner():
         sqlData = cursor.fetchall()
         sqlData = sqlData[0]
         try:
-            if sqlData['owner'] == session['username'] or session['group'] == 'administrator':
+            if sqlData['owner'] == session['username'] or int(session['group']) <= 1:
                 cursor.execute("DELETE FROM banners WHERE filename=%s LIMIT 1", [name]) 
                 mysql.connection.commit()
                 cursor.execute("SELECT * FROM banners WHERE board=%s", [uri])
@@ -591,13 +609,10 @@ def login():
     globalSettings = reloadSettings()
     msg = ''
     if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
-        passwordHash = returnHash(request.form['password'])
+        passwordHash = returnHash(request.form['password']+salt)
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute('SELECT * FROM accounts WHERE username = %s AND password = %s', (request.form['username'], passwordHash))
         account = cursor.fetchone()
-
-        print(passwordHash)
-        print(account)
         if account:
             if account['password'] == passwordHash and account['username'] == request.form['username']:
                 session['loggedin'] = True
@@ -645,7 +660,7 @@ def register():
             else:
                 # Account doesnt exists and the form data is valid, now insert new account into accounts table
                 password = returnHash(password)
-                cursor.execute('INSERT INTO accounts VALUES (NULL, %s, %s, %s, "user")', (username, password, email))
+                cursor.execute('INSERT INTO accounts VALUES (NULL, %s, %s, %s, 4)', (username, password, email))
                 mysql.connection.commit()
                 msg = 'You have successfully registered!'
                 return render_template('login.html', msg="Registration complete, please log in", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
@@ -738,7 +753,7 @@ def newThread():
                 name = request.form['name']
                 name = stripHTML(name)
                 session['name'] = name
-                tripcode = checkTrip(name, session['group'])
+                tripcode = checkTrip(name, int(session['group']))
                 if tripcode != False:
                     name = name.split("##",1)[0] + "##" + tripcode 
             else:
@@ -866,7 +881,7 @@ def reply():
             name = request.form['name']
             name = stripHTML(name)
             session['name'] = name
-            tripcode = checkTrip(name, session['group'])
+            tripcode = checkTrip(name, int(session['group']))
             if tripcode != False:
                 name = name.split("##",1)[0] + "##" + tripcode
         else:
@@ -978,5 +993,6 @@ def deletePost():
         mysql.connection.commit()
     else:
         return "Request must be POST"
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=configData["port"])

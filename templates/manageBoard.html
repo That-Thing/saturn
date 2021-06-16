@@ -87,7 +87,7 @@
                     <span class="banner-options">
                         <p>Banner size: {{banner['filesize']}}B</p>
                         <form action="/deletebanner?uri={{sqlData['uri']}}&name={{banner['filename']}}" method="POST">
-                            <i class="fas fa-trash-alt text-icon"></i><input type="submit" value="Delete">
+                            <i class="fas fa-trash-alt text-icon"></i><input class="btn" type="submit" value="Delete">
                         </form>
                     </span>
                     <img src="../{{data['bannerLocation']}}/{{banner['board']}}/{{banner['filename']}}">

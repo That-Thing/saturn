@@ -41,10 +41,10 @@
         <div class="box center" id="accountBox">
             <h2 class="box-header">Account</h2>
             {% if session['username']%}
-                <span>Logged in as: {{session['username']}} [{{session['group']}}]</span><br>
+                <span>Logged in as: {{session['username']}} [{{session['group'] | checkRole}}]</span><br>
                 <span id="userOptions">  
                     <a href="{{ url_for('accountSettings') }}"><i class="fas fa-user text-icon"></i>Account</a>
-                    {% if session['group']=='administrator'%}
+                    {% if session['group'] | int<=1%}
                         <a href="{{ url_for('siteSettings') }}"><i class="fas fa-cog text-icon"></i>Global Settings</a>
                         <a href="{{ url_for('boardManagement') }}"><i class="fas fa-stream text-icon"></i>Board Management</a>
                     {% endif %}
