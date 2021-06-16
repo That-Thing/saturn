@@ -268,7 +268,8 @@ p {
     /*font-weight: bold;*/
 }
 .subject {
-    color: var(--subject);
+    color: var(--post-subject);
+    font-weight: bold;
 }
 .name {
     color: var(--post-name);

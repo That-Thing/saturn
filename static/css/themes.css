@@ -150,7 +150,7 @@ body.theme-yotsuba {
     --button-background: #d0d0d0;
     --button-hover: #dcdcdc; /*Hover color of buttons*/
     --button-border: #666666; /*border for buttons*/
-    --post-subject: #cc1105; /*Color of the post subject text*/
+    --post-subject: #0f0c5d; /*Color of the post subject text*/
     --post-name: #117743; /*Color of the name attatched to a post*/
     --post-shadow: none; /*Shadow behind objects like posts*/
     --header-color: #98e;
