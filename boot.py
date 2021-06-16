@@ -287,6 +287,7 @@ def page_not_found(e):
 @app.route('/', methods=['GET'])
 def index():
     globalSettings = reloadSettings()
+    print(request.cookies.get('theme'))
     return render_template('index.html', data=globalSettings, currentTheme=request.cookies.get('theme'), total=getTotal(), lastHour=lastHour(), themes=themes)
 
 #boards
@@ -682,6 +683,7 @@ def getThreads(uri):
 @app.route('/<board>/', methods=['GET'])
 @app.route('/<board>', methods=['GET'])
 def boardPage(board):
+    print(request.cookies.get('theme'))
     filePass = checkFilePass()
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("SELECT * FROM boards")

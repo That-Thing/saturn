@@ -23,10 +23,10 @@ function changeTheme(theme, themes) {
       body.className = '';
       if(themes[x]['class'] != '') {
         body.classList.add(themes[x]['class']);
-        document.cookie = "theme="+themes[x]['class']+"; expires=Fri, 31 Dec 9999 23:59:59 GMT";
+        document.cookie = "theme="+themes[x]['class']+"; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/";
       } else {
         body.removeAttribute("class");
-        document.cookie = "theme="+themes[x]['id']+"; expires=Fri, 31 Dec 9999 23:59:59 GMT";
+        document.cookie = "theme="+themes[x]['id']+"; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/";
       }      
       localStorage.setItem('theme', themes[x]['class']);
       

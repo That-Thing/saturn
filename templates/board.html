@@ -139,11 +139,11 @@
                                 <span class="post-dropdown">
                                     <span class="dropdown-button dropdown-button-marker" onclick="dropdownFunction(this)"><i class="fas fa-caret-right dropdown-button-marker"></i></span>
                                     <div class="dropdown-content">
-                                    <div class="dropdown-link" onclick="hidePostThread(this)">Hide post</div>
-                                    <hr>
-                                    <div class="dropdown-link" onclick="">2</div>
-                                    <hr>  
-                                    <div class="dropdown-link" onclick="">3</div>
+                                        <div class="dropdown-link" onclick="hidePostThread(this)">Hide post</div>
+                                        <hr>
+                                        <div class="dropdown-link" onclick="">Report</div>
+                                        <hr>  
+                                        <div class="dropdown-link" onclick="">Filter</div>
                                     </div>
                                 </span>
                                 <span class="subject">{{thread['subject']}}</span>
@@ -166,13 +166,11 @@
                                         <span class="post-dropdown">
                                             <i class="fas fa-caret-right dropdown-button-marker dropdown-button" onclick="dropdownFunction(this)"></i>
                                             <div class="dropdown-content">
-                                            <div class="dropdown-link" onclick="hidePostReply(this)">Hide post</div>
-                                            <hr>
-                                            <div class="dropdown-link" onclick="">2</div>
-                                            <hr>  
-                                            <div class="dropdown-link" onclick="">3</div>
-                                            <hr>  
-                                            <div class="dropdown-link" onclick="">4</div>
+                                                <div class="dropdown-link" onclick="hidePostReply(this)">Hide post</div>
+                                                <hr>
+                                                <div class="dropdown-link" onclick="">Report</div>
+                                                <hr>  
+                                                <div class="dropdown-link" onclick="">Filter</div>
                                             </div>
                                         </span>
                                         <input type="checkbox" name="{{post['number']}}-{{board}}">
@@ -235,8 +233,8 @@
         <footer>
             Any post made by a user is the responsibility of that user.
         </footer>
+        <script src="../static/js/themes.js"></script>
         <script src="../static/js/posting.js"></script>
         <script src="../../static/js/markdown.js"></script>
-        <script src="../static/js/themes.js"></script>
     </body>
 </html>
