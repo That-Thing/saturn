@@ -141,6 +141,12 @@
                                     <div class="dropdown-content">
                                         <div class="dropdown-link" onclick="hidePostThread(this)">Hide post</div>
                                         <hr>
+                                        {% if session['group'] | int <= 3 %}
+                                            <div class="dropdown-link" onclick="deletePost(this)">Delete</div>
+                                        {%else%}
+                                            <a href="../deletePost?board={{board}}&id={{thread['number']}}"><div class="dropdown-link">Delete</div></a>
+                                        {%endif%}
+                                        <hr>  
                                         <div class="dropdown-link" onclick="">Report</div>
                                         <hr>  
                                         <div class="dropdown-link" onclick="">Filter</div>
@@ -220,7 +226,7 @@
                         {%endfor%}
                     </div>
                 {% endfor %}
-                {% if boardData['owner'] == session['username'] or session['group'] == 'administrator' %}
+                {% if boardData['owner'] == session['username']%}
                 <div id="boardManagement">
                     <hr>
                     <span>

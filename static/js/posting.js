@@ -27,23 +27,23 @@ window.onclick = function(event) {
 function hidePostReply(post) {
   post = post.parentNode.parentNode.parentNode.parentNode.parentNode;//this is such a stupid way of doing this.
   post.classList.add("hide");
-  let hidden = sessionStorage.getItem('hidden');
-  if (hidden == null) {
-    hidden = "";
+  let hidden = JSON.parse(sessionStorage.getItem('hidden'));
+  if(hidden == null) {
+    hidden = [];
   }
-  hidden = hidden + ","+post.id;
-  sessionStorage.setItem('hidden', hidden)
+  hidden.push(post.id);
+  sessionStorage.setItem('hidden', JSON.stringify(hidden))
 }
 //hide entire thread
 function hidePostThread(post) {
   post = post.parentNode.parentNode.parentNode.parentNode.parentNode;
   post.classList.add("hide");
-  let hidden = sessionStorage.getItem('hidden');
-  if (hidden == null) {
-    hidden = "";
+  let hidden = JSON.parse(sessionStorage.getItem('hidden'));
+  if(hidden == null) {
+    hidden = [];
   }
-  hidden = hidden + ","+post.id;
-  sessionStorage.setItem('hidden', hidden)
+  hidden.push(post.id);
+  sessionStorage.setItem('hidden', JSON.stringify(hidden))
 }
 
 
@@ -53,16 +53,9 @@ function showHiddenMenu() {
   var hiddenMenu = document.createElement("div");
   hiddenMenu.className = "floating-menu";
   hiddenMenu.id = "hidden-menu";
-  try {
-    var hidden = sessionStorage.getItem('hidden');
-  } catch (e) {
-    var hidden;
-  }
-  try {
-    hidden = hidden.split(",");
-    hidden.splice(0, 1);
-  } catch (e) {
-    //do nothing
+  let hidden = JSON.parse(sessionStorage.getItem('hidden'));
+  if(hidden == null) {
+    hidden = [];
   }
   var divs = "";
   try {
@@ -73,7 +66,7 @@ function showHiddenMenu() {
       }
     });
   } catch {
-    //do nothing...again
+    //do nothing
   }
   menuTemplate = `
     <div class="drag-header floating-menu-header">
@@ -135,18 +128,17 @@ function dragElement(elmnt) {
 
 //Hide all threads/posts that are marked as hidden in the session
 function checkHidden() {
-  if (sessionStorage.getItem('hidden') != null) {
+  let hidden = JSON.parse(sessionStorage.getItem('hidden'));
+  if (hidden != null) {
     var threads = document.getElementsByClassName('thread');
     var posts = document.getElementsByClassName('replyDiv');
-    var hiddenPosts = sessionStorage.getItem('hidden').split(",");
-    hiddenPosts.splice(0, 1);
     for( i=0; i< threads.length; i++ ) {
-      if (hiddenPosts.includes(threads[i].id)) {
+      if (hidden.includes(threads[i].id)) {
         threads[i].classList.add("hide");  
       }
     }
     for( i=0; i< posts.length; i++ ) {
-      if (hiddenPosts.includes(posts[i].id)) {
+      if (hidden.includes(posts[i].id)) {
         posts[i].classList.add("hide");  
       }
     }
@@ -158,9 +150,13 @@ checkHidden()
 function removeHidden(id) {
   document.getElementById(id.parentNode.remove());
   id = id.parentNode.id.replace('hidden-','');
-  var hidden = sessionStorage.getItem('hidden').replace(','+id,'');
-  var hidden = sessionStorage.getItem('hidden').replace(id,'');
-  sessionStorage.setItem('hidden', hidden);
+  var hidden = JSON.parse(sessionStorage.getItem('hidden'));
+  for( i=0; i< hidden.length; i++ ) {
+    if(hidden[i] == id) {
+      hidden.splice(i-1, i)
+    }
+  }
+  sessionStorage.setItem('hidden', JSON.stringify(hidden));
   document.getElementById(id).classList.remove('hide');
 }
 
