@@ -322,7 +322,11 @@ def boards():
 def help():
     globalSettings = reloadSettings()
     return render_template('help.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-
+#FAQ page
+@app.route('/faq', methods=['GET'])
+def faq():
+    globalSettings = reloadSettings()
+    return render_template('faq.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 
 #global settings redirect
 @app.route('/globalsettings', methods=['GET'])

@@ -72,6 +72,13 @@ hr {
     border-color: var(--hr);
 }
 /*Button*/
+.btn {
+    background-color: var(--button-background);
+    border: 0px solid;
+    color: var(--text-color);
+    font-size: 100%;
+    max-width: 100%;
+}
 .btn:hover {
     background-color: var(--button-hover);
 }
@@ -259,7 +266,27 @@ p {
     float: left;
 }
 
+/*"Start a new thread" Button*/
+#post-button {
+    float: left;
+    margin: 0 5px;
+    background: var(--button-background);
+    color: #ACACAC;
+    border: 1px solid var(--button-border);
+}
+#post-button:hover {
+    background: var(--button-hover);
+}
+
+
 /*posts*/
+.quote-link {
+    text-decoration: underline;
+    color: var(--link-color);
+}
+.quote-link:hover {
+    color: var(--link-hover);
+}
 .op {
     font-size: 80%;
     clear: left;
@@ -408,3 +435,15 @@ p {
 .remove-hidden:hover {
     color: var(--link-hover);
 }
+
+/*FAQ page*/
+.box-faq {
+    width: 50%;
+}
+#faq-content {
+    margin-top: 5%;
+}
+.faq-box-content {
+    padding: 5px;
+}
+

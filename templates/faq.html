@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{data['siteName']}} - FAQ</title>
+        <meta charset="UTF-8">
+        <link href="../static/css/global.css" type="text/css" rel="stylesheet">
+        <link href="../../static/css/markdown.css" type="text/css" rel="stylesheet">
+        <link href="../../static/css/help.css" type="text/css" rel="stylesheet">
+        <link rel="shortcut icon" type="image/png" href="../{{data['faviconUrl']}}"/>
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+    </head>
+    <body class="{{currentTheme}}">
+        <nav>
+            <span id="navMain">
+                <a href="{{ url_for('index') }}"><i class="fas fa-home text-icon"></i>Home</a>
+                <a href="{{ url_for('boards') }}"><i class="fas fa-stream text-icon"></i>Boards</a>
+                <a href="{{ url_for('help') }}"><i class="fas fa-question text-icon"></i>Help</a>
+                <a href="settings"><i class="fas fa-cog text-icon"></i>Settings</a>
+                <select onchange="changeTheme(this.value, {{themes}})" id="theme-select">
+                    {% for theme in themes %}
+                        <option id="{{themes[theme]['class']}}" value="{{themes[theme]['id']}}">{{themes[theme]['name']}}</option>
+                    {% endfor %}
+                </select>
+            </span>
+        </nav>
+        <div id="faq-content">
+            <div class="box box-faq" id="faq">
+                <h2 class="box-header center">Frequently Asked Questions</h2>
+                <div class="faq-box-content">
+                    <p>This page contains information about {{data['siteName']}} and the software it uses.</p>
+                </div>
+            </div>
+            <div class="box box-faq" id="imageboard">
+                <h2 class="box-header center">What is an imageboard?</h2>
+                <div class="faq-box-content">
+                    <p>
+                        An imageboard is a type of Internet forum that revolves around the posting of images, often alongside text and discussion. The first imageboards were created in Japan as an extension of the textboard concept.
+                        These sites later inspired the creation of a number of English-language imageboards, such as 4chan. <span class="small">(source: <a href="https://en.wikipedia.org/wiki/Imageboard" target="_blank">Wikipedia</a>)</span>
+                    </p>
+                    <p>
+                        Imageboards tend to be anonymous, meaning that posters don't need to register on the site to post and posts don't usually have names attatched to them. 
+                    </p>
+                </div>
+            </div>
+            <div class="box box-faq" id="software">
+                <h2 class="box-header center">What software does {{data['siteName']}} use?</h2>
+                <div class="faq-box-content">
+                    <p>{{data['siteName']}} uses open source imageboard software called Saturn written by <a href="https://github.com/That-Thing" target="_blank">Sen</a>.</p>
+                    <p><a href="https://github.com/That-Thing/saturn-dev" target="_blank"><i class="fab fa-github text-icon"></i>Github Repository</a></p>
+                </div>
+            </div>
+            <div class="box box-faq" id="posting">
+                <h2 class="box-header center">How to post?</h2>
+                <div class="faq-box-content">
+                    <p>To make a thread, go to any board on the site and click the <button class="btn">Start a new thread</button> button. Make sure to fill out all of the required fields.</p>
+                </div>
+            </div>
+        </div>
+        <script src="../static/js/themes.js"></script>
+    </body>
+</html>
