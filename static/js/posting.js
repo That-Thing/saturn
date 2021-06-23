@@ -27,23 +27,23 @@ window.onclick = function(event) {
 function hidePostReply(post) {
   post = post.parentNode.parentNode.parentNode.parentNode.parentNode;//this is such a stupid way of doing this.
   post.classList.add("hide");
-  let hidden = JSON.parse(sessionStorage.getItem('hidden'));
+  let hidden = JSON.parse(localStorage.getItem('hidden'));
   if(hidden == null) {
     hidden = [];
   }
   hidden.push(post.id);
-  sessionStorage.setItem('hidden', JSON.stringify(hidden))
+  localStorage.setItem('hidden', JSON.stringify(hidden))
 }
 //hide entire thread
 function hidePostThread(post) {
   post = post.parentNode.parentNode.parentNode.parentNode.parentNode;
   post.classList.add("hide");
-  let hidden = JSON.parse(sessionStorage.getItem('hidden'));
+  let hidden = JSON.parse(localStorage.getItem('hidden'));
   if(hidden == null) {
     hidden = [];
   }
   hidden.push(post.id);
-  sessionStorage.setItem('hidden', JSON.stringify(hidden))
+  localStorage.setItem('hidden', JSON.stringify(hidden))
 }
 
 
@@ -52,7 +52,7 @@ function showHiddenMenu() {
   var hiddenMenu = document.createElement("div");
   hiddenMenu.className = "floating-menu";
   hiddenMenu.id = "hidden-menu";
-  let hidden = JSON.parse(sessionStorage.getItem('hidden'));
+  let hidden = JSON.parse(localStorage.getItem('hidden'));
   if(hidden == null) {
     hidden = [];
   }
@@ -126,7 +126,7 @@ function dragElement(elmnt) {
 
 //Hide all threads/posts that are marked as hidden in the session
 function checkHidden() {
-  let hidden = JSON.parse(sessionStorage.getItem('hidden'));
+  let hidden = JSON.parse(localStorage.getItem('hidden'));
   if (hidden != null) {
     var threads = document.getElementsByClassName('thread');
     var posts = document.getElementsByClassName('replyDiv');
@@ -148,13 +148,13 @@ checkHidden()
 function removeHidden(id) {
   document.getElementById(id.parentNode.remove());
   id = id.parentNode.id.replace('hidden-','');
-  var hidden = JSON.parse(sessionStorage.getItem('hidden'));
+  var hidden = JSON.parse(localStorage.getItem('hidden'));
   for( i=0; i< hidden.length; i++ ) {
     if(hidden[i] == id) {
       delete hidden[i]
     }
   }
-  sessionStorage.setItem('hidden', JSON.stringify(hidden));
+  localStorage.setItem('hidden', JSON.stringify(hidden));
   document.getElementById(id).classList.remove('hide');
 }
 

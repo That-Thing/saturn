@@ -45,13 +45,9 @@ captcha = ImageCaptcha(fonts=['./static/fonts/quicksand.ttf']) #Fonts for captch
 
 #TO DO:
 #add more board settings
-#finish making board template
-#add message formatting (greentext, pinktext, etc)
 #polish up thread creation
 #add expansion of thumbnail on click for posts
 #Add captcha deletion
-#add posts to display following a thread in the board page
-#add password generation for posts with the password being stored in session data
 #add post deletion
 #catalog
 #add floating reply thing.
@@ -151,7 +147,7 @@ def checkFilePass():
     if 'filePassword' in session:
         return session['filePassword']
     else:
-        characters = string.ascii_letters + string.punctuation  + string.digits
+        characters = string.ascii_letters + string.digits
         password =  "".join(random.choice(characters) for x in range(8))
         session['filePassword'] = password
         return password
@@ -802,13 +798,21 @@ def newThread():
                                     return "Incorrect file type submitted"
                             filenames = ','.join([str(x) for x in filenames])
                             filePaths = ','.join([str(x) for x in filePaths])
-                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s, %s, %s, %s)', (name, subject, options, comment, x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler, returnHash(filePass))) #parse message later
+                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s, %s, %s, %s)', (name, subject, options, comment, x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass)) #parse message later
                         cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (x['posts']+1, x['uri']))
                         cursor.execute("SELECT * FROM server")
                         serverInfo = cursor.fetchone()
                         cursor.execute("UPDATE server SET posts=%s", [serverInfo['posts']+1])
                         mysql.connection.commit()
-                        return redirect(f"{x['uri']}/thread/{x['posts']+1}")
+                        ownedPosts = request.cookies.get('ownedPosts')
+                        if ownedPosts == None:
+                            ownedPosts = "{}"
+                        print(ownedPosts)
+                        ownedPosts = json.loads(ownedPosts)
+                        ownedPosts[f"{board['uri']}/{board['posts']+1}"] = filePass
+                        resp = redirect(f"{x['uri']}/thread/{x['posts']+1}")
+                        resp.set_cookie('ownedPosts', json.dumps(ownedPosts))
+                        return resp
                     else:
                         return "Incorrect captcha"
                 else:
@@ -830,13 +834,21 @@ def newThread():
                                 return "Incorrect file type submitted"
                         filenames = ','.join([str(x) for x in filenames])
                         filePaths = ','.join([str(x) for x in filePaths])
-                    cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s, %s, %s, %s)', (name, subject, options, comment, x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler, returnHash(filePass))) #parse message later
+                    cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s, %s, %s, %s)', (name, subject, options, comment, x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass)) #parse message later
                     cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (x['posts']+1, x['uri']))
                     cursor.execute("SELECT * FROM server")
                     serverInfo = cursor.fetchone()
                     cursor.execute("UPDATE server SET posts=%s", [serverInfo['posts']+1])
                     mysql.connection.commit()
-                    return redirect(f"{x['uri']}/thread/{x['posts']+1}")
+                    ownedPosts = request.cookies.get('ownedPosts')
+                    if ownedPosts == None:
+                        ownedPosts = "{}"
+                    print(ownedPosts)
+                    ownedPosts = json.loads(ownedPosts)
+                    ownedPosts[f"{board['uri']}/{board['posts']+1}"] = filePass
+                    resp = redirect(f"{x['uri']}/thread/{x['posts']+1}")
+                    resp.set_cookie('ownedPosts', json.dumps(ownedPosts))
+                    return resp
                 else:
                     return render_template('error.html', errorMsg="Please make sure the message and files are present.", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
 
@@ -867,8 +879,6 @@ def thread(board, thread):
     return render_template('error.html', errorMsg="Board not found", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
 
 
-#LOOK OVER THIS CODE AND MAKE SURE IT'S NOT A MASSIVE PILE OF SHIT THAT I HAVE TO COMPLETELY RE-WRITE
-#If I have to re-write this, the shotgun is in the gun safe. 
 @app.route('/reply', methods=['POST'])
 def reply():
     if request.method == 'POST':
@@ -937,15 +947,23 @@ def reply():
                         filenames = []
                         filePaths = []
                     if len(filePaths) == 0:
-                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(request.remote_addr), spoiler, returnHash(filePass))) #parse message later
+                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(request.remote_addr), spoiler,filePass)) #parse message later
                     else:
-                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler, returnHash(filePass))) #parse message later
+                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass)) #parse message later
                     cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (board['posts']+1, board['uri']))
                     cursor.execute("SELECT * FROM server")
                     serverInfo = cursor.fetchone()
                     cursor.execute("UPDATE server SET posts=%s", [serverInfo['posts']+1])
                     mysql.connection.commit()
-                    return redirect(f"{board['uri']}/thread/{request.form['thread']}#{board['posts']+1}")
+                    ownedPosts = request.cookies.get('ownedPosts')
+                    if ownedPosts == None:
+                        ownedPosts = "{}"
+                    print(ownedPosts)
+                    ownedPosts = json.loads(ownedPosts)
+                    ownedPosts[f"{board['uri']}/{board['posts']+1}"] = filePass
+                    resp = redirect(f"{board['uri']}/thread/{request.form['thread']}#{board['posts']+1}")
+                    resp.set_cookie('ownedPosts', json.dumps(ownedPosts))
+                    return resp
                 else:
                     return "Incorrect Captcha"
             else:
@@ -973,15 +991,23 @@ def reply():
                 filenames = []
                 filePaths = []
             if len(filePaths) == 0:
-                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(request.remote_addr), spoiler, returnHash(filePass))) #parse message later
+                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(request.remote_addr), spoiler,filePass)) #parse message later
             else:
-                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler, returnHash(filePass))) #parse message later
+                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass)) #parse message later
             cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (board['posts']+1, board['uri']))
             cursor.execute("SELECT * FROM server")
             serverInfo = cursor.fetchone()
             cursor.execute("UPDATE server SET posts=%s", [serverInfo['posts']+1])
             mysql.connection.commit()
-            return redirect(f"{board['uri']}/thread/{request.form['thread']}#{board['posts']+1}")
+            ownedPosts = request.cookies.get('ownedPosts')
+            if ownedPosts == None:
+                ownedPosts = "{}"
+            print(ownedPosts)
+            ownedPosts = json.loads(ownedPosts)
+            ownedPosts[f"{board['uri']}/{board['posts']+1}"] = filePass
+            resp = redirect(f"{board['uri']}/thread/{request.form['thread']}#{board['posts']+1}")
+            resp.set_cookie('ownedPosts', json.dumps(ownedPosts))
+            return resp
     else:
         return render_template('error.html', errorMsg="Request must be POST", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)   
     
