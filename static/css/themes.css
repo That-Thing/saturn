@@ -352,3 +352,9 @@ body.theme-tomorrow {
 .theme-tomorrow .board-entry {
     border-top: 1px solid #111;
 }
+.theme-tomorrow .floating-menu-header {
+    border-bottom: 1px solid #111;
+}
+.theme-tomorrow .dropdown-content hr {
+    border-color: #111;
+}
