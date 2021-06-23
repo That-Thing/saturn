@@ -48,7 +48,6 @@ function hidePostThread(post) {
 
 
 //might need to just rewrite this completely unless I figure out how to access sql data using JS. 
-//Don't know if this even works.
 function showHiddenMenu() {
   var hiddenMenu = document.createElement("div");
   hiddenMenu.className = "floating-menu";
@@ -60,7 +59,6 @@ function showHiddenMenu() {
   var divs = "";
   try {
     hidden.forEach(element => {
-      console.log(element)
       if (element != null && element != undefined) {
         divs = divs + '<div class="hidden-entry" id="hidden-'+ element +'"><span>'+ element +'</span> <i class="fas fa-times text-icon-l remove-hidden" onclick="removeHidden(this)"></i></div><br>';
       }
@@ -153,7 +151,7 @@ function removeHidden(id) {
   var hidden = JSON.parse(sessionStorage.getItem('hidden'));
   for( i=0; i< hidden.length; i++ ) {
     if(hidden[i] == id) {
-      hidden.splice(i-1, i)
+      delete hidden[i]
     }
   }
   sessionStorage.setItem('hidden', JSON.stringify(hidden));
