@@ -141,10 +141,14 @@
                                     <div class="dropdown-content">
                                         <div class="dropdown-link" onclick="hidePostThread(this)">Hide post</div>
                                         <hr>
-                                        {% if session['group'] | int <= 3 %}
-                                            <div class="dropdown-link" onclick="deletePost(this)">Delete</div>
+                                        {% if session['group'] %}
+                                            {% if session['group'] | int <= 3 %}
+                                                <div class="dropdown-link" onclick="deletePost(this)">Delete</div>
+                                            {%else%}
+                                                <a href="../deletePost?board={{board}}&id={{thread['number']}}"><div class="dropdown-link">Delete</div></a>
+                                            {%endif%}
                                         {%else%}
-                                            <a href="../deletePost?board={{board}}&id={{thread['number']}}"><div class="dropdown-link">Delete</div></a>
+                                            <div class="dropdown-link" onclick="deletePost(this)">Delete</div>
                                         {%endif%}
                                         <hr>  
                                         <div class="dropdown-link" onclick="">Report</div>
