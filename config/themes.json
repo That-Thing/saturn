@@ -13,5 +13,10 @@
         "name": "Yotsuba B",
         "id": "yotsubaB",
         "class": "theme-yotsuba-b"
+    },
+    "tomorrow": {
+        "name": "Tomorrow",
+        "id": "tomorrow",
+        "class": "theme-tomorrow"
     }
 }
