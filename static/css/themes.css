@@ -127,8 +127,12 @@ body.theme-yotsuba {
     background-color: #828282;
     transition: background-color 0.2s;
 }
-
-
+.theme-yotsuba #board-list-header {
+    background-color: var(--header-color);
+}
+.theme-yotsuba #boardsDiv .board-entry:nth-child(odd) {
+    background-color: white;
+}
 
 
 /*
@@ -218,7 +222,7 @@ body.theme-yotsuba-b {
     margin-top: 0;
 }
 .theme-yotsuba-b .login form label, .theme-yotsuba-b .register form label {
-    background-color: #98e;
+    background-color: var(--header-color);
 }
 .theme-yotsuba-b .login form input, .theme-yotsuba-b .register form input {
     color: #7d7d7d;
@@ -231,7 +235,12 @@ body.theme-yotsuba-b {
     background-color: #828282;
     transition: background-color 0.2s;
 }
-
+.theme-yotsuba-b #board-list-header {
+    background-color: var(--header-color);
+}
+.theme-yotsuba-b #boardsDiv .board-entry:nth-child(odd) {
+    background-color: white;
+}
 
 
 /*
@@ -327,4 +336,19 @@ body.theme-tomorrow {
 .theme-tomorrow .login form input[type="submit"]:hover, .theme-tomorrow .register form input[type="submit"]:hover {
     background-color: var(--input);
     transition: background-color 0.2s;
+}
+.theme-tomorrow #boardsDiv hr, .theme-tomorrow #help-box hr {
+    border-color: #111;
+}
+.theme-tomorrow #board-list-header {
+    background-color: var(--page-background);
+}
+.theme-tomorrow #boardsDiv {
+    background-color: var(--page-background);
+}
+.theme-tomorrow #boardsDiv .board-entry:nth-child(odd) {
+    background-color: rgba(255,255,255,.1);
+}
+.theme-tomorrow .board-entry {
+    border-top: 1px solid #111;
 }

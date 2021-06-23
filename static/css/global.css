@@ -137,7 +137,7 @@ input, select, textarea {
 .alligned {
     margin-top: 10%;
     width: 50%;
-    padding-bottom: 5px;
+    /* padding-bottom: 5px; */
 }
 /*Box label*/
 .box-header {
@@ -190,10 +190,25 @@ input, select, textarea {
     margin: 5px;
     margin-left: 10px;
 }
+#board-list-header {
+    padding: 3px;
+}
+#boardsDiv {
+    background-color: var(--nav-color);
+}
+#boardsDiv .settings-category {
+    margin: 0px;
+}
+#board-list-header {
+    background-color: var(--nav-color);
+}
+#boardsDiv .board-entry:nth-child(odd) {
+    background-color: var(--background-2);
+}
 .board-entry {
     text-align: left;
-    margin: 5px;
-    margin-left: 10px;
+    padding: 5px;
+    border-top: 1px solid var(--border-color);
 }
 #boardManagement {
     padding-bottom: 5px;
