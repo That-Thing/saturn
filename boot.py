@@ -809,7 +809,7 @@ def newThread():
                             ownedPosts = "{}"
                         print(ownedPosts)
                         ownedPosts = json.loads(ownedPosts)
-                        ownedPosts[f"{board['uri']}/{board['posts']+1}"] = filePass
+                        ownedPosts[f"{x['uri']}/{x['posts']+1}"] = filePass
                         resp = redirect(f"{x['uri']}/thread/{x['posts']+1}")
                         resp.set_cookie('ownedPosts', json.dumps(ownedPosts))
                         return resp
@@ -845,7 +845,7 @@ def newThread():
                         ownedPosts = "{}"
                     print(ownedPosts)
                     ownedPosts = json.loads(ownedPosts)
-                    ownedPosts[f"{board['uri']}/{board['posts']+1}"] = filePass
+                    ownedPosts[f"{x['uri']}/{x['posts']+1}"] = filePass
                     resp = redirect(f"{x['uri']}/thread/{x['posts']+1}")
                     resp.set_cookie('ownedPosts', json.dumps(ownedPosts))
                     return resp
@@ -1009,18 +1009,43 @@ def reply():
             resp.set_cookie('ownedPosts', json.dumps(ownedPosts))
             return resp
     else:
-        return render_template('error.html', errorMsg="Request must be POST", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)   
-    
-@app.route('/deletePost', methods=['POST'])
-def deletePost():
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        return "Request must be POST"  
+
+
+@app.route('/<board>/postActions', methods=['POST'])
+def postActions(board):
     if request.method == 'POST':
-        for post in request.form['posts']:
-            cursor.execute("SELECT FROM posts WHERE number=%s AND board=%s", post, request.form['board'])
-            currentPost = cursor.fetchone()
-            if returnHash(currentPost['password']) == returnHash(request.form["password"]):
-                cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", post, request.form['board'])
-        mysql.connection.commit()
+        if request.form['delete'] == 'Delete': #Delete post
+            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (int(request.form['post']), board))
+            post = cursor.fetchone()
+            if post['password'] == request.form['password']:
+                if post['files'] != None: #delete files from disk
+                    files = post['files'].split(',')
+                    for file in files:
+                        thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
+                        os.remove(file)
+                        os.remove(thumbPath)
+                if post['type'] == 1: #Check if post is a thread and delete all child posts. 
+                    cursor.execute("SELECT * FROM posts WHERE thread=%s AND board=%s", (int(request.form['post']), board))
+                    posts = cursor.fetchall()
+                    for x in posts:
+                        files = []
+                        if x['files'] != None:
+                            files = files + x['files'].split(',')
+                        for file in files:
+                            thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
+                            os.remove(file)
+                            os.remove(thumbPath)
+                    cursor.execute("DELETE FROM posts WHERE thread=%s AND board=%s", (int(request.form['post']), board))
+                cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (int(request.form['post']), board))
+                mysql.connection.commit()
+                return(redirect(f"/{board}/"))
+            else:
+                return render_template('error.html', errorMsg="Password is incorrect", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        else:
+            return "Still not implemented, check back later"
+            #handle reports
     else:
         return "Request must be POST"
 

@@ -35,7 +35,7 @@
             <button class="btn" onclick="showAuthor()">Start a new thread</button>
         </div>
         <div id="author-container" style="display: none;">  
-            <form action="/newThread" method="POST" id="authorForm" enctype="multipart/form-data">
+            <form action="{{url_for('newThread')}}" method="POST" id="authorForm" enctype="multipart/form-data">
                 <input type="hidden" name="board" value="{{board}}">
                 <table>
                     <tbody>
@@ -138,23 +138,20 @@
                             <div class="postInfo">
                                 <span class="post-dropdown">
                                     <span class="dropdown-button dropdown-button-marker" onclick="dropdownFunction(this)"><i class="fas fa-caret-right dropdown-button-marker"></i></span>
-                                    <div class="dropdown-content">
-                                        <div class="dropdown-link" onclick="hidePostThread(this)">Hide post</div>
-                                        <hr>
-                                        {% if session['group'] %}
-                                            {% if session['group'] | int <= 3 %}
-                                                <div class="dropdown-link" onclick="deletePost(this)">Delete</div>
-                                            {%else%}
-                                                <a href="../deletePost?board={{board}}&id={{thread['number']}}"><div class="dropdown-link">Delete</div></a>
-                                            {%endif%}
-                                        {%else%}
-                                            <div class="dropdown-link" onclick="deletePost(this)">Delete</div>
-                                        {%endif%}
-                                        <hr>  
-                                        <div class="dropdown-link" onclick="">Report</div>
-                                        <hr>  
-                                        <div class="dropdown-link" onclick="">Filter</div>
-                                    </div>
+                                    <form action="/{{board}}/postActions" method="POST">
+                                        <div class="dropdown-content">
+                                            <div class="dropdown-link" onclick="hidePostThread(this)">Hide post</div>
+                                            <hr>
+                                            <input type="hidden" name="board" value="{{board}}">
+                                            <input type="hidden" name="password" value="{{filePass}}">
+                                            <input type="hidden" name="post" value="{{thread['number']}}">
+                                            <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete">
+                                            <hr>  
+                                            <div class="dropdown-link" type="submit">Report</div>
+                                            <hr>  
+                                            <div class="dropdown-link" onclick="">Filter</div>
+                                        </div>
+                                    </form>
                                 </span>
                                 <span class="subject">{{thread['subject']}}</span>
                                 {%if thread['options'] | length > 0%}
@@ -175,13 +172,20 @@
                                     <div class="postInfo">
                                         <span class="post-dropdown">
                                             <i class="fas fa-caret-right dropdown-button-marker dropdown-button" onclick="dropdownFunction(this)"></i>
-                                            <div class="dropdown-content">
-                                                <div class="dropdown-link" onclick="hidePostReply(this)">Hide post</div>
-                                                <hr>
-                                                <div class="dropdown-link" onclick="">Report</div>
-                                                <hr>  
-                                                <div class="dropdown-link" onclick="">Filter</div>
-                                            </div>
+                                            <form action="/{{board}}/postActions" method="POST">
+                                                <div class="dropdown-content">
+                                                    <div class="dropdown-link" onclick="hidePostThread(this)">Hide post</div>
+                                                    <hr>
+                                                    <input type="hidden" name="board" value="{{board}}">
+                                                    <input type="hidden" name="password" value="{{filePass}}">
+                                                    <input type="hidden" name="post" value="{{post['number']}}">
+                                                    <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete">
+                                                    <hr>  
+                                                    <div class="dropdown-link" type="submit">Report</div>
+                                                    <hr>  
+                                                    <div class="dropdown-link" onclick="">Filter</div>
+                                                </div>
+                                            </form>
                                         </span>
                                         <input type="checkbox" name="{{post['number']}}-{{board}}">
                                         <span class="subject">{{post['subject']}}</span>
@@ -203,24 +207,24 @@
                                             <div class="uploads">
                                         {%endif%}
                                         {%for file in files%}
-                                                <div class="fileDiv">
-                                                    <div class="file-info">
-                                                        <a class="filename" href="../../{{file}}" target="_blank">{{filenames[files.index(file)]}}</a>
-                                                        <a href="../../{{file}}" download="{{filenames[files.index(file)]}}"><i class="fas fa-download text-icon"></i></a>
-                                                        {%if file | checkimage == True%}
-                                                            <span class="fileSize text-icon">({{file | filesize}}, {{file | dimensions}})</span>
-                                                        {%else%}
-                                                            <span class="fileSize text-icon">({{file | filesize}})</span>
-                                                        {%endif%}
-                                                    </div>
-                                                    <a class="linkImg" target="_blank" href="../../{{file}}">
-                                                        {%if post['spoiler'] == 1%}
-                                                            <img loading="lazy" class="thumbnail" src="../../{{data['spoilerImage']}}">
-                                                        {%else%}
-                                                            <img loading="lazy" class="thumbnail" src="../../{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
-                                                        {%endif%}
-                                                    </a>
+                                            <div class="fileDiv">
+                                                <div class="file-info">
+                                                    <a class="filename" href="../../{{file}}" target="_blank">{{filenames[files.index(file)]}}</a>
+                                                    <a href="../../{{file}}" download="{{filenames[files.index(file)]}}"><i class="fas fa-download text-icon"></i></a>
+                                                    {%if file | checkimage == True%}
+                                                        <span class="fileSize text-icon">({{file | filesize}}, {{file | dimensions}})</span>
+                                                    {%else%}
+                                                        <span class="fileSize text-icon">({{file | filesize}})</span>
+                                                    {%endif%}
                                                 </div>
+                                                <a class="linkImg" target="_blank" href="../../{{file}}">
+                                                    {%if post['spoiler'] == 1%}
+                                                        <img loading="lazy" class="thumbnail" src="../../{{data['spoilerImage']}}">
+                                                    {%else%}
+                                                        <img loading="lazy" class="thumbnail" src="../../{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
+                                                    {%endif%}
+                                                </a>
+                                            </div>
                                         {%endfor%}
                                         </div>
                                     {%endif%}

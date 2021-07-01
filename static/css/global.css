@@ -418,6 +418,14 @@ p {
 .dropdown-link:hover {
     color: var(--link-hover);
 }
+.dropdown-submit {
+    background: none;
+    width: 100%;
+    padding: 0px;
+    text-align: left;
+    cursor: pointer;
+}
+
 .floating-menu {
     background-color: var(--nav-color);
     width: 25%;
