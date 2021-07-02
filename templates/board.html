@@ -3,9 +3,9 @@
     <head>
         <title>/{{board}}/ - {{boardData['name']}}</title>
         <meta charset="UTF-8">
-        <link href="../static/css/global.css" type="text/css" rel="stylesheet">
-        <link href="../static/css/board.css" type="text/css" rel="stylesheet">
-        <link href="../../static/css/markdown.css" type="text/css" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/global.css') }}" type="text/css" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/board.css') }}" type="text/css" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/markdown.css') }}" type="text/css" rel="stylesheet">
         <link rel="shortcut icon" type="image/png" href="../{{data['faviconUrl']}}"/>
         <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
     </head>
@@ -143,7 +143,13 @@
                                             <div class="dropdown-link" onclick="hidePostThread(this)">Hide post</div>
                                             <hr>
                                             <input type="hidden" name="post" value="{{thread['number']}}">
-                                            <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete">
+                                            {%if session['filePassword'] == thread['password']%}
+                                                <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete">
+                                            {%elif group and session['group'] <= 3%}
+                                                <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete">
+                                            {%else%}
+                                                <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete">
+                                            {%endif%}
                                             <hr>  
                                             <div class="dropdown-link" type="submit">Report</div>
                                             <hr>  
@@ -234,7 +240,7 @@
                 <div id="boardManagement">
                     <hr>
                     <span>
-                        [<a href="../manageboard?uri={{boardData['uri']}}">Board Settings</a>]
+                        [<a href="{{ url_for('manageBoard', uri=boardData['uri']) }}">Board Settings</a>]
                     </span>
                 </div>
             {%endif%}
@@ -243,8 +249,8 @@
         <footer>
             Any post made by a user is the responsibility of that user.
         </footer>
-        <script src="../static/js/themes.js"></script>
-        <script src="../static/js/posting.js"></script>
-        <script src="../../static/js/markdown.js"></script>
+        <script src="{{ url_for('static', filename='js/themes.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/posting.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/markdown.js') }}"></script>
     </body>
 </html>

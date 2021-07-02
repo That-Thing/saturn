@@ -3,8 +3,8 @@
     <head>
         <title>{{data['siteName']}} - FAQ</title>
         <meta charset="UTF-8">
-        <link href="../static/css/global.css" type="text/css" rel="stylesheet">
-        <link href="../../static/css/markdown.css" type="text/css" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/global.css') }}" type="text/css" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/markdown.css') }}" type="text/css" rel="stylesheet">
         <link href="../../static/css/help.css" type="text/css" rel="stylesheet">
         <link rel="shortcut icon" type="image/png" href="../{{data['faviconUrl']}}"/>
         <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
@@ -56,6 +56,6 @@
                 </div>
             </div>
         </div>
-        <script src="../static/js/themes.js"></script>
+        <script src="{{ url_for('static', filename='js/themes.js') }}"></script>
     </body>
 </html>

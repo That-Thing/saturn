@@ -133,7 +133,9 @@ body.theme-yotsuba {
 .theme-yotsuba #boardsDiv .board-entry:nth-child(odd) {
     background-color: white;
 }
-
+.theme-yotsuba .dropdown-submit {
+    border: none;
+}
 
 /*
 ###########
@@ -241,7 +243,9 @@ body.theme-yotsuba-b {
 .theme-yotsuba-b #boardsDiv .board-entry:nth-child(odd) {
     background-color: white;
 }
-
+.theme-yotsuba-b .dropdown-submit {
+    border: none;
+}
 
 /*
 ##########
@@ -357,4 +361,7 @@ body.theme-tomorrow {
 }
 .theme-tomorrow .dropdown-content hr {
     border-color: #111;
+}
+.theme-tomorrow .dropdown-submit {
+    border: none;
 }

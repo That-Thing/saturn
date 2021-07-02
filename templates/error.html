@@ -1,12 +1,12 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <link href="../static/css/global.css" type="text/css" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/global.css') }}" type="text/css" rel="stylesheet">
         <link href="../static/css/index.css" type="text/css" rel="stylesheet">
         <link rel="shortcut icon" type="image/png" href="../{{data['faviconUrl']}}"/>
     </head>
     <body class="{{currentTheme}}">
         <h1 class="error-text">{{errorMsg}}</h1>
     </body>
-    <script src="../static/js/themes.js"></script>
+    <script src="{{ url_for('static', filename='js/themes.js') }}"></script>
 </html>

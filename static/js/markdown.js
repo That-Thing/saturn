@@ -99,7 +99,7 @@ var BBCodeHTML = function() {
     me.addFormat('||{TEXT}||', '<span class="spoiler">{TEXT}</span>'); //alternative spoiler
     me.addFormat('##{TEXT}##', '<span class="rainbow">{TEXT}</span>'); //rainbow text
     me.addFormat('((({TEXT})))', '<span class="detected">{TEXT}</span>'); //detected text
-    me.addFormat('=={TEXT}==', '<span class="redText">{TEXT}</span>'); //red text
+    me.addFormat('=={TEXT}==', '<span class="redtext">{TEXT}</span>'); //red text
   };
   var textParser = new BBCodeHTML();
 
