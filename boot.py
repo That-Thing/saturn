@@ -66,6 +66,9 @@ app.config['MYSQL_PASSWORD'] = databaseConfig["password"]
 app.config['MYSQL_DB'] = databaseConfig["name"]
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 mysql = MySQL(app)
+
+
+
 #global settings
 def reloadSettings():
     with open('./config/config.json') as configFile: #global config file
@@ -194,14 +197,7 @@ def checkTrip(name, role): #check if tripcode password is included and hash it i
     if "##" in name:
         password = name.split("##",1)[1]
         if password == "rs":
-            if role == 1:
-                password = "Administrator"
-            elif role == 2:
-                password = "Moderator"
-            elif role == 3:
-                password = "Janitor"
-            elif password == 4:
-                password == "user"
+            password = groups[role]['name']
             return password
         else:
             password = returnHash(password)
@@ -511,7 +507,6 @@ def deleteBoard():
                         path = os.path.join(globalSettings['mediaLocation'], uri) #path for banner folder for specific board. 
                         for x in os.listdir(path):
                             os.remove(os.path.join(path, x))
-                        print(path)
                         os.rmdir(path)#remove media sub-folder
                         return redirect(url_for('boardManagement', msg=uri + " successfully deleted"))
                     else:
@@ -698,7 +693,6 @@ def getThreads(uri):
 @app.route('/<board>/', methods=['GET'])
 @app.route('/<board>', methods=['GET'])
 def boardPage(board):
-    print(request.cookies.get('theme'))
     filePass = checkFilePass()
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("SELECT * FROM boards")
@@ -807,7 +801,6 @@ def newThread():
                         ownedPosts = request.cookies.get('ownedPosts')
                         if ownedPosts == None:
                             ownedPosts = "{}"
-                        print(ownedPosts)
                         ownedPosts = json.loads(ownedPosts)
                         ownedPosts[f"{x['uri']}/{x['posts']+1}"] = filePass
                         resp = redirect(f"{x['uri']}/thread/{x['posts']+1}")
@@ -843,7 +836,6 @@ def newThread():
                     ownedPosts = request.cookies.get('ownedPosts')
                     if ownedPosts == None:
                         ownedPosts = "{}"
-                    print(ownedPosts)
                     ownedPosts = json.loads(ownedPosts)
                     ownedPosts[f"{x['uri']}/{x['posts']+1}"] = filePass
                     resp = redirect(f"{x['uri']}/thread/{x['posts']+1}")
@@ -958,7 +950,6 @@ def reply():
                     ownedPosts = request.cookies.get('ownedPosts')
                     if ownedPosts == None:
                         ownedPosts = "{}"
-                    print(ownedPosts)
                     ownedPosts = json.loads(ownedPosts)
                     ownedPosts[f"{board['uri']}/{board['posts']+1}"] = filePass
                     resp = redirect(f"{board['uri']}/thread/{request.form['thread']}#{board['posts']+1}")
@@ -1002,7 +993,6 @@ def reply():
             ownedPosts = request.cookies.get('ownedPosts')
             if ownedPosts == None:
                 ownedPosts = "{}"
-            print(ownedPosts)
             ownedPosts = json.loads(ownedPosts)
             ownedPosts[f"{board['uri']}/{board['posts']+1}"] = filePass
             resp = redirect(f"{board['uri']}/thread/{request.form['thread']}#{board['posts']+1}")
@@ -1015,7 +1005,7 @@ def reply():
 @app.route('/<board>/postActions', methods=['POST'])
 def postActions(board):
     if request.method == 'POST':
-        if request.form['delete'] == 'Delete': #Delete post
+        if request.form['delete'] == 'Delete': #Post deletion
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
             cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (int(request.form['post']), board))
             post = cursor.fetchone()

@@ -145,10 +145,10 @@
                                             <input type="hidden" name="post" value="{{thread['number']}}">
                                             {%if session['filePassword'] == thread['password']%}
                                                 <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete">
-                                            {%elif group and session['group'] <= 3%}
+                                            {%elif session['group'] and session['group'] <= 3%}
                                                 <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete">
                                             {%else%}
-                                                <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete">
+                                                <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="FIX">
                                             {%endif%}
                                             <hr>  
                                             <div class="dropdown-link" type="submit">Report</div>
