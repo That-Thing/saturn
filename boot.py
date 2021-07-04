@@ -326,7 +326,7 @@ def siteSettings():
     globalSettings = reloadSettings()
     try:
         if int(session['group']) <= 1:
-            return render_template('siteSettings.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+            return render_template('siteSettings.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes, groups=groups)
         else:
             return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     except Exception as e:

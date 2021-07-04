@@ -60,37 +60,9 @@
                     <label>
                         Minimum permission level for board creation:
                         <select name="requiredRole" id="requiredRole">
-                            {% if data['requiredRole'] == "0" %}
-                                <option value="0" selected>Root</option>
-                                <option value="1">Administrator</option>
-                                <option value="2">Moderator</option>
-                                <option value="3">Janitor</option>
-                                <option value="4">User</option>
-                            {% elif data['requiredRole'] == "1" %}
-                                <option value="0">Root</option>
-                                <option value="1" selected>Administrator</option>
-                                <option value="2">Moderator</option>
-                                <option value="3">Janitor</option>
-                                <option value="4">User</option>
-                            {% elif data['requiredRole'] == "2" %}
-                                <option value="0">Root</option>
-                                <option value="1">Administrator</option>
-                                <option value="2" selected>Moderator</option>
-                                <option value="3">Janitor</option>
-                                <option value="4">User</option>
-                            {% elif data['requiredRole'] == "3" %}
-                                <option value="0">Root</option>
-                                <option value="1">Administrator</option>
-                                <option value="2">Moderator</option>
-                                <option value="3" selected>Janitor</option>
-                                <option value="4">User</option>
-                            {% elif data['requiredRole'] == "4" %}
-                                <option value="0">Root</option>
-                                <option value="1">Administrator</option>
-                                <option value="2">Moderator</option>
-                                <option value="3">Janitor</option>
-                                <option value="4" selected>User</option>
-                            {% endif %}
+                            {% for group in groups %}
+                                <option value="{{group['id']}}"  {% if data['requiredRole'] == group['id'] | string %}selected{% endif %}>{{group['name']}}</option>
+                            {% endfor %}
                         </select>
                     </label>
                     <label>
