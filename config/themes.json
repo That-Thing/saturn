@@ -18,5 +18,10 @@
         "name": "Tomorrow",
         "id": "tomorrow",
         "class": "theme-tomorrow"
+    },
+    "photon": {
+        "name": "Photon",
+        "id": "photon",
+        "class": "theme-photon"
     }
 }

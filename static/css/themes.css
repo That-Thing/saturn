@@ -289,9 +289,6 @@ body.theme-tomorrow {
 .theme-tomorrow .box-header {
     background-color: var(--header-color);
 }
-.theme-tomorrow .innerPost {
-
-}
 .theme-tomorrow .author-label {
     background-color: var(--input);
     border: 1px solid #111;
@@ -363,5 +360,107 @@ body.theme-tomorrow {
     border-color: #111;
 }
 .theme-tomorrow .dropdown-submit {
+    border: none;
+}
+
+/*
+########
+#photon#
+########
+*/
+
+.theme-photon {
+    --text-color: #333; /*Text color*/
+    --page-background: #eee; /*Background color for the entire page*/
+    --background-2: #ddd; /*Background color for posts, boxes, etc*/
+    --nav-color: rgba(221,221,221); /*background color of nav bar*/
+    --border-color: #ccc; /*color for things such as button borders */
+    --border-radius: 0px; /*Border radius for things like boxes, posts, etc.*/
+    --font-family: arial,helvetica,sans-serif; /*Default font*/
+    --link-color: #f60; /*Links*/
+    --link-hover: #f30; /*Link hover color*/
+    --input: white; /*Background for input fields*/
+    --hr: #ddd; /*divider tags*/
+    --small-text: #767676; /*color of small text*/
+    --button-background: linear-gradient(to bottom, #F8F8F8, #DCDCDC) no-repeat!important;;
+    --button-hover: linear-gradient(to bottom, #eaeaea, #c1c1c1) no-repeat!important; ; /*Hover color of buttons*/
+    --button-border: rgb(118, 118, 118); /*border for buttons*/
+    --post-subject: #111; /*Color of the post subject text*/
+    --post-name: #004a99; /*Color of the name attatched to a post*/
+    --post-shadow: none; /*Shadow behind objects like posts*/
+    --header-color: rgba(221,221,221);
+}
+body.theme-photon {
+    -webkit-animation: none;
+    background-size: auto;
+    background: var(--page-background);
+}
+.theme-photon nav {
+    font-size: 70%;
+    border: 1px solid var(--border-color);
+}
+.theme-photon .innerPost {
+    border: 1px solid var(--border-color)
+}
+.theme-photon .box {
+    background-color: var(--page-background);
+    border: 1px solid var(--border-color);
+}
+.theme-photon .box-header {
+    background-color: var(--background-2);
+}
+.theme-photon .author-label {
+    background-color: var(--background-2);
+    border: 1px solid var(--border-color);
+}
+.theme-photon input, .theme-photon textarea, .theme-photon select, .theme-photon .settings-category input {
+    color: #7d7d7d;
+    border: 1px solid var(--border-color);
+}
+.theme-photon .btn {
+    background: linear-gradient(to bottom, #F8F8F8, #DCDCDC) no-repeat!important;
+    border: 1px solid #BBB!important;
+    border-radius: 2px;
+    color: black!important;
+}
+.theme-photon .btn:active {
+    background: linear-gradient(to bottom, #dcdcdc, #b8b8b8) no-repeat!important;   
+}
+.theme-photon .btn:hover {
+    background: linear-gradient(to bottom, #eaeaea, #c1c1c1) no-repeat!important; 
+}
+.theme-photon .dropdown-content {
+    border: 1px solid var(--border-color);
+}
+.theme-photon #board-info h1, .theme-photon #board-info h4 {
+    font-weight: normal;
+    color: var(--post-name);
+    text-shadow: 1px 1px 1px rgb(0 74 153 / 60%);
+}
+/*Stuff for the login/register page*/
+.theme-photon .login, .theme-photon .register{
+    border: 1px solid var(--border-color);
+    background-color: var(--page-background);
+}
+.theme-photon .login h1, .theme-photon .register h1 {
+    background-color: var(--header-color);
+    margin-top: 0;
+}
+.theme-photon .login form label, .theme-photon .register form label {
+    background-color: var(--header-color);
+}
+.theme-photon .login form input, .theme-photon .register form input {
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+}
+
+
+.theme-photon #boardsDiv .board-entry:nth-child(odd) {
+    background-color: var(--page-background);
+}
+.theme-photon .dropdown-content hr {
+    border: 1px solid var(--border-color);
+}
+.theme-photon .dropdown-submit {
     border: none;
 }
