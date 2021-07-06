@@ -167,6 +167,9 @@ function removeHidden(id) {
 function deletePrompt(post) {
   var children = post.parentNode.children;
   var password = prompt("Could not delete; Please input post password.");
+  if (password === null) {
+    return;
+  }
   children['password'].value = password;
   children['delete'].click();
 }
