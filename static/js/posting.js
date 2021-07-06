@@ -160,3 +160,13 @@ function removeHidden(id) {
 
 //TODO:
 //Add a letter for board URI so it doesn't hide threads on other boards with the same number.
+
+
+
+//Post deletion
+function deletePrompt(post) {
+  var children = post.parentNode.children;
+  var password = prompt("Could not delete; Please input post password.");
+  children['password'].value = password;
+  children['delete'].click();
+}

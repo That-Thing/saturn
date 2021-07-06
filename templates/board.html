@@ -6,7 +6,7 @@
         <link href="{{ url_for('static', filename='css/global.css') }}" type="text/css" rel="stylesheet">
         <link href="{{ url_for('static', filename='css/board.css') }}" type="text/css" rel="stylesheet">
         <link href="{{ url_for('static', filename='css/markdown.css') }}" type="text/css" rel="stylesheet">
-        <link rel="shortcut icon" type="image/png" href="../{{data['faviconUrl']}}"/>
+        <link rel="shortcut icon" type="image/png" href="/{{data['faviconUrl']}}"/>
         <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
     </head>
     <body class="{{currentTheme}}">
@@ -27,7 +27,7 @@
             </span>
         </nav>
         <div id="board-info">
-            <img src="../{{banner}}" id="banner" alt="banner">
+            <img src="/{{banner}}" id="banner" alt="banner">
             <h1 class="center" id="board-name">/{{board}}/ - {{boardData['name']}}</h1>
             <h4 class="center">{{boardData['description']}}</h4>
         </div>
@@ -62,7 +62,7 @@
                         {% if boardData['captcha'] == 1 %}
                             <tr>
                                 <td class="author-label">Verification</td>
-                                <td style="display: grid;"><img src="../{{captcha}}" tabindex="5" class="captcha"><input class="author-input" tabindex="6" type="text" name="captcha" autocomplete="off" required></td>
+                                <td style="display: grid;"><img src="/{{captcha}}" tabindex="5" class="captcha"><input class="author-input" tabindex="6" type="text" name="captcha" autocomplete="off" required></td>
                                 
                             </tr>
                         {% endif %}
@@ -117,7 +117,7 @@
                             {%for file in files%}
                                     <div class="fileDiv">
                                         <div class="file-info">
-                                            <a class="filename" href="../{{file}}" target="_blank">{{filenames[files.index(file)]}}</a>
+                                            <a class="filename" href="/{{file}}" target="_blank">{{filenames[files.index(file)]}}</a>
                                             <a href="../{{file}}" download="{{filenames[files.index(file)]}}"><i class="fas fa-download text-icon"></i></a>
                                             {%if file | checkimage == True%}
                                                 <span class="fileSize text-icon">({{file | filesize}}, {{file | dimensions}})</span>
@@ -125,11 +125,11 @@
                                                 <span class="fileSize text-icon">({{file | filesize}})</span>
                                             {%endif%}
                                         </div>
-                                        <a class="linkImg" target="_blank" href="../{{file}}">
+                                        <a class="linkImg" target="_blank" href="/{{file}}">
                                             {%if thread['spoiler'] == 1%}
-                                                <img loading="lazy" class="thumbnail" src="../{{data['spoilerImage']}}">
+                                                <img loading="lazy" class="thumbnail" src="/{{data['spoilerImage']}}">
                                             {%else%}
-                                                <img loading="lazy" class="thumbnail" src="../{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
+                                                <img loading="lazy" class="thumbnail" src="/{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
                                             {%endif%}
                                         </a>
                                     </div>
@@ -146,9 +146,11 @@
                                             {%if session['filePassword'] == thread['password']%}
                                                 <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete">
                                             {%elif session['group'] and session['group'] <= 3%}
-                                                <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete">
+                                                <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete SDSDF">
                                             {%else%}
-                                                <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="FIX">
+                                                <input type="hidden" name="password">
+                                                <div class="dropdown-link dropdown-submit" onclick="deletePrompt(this)">Delete</div>
+                                                <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete" style="display: none;">
                                             {%endif%}
                                             <hr>  
                                             <div class="dropdown-link" type="submit">Report</div>
@@ -181,7 +183,15 @@
                                                     <div class="dropdown-link" onclick="hidePostThread(this)">Hide post</div>
                                                     <hr>
                                                     <input type="hidden" name="post" value="{{post['number']}}">
-                                                    <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete">
+                                                    {%if session['filePassword'] == post['password']%}
+                                                        <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete">
+                                                    {%elif session['group'] and session['group'] <= 3%}
+                                                        <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete SDSDF">
+                                                    {%else%}
+                                                        <input type="hidden" name="password">
+                                                        <div class="dropdown-link dropdown-submit" onclick="deletePrompt(this)">Delete</div>
+                                                        <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete" style="display: none;">
+                                                    {%endif%}
                                                     <hr>  
                                                     <div class="dropdown-link" type="submit">Report</div>
                                                     <hr>  
@@ -211,19 +221,19 @@
                                         {%for file in files%}
                                             <div class="fileDiv">
                                                 <div class="file-info">
-                                                    <a class="filename" href="../../{{file}}" target="_blank">{{filenames[files.index(file)]}}</a>
-                                                    <a href="../../{{file}}" download="{{filenames[files.index(file)]}}"><i class="fas fa-download text-icon"></i></a>
+                                                    <a class="filename" href="/{{file}}" target="_blank">{{filenames[files.index(file)]}}</a>
+                                                    <a href="/{{file}}" download="{{filenames[files.index(file)]}}"><i class="fas fa-download text-icon"></i></a>
                                                     {%if file | checkimage == True%}
                                                         <span class="fileSize text-icon">({{file | filesize}}, {{file | dimensions}})</span>
                                                     {%else%}
                                                         <span class="fileSize text-icon">({{file | filesize}})</span>
                                                     {%endif%}
                                                 </div>
-                                                <a class="linkImg" target="_blank" href="../../{{file}}">
+                                                <a class="linkImg" target="_blank" href="/{{file}}">
                                                     {%if post['spoiler'] == 1%}
-                                                        <img loading="lazy" class="thumbnail" src="../../{{data['spoilerImage']}}">
+                                                        <img loading="lazy" class="thumbnail" src="/{{data['spoilerImage']}}">
                                                     {%else%}
-                                                        <img loading="lazy" class="thumbnail" src="../../{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
+                                                        <img loading="lazy" class="thumbnail" src="/{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
                                                     {%endif%}
                                                 </a>
                                             </div>

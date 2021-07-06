@@ -398,6 +398,7 @@ body.theme-photon {
 .theme-photon nav {
     font-size: 70%;
     border: 1px solid var(--border-color);
+    box-shadow: -5px 1px 10px rgb(0 0 0 / 20%);
 }
 .theme-photon .innerPost {
     border: 1px solid var(--border-color)

@@ -1,3 +1,4 @@
+@import url("./themes.css");
 @keyframes rainbow {
 	0%,
 	100% {
@@ -57,6 +58,6 @@
     padding: 0 1px;
 }
 .spoiler:hover {
-    color: #ACACAC;
+    color: var(--text-color);
     background: none;
 }
