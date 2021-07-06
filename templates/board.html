@@ -146,7 +146,7 @@
                                             {%if session['filePassword'] == thread['password']%}
                                                 <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete">
                                             {%elif session['group'] and session['group'] <= 3%}
-                                                <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete SDSDF">
+                                                <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete">
                                             {%else%}
                                                 <input type="hidden" name="password">
                                                 <div class="dropdown-link dropdown-submit" onclick="deletePrompt(this)">Delete</div>
@@ -186,7 +186,7 @@
                                                     {%if session['filePassword'] == post['password']%}
                                                         <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete">
                                                     {%elif session['group'] and session['group'] <= 3%}
-                                                        <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete SDSDF">
+                                                        <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete">
                                                     {%else%}
                                                         <input type="hidden" name="password">
                                                         <div class="dropdown-link dropdown-submit" onclick="deletePrompt(this)">Delete</div>
