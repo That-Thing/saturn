@@ -67,8 +67,6 @@ app.config['MYSQL_DB'] = databaseConfig["name"]
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 mysql = MySQL(app)
 
-
-
 #global settings
 def reloadSettings():
     with open('./config/config.json') as configFile: #global config file
