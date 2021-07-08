@@ -173,3 +173,8 @@ function deletePrompt(post) {
   children['password'].value = password;
   children['delete'].click();
 }
+
+//paste support
+document.getElementById("authorForm").addEventListener('paste', e => {
+  document.getElementById("file-input").files = e.clipboardData.files;
+});

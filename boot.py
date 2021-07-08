@@ -204,6 +204,10 @@ def checkTrip(name, role): #check if tripcode password is included and hash it i
             return password[:int(globalSettings["tripLength"])]
     else: 
         return False
+
+def checkGroup():
+    if 'group' not in session:
+        session['group'] = 99
 #filters
 
 
@@ -292,17 +296,17 @@ def page_not_found(e):
 
 
 
-
-
 #index
 @app.route('/', methods=['GET'])
 def index():
+    checkGroup()
     globalSettings = reloadSettings()
     return render_template('index.html', data=globalSettings, currentTheme=request.cookies.get('theme'), total=getTotal(), lastHour=lastHour(), themes=themes)
 
 #boards
 @app.route('/boards', methods=['GET'])
 def boards():
+    checkGroup()
     globalSettings = reloadSettings()
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("SELECT * FROM boards")
@@ -312,17 +316,20 @@ def boards():
 #help page
 @app.route('/help', methods=['GET'])
 def help():
+    checkGroup()
     globalSettings = reloadSettings()
     return render_template('help.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 #FAQ page
 @app.route('/faq', methods=['GET'])
 def faq():
+    checkGroup()
     globalSettings = reloadSettings()
     return render_template('faq.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 
 #global settings redirect
 @app.route('/globalsettings', methods=['GET'])
 def siteSettings():
+    checkGroup()
     globalSettings = reloadSettings()
     try:
         if int(session['group']) <= 1:
@@ -335,6 +342,7 @@ def siteSettings():
 #Save global settings
 @app.route('/saveSettings', methods=['POST'])
 def saveSettings():
+    checkGroup()
     globalSettings = reloadSettings()
     if request.method == 'POST':
         try:
@@ -355,6 +363,7 @@ def saveSettings():
 
 @app.route('/accountsettings', methods=['GET'])
 def accountSettings():
+    checkGroup()
     globalSettings = reloadSettings()
     try:
         if session['loggedin'] == True:
@@ -369,6 +378,7 @@ def accountSettings():
         return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)   
 @app.route('/updatePassword', methods=['POST'])
 def updatePassword():
+    checkGroup()
     if request.method == 'POST':
         if session['loggedin'] == True:
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
@@ -400,6 +410,7 @@ def updatePassword():
 
 @app.route('/updateemail', methods=['POST'])
 def updateEmail():
+    checkGroup()
     if request.method == 'POST':
         try:
             if session['loggedin'] == True:
@@ -423,6 +434,7 @@ def updateEmail():
 #board management page
 @app.route('/boardmanagement', methods=['GET'])
 def boardManagement():
+    checkGroup()
     globalSettings = reloadSettings()
     try:
         if int(session['group']) <= 1:
@@ -441,6 +453,7 @@ def boardManagement():
 #Individual board management
 @app.route('/manageboard', methods=['GET'])
 def manageBoard():
+    checkGroup()
     globalSettings = reloadSettings()
     uri = request.args.get('uri', type=str)
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
@@ -461,6 +474,7 @@ def manageBoard():
 #create board
 @app.route('/createboard', methods=['POST'])
 def createBoard():
+    checkGroup()
     globalSettings = reloadSettings()
     if request.method == 'POST':
         try:
@@ -486,6 +500,7 @@ def createBoard():
 #delete board
 @app.route('/deleteboard', methods=['POST'])
 def deleteBoard():
+    checkGroup()
     if request.method == 'POST':
         uri = request.args.get('uri', type=str)
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
@@ -522,6 +537,7 @@ def deleteBoard():
         return render_template('error.html', errorMsg="Request must be POST", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 @app.route('/updateBoard', methods=['POST'])
 def updateBoard():
+    checkGroup()
     if request.method == 'POST':
         uri = request.args.get('uri', type=str)
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
@@ -550,6 +566,7 @@ def updateBoard():
 #upload banner and create sql entry
 @app.route('/uploadbanner', methods=['POST'])
 def uploadBanner():
+    checkGroup()
     globalSettings = reloadSettings()
     uri = request.args.get('uri', type=str)
     if request.method == 'POST':
@@ -578,6 +595,7 @@ def uploadBanner():
         return render_template('error.html', errorMsg="Request must be POST", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)    
 @app.route('/deletebanner', methods=['POST'])
 def deleteBanner():
+    checkGroup()
     globalSettings = reloadSettings()
     uri = request.args.get('uri', type=str)
     name = request.args.get('name', type=str)
@@ -601,6 +619,7 @@ def deleteBanner():
 #Account stuff  Most of it isn't mine lol. 
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
+    checkGroup()
     globalSettings = reloadSettings()
     msg = ''
     if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
@@ -632,6 +651,7 @@ def logout():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    checkGroup()
     globalSettings = reloadSettings()
     if globalSettings['enableRegistration'] == 'on':
         msg = ''
@@ -693,6 +713,7 @@ def getThreads(uri):
 @app.route('/<board>/', methods=['GET'])
 @app.route('/<board>', methods=['GET'])
 def boardPage(board):
+    checkGroup()
     filePass = checkFilePass()
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("SELECT * FROM boards")
@@ -735,6 +756,7 @@ def uploadFile(f, board, filename, spoiler):
 
 @app.route('/newThread', methods=['POST'])
 def newThread():
+    checkGroup()
     filePass = checkFilePass()
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("SELECT * FROM boards")
@@ -848,6 +870,7 @@ def newThread():
 @app.route('/<board>/thread/<thread>', methods=['GET'])
 @app.route('/<board>/thread/<thread>', methods=['GET'])
 def thread(board, thread):
+    checkGroup()
     filePass = checkFilePass()
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("SELECT * FROM posts WHERE board=%s AND number=%s AND type=1", (board, thread))
@@ -873,6 +896,7 @@ def thread(board, thread):
 
 @app.route('/reply', methods=['POST'])
 def reply():
+    checkGroup()
     if request.method == 'POST':
         filePass = checkFilePass()
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
@@ -1004,6 +1028,7 @@ def reply():
 
 @app.route('/<board>/postActions', methods=['POST'])
 def postActions(board):
+    checkGroup()
     if request.method == 'POST':
         if request.form['delete'] == 'Delete': #Post deletion
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
