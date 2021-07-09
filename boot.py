@@ -254,17 +254,24 @@ def fivePosts(thread, board):
             break
     final.reverse()
     return final
-@app.template_filter('checkMarkdown') #checks if post has greentext. 
-def checkMarkdown(text):
-    gtRegex = r"^&gt;.*$"
-    ptRegex = r"^&lt;.*$"
+@app.template_filter('checkMarkdown') #checks if post has markdown. 
+def checkMarkdown(text, thread, board):
+    gtRegex = r"^&gt;$" #greentext regex
+    ptRegex = r"^&lt;.*$" #pinktext regex
+    lbRegex = r"^&gt;&gt;&gt;$" #link board regex
+    lqRegex = r"^&gt;&gt;$" #link post/quote regex
     text = stripHTML(text)
     lines = text.splitlines(True)
     result = ""
     for x in lines:
-        if bool(re.match(gtRegex, x)) == True:
+        if bool(re.match(lbRegex, x[:12])) == True:
+            x = f"<a class='link-board' href='/{x[12:].strip('/')}/'>{x}</a>"
+        elif bool(re.match(lqRegex, x[:8])) == True:
+            number = re.findall(r"^[0-9]*$", x[8:])
+            x = f"<a class='link-quote' href='/{board}/thread/{thread}#{x[8:]}'>{x}</a>"
+        elif bool(re.match(gtRegex, x[:4])) == True:
             x = f"<span class='greentext'>{x}</span>"
-        if bool(re.match(ptRegex, x)):
+        elif bool(re.match(ptRegex, x[:4])):
             x = f"<span class='pinktext'>{x}</span>"
         result = result+x
     return result

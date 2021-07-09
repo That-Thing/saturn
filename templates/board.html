@@ -169,7 +169,7 @@
                                 <span><a class="postNumber" href="thread/{{thread['number']}}#{{thread['number']}}">No.</a><a class="postNumber">{{thread['number']}}</a></span>
                                 <span>[<a class="reply">Reply</a>]</span>
                             </div>
-                            <blockquote class="comment">{{thread['message']}}</blockquote>
+                            <blockquote class="comment">{{thread['message'] | checkMarkdown(thread['number'], board)}}</blockquote>
                         </div>
                         {%set posts = thread['number'] | fivePosts(board)%}
                         {%for post in posts%}
@@ -240,7 +240,7 @@
                                         {%endfor%}
                                         </div>
                                     {%endif%}
-                                    <blockquote class="comment">{{post['message']}}</blockquote>
+                                    <blockquote class="comment">{{post['message'] | checkMarkdown(thread['number'], board)}}</blockquote>
                                     </div>
                                 </div>
                         {%endfor%}
