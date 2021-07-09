@@ -19,6 +19,8 @@
     --post-subject: #b294bb; /*Color of the post subject text*/
     --post-name: #81be84; /*Color of the name attatched to a post*/
     --post-shadow: 3px 5px 10px rgb(0 0 0 / 33%); /*Shadow behind objects like posts*/
+    --marked-post: #1d2226; /*Background of marked post*/
+    --marked-post-border: 1px #2a313742 solid; /*Border of marked post*/
 }
 
 
@@ -58,6 +60,8 @@
     --post-name: #117743; /*Color of the name attatched to a post*/
     --post-shadow: none; /*Shadow behind objects like posts*/
     --header-color: #fca;
+    --marked-post: #f0c0b0; /*Background of marked post*/
+    --marked-post-border: 1px solid #d99f91; /*Border of marked post*/
 }
 body.theme-yotsuba {
     -webkit-animation: none;
@@ -103,6 +107,9 @@ body.theme-yotsuba {
 }
 .theme-yotsuba .dropdown-content {
     border: 1px solid
+}
+.theme-yotsuba .marked-post {
+    border: var(--marked-post-border);
 }
 /*Stuff for the login/register page*/
 .theme-yotsuba .login, .theme-yotsuba .register{
@@ -163,6 +170,8 @@ body.theme-yotsuba {
     --post-name: #117743; /*Color of the name attatched to a post*/
     --post-shadow: none; /*Shadow behind objects like posts*/
     --header-color: #98e;
+    --marked-post: #d6bad0; /*Background of marked post*/
+    --marked-post-border: 1px solid #ba9dbf; /*Border of marked post*/
 }
 body.theme-yotsuba-b {
     -webkit-animation: none;
@@ -193,6 +202,9 @@ body.theme-yotsuba-b {
 .theme-yotsuba-b input, .theme-yotsuba-b textarea, .theme-yotsuba-b select, .theme-yotsuba-b .settings-category input {
     color: #7d7d7d;
     border: 1px solid #aaa;
+}
+.theme-yotsuba-b .marked-post {
+    border: var(--marked-post-border);
 }
 .theme-yotsuba-b .btn {
     background: linear-gradient(to bottom, #F8F8F8, #DCDCDC) no-repeat!important;
@@ -273,6 +285,8 @@ body.theme-yotsuba-b {
     --post-name: #c5c8c6; /*Color of the name attatched to a post*/
     --post-shadow: none; /*Shadow behind objects like posts*/
     --header-color: #1d1f21;
+    --marked-post: rgba(0, 0, 0, .14); /*Background of marked post*/
+    --marked-post-border: 1px solid #111; /*Border of marked post*/
 }
 body.theme-tomorrow {
     -webkit-animation: none;
@@ -389,6 +403,8 @@ body.theme-tomorrow {
     --post-name: #004a99; /*Color of the name attatched to a post*/
     --post-shadow: none; /*Shadow behind objects like posts*/
     --header-color: rgba(221,221,221);
+    --marked-post: #ccc; /*Background of marked post*/
+    --marked-post-border: 1px solid #ccc; /*Border of marked post*/
 }
 body.theme-photon {
     -webkit-animation: none;

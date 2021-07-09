@@ -425,7 +425,10 @@ p {
     text-align: left;
     cursor: pointer;
 }
-
+.marked-post {
+    background: var(--marked-post);
+    border: var(--marked-post-border);
+}
 .floating-menu {
     background-color: var(--nav-color);
     width: 25%;
