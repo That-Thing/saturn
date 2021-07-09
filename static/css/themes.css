@@ -285,7 +285,7 @@ body.theme-yotsuba-b {
     --post-name: #c5c8c6; /*Color of the name attatched to a post*/
     --post-shadow: none; /*Shadow behind objects like posts*/
     --header-color: #1d1f21;
-    --marked-post: rgba(0, 0, 0, .14); /*Background of marked post*/
+    --marked-post: #1d1d21; /*Background of marked post*/
     --marked-post-border: 1px solid #111; /*Border of marked post*/
 }
 body.theme-tomorrow {
