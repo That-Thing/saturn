@@ -260,6 +260,7 @@ def checkMarkdown(text, thread, board):
     ptRegex = r"^&lt;.*$" #pinktext regex
     lbRegex = r"^&gt;&gt;&gt;$" #link board regex
     lqRegex = r"^&gt;&gt;$" #link post/quote regex
+    urlRegex = r"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)"
     text = stripHTML(text)
     lines = text.splitlines(True)
     result = ""
