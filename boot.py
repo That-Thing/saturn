@@ -206,6 +206,12 @@ def checkTrip(name, role): #check if tripcode password is included and hash it i
 def checkGroup():
     if 'group' not in session:
         session['group'] = 99
+
+def get404():
+    path = './static/images/404'
+    image = os.path.join(path, random.choice(os.listdir(path)))
+    return image
+
 #filters
 
 
@@ -295,9 +301,7 @@ def checkRole(role):
 
 @app.errorhandler(404)
 def page_not_found(e):
-    path = './static/images/404'
-    image = os.path.join(path, random.choice(os.listdir(path)))
-    return render_template('404.html', image=image, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
+    return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
 
 
 
@@ -737,9 +741,7 @@ def boardPage(board):
                 return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, captcha=captcha, threads=posts, filePass=filePass, themes=themes)
             else:
                 return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, threads=posts, filePass=filePass, themes=themes)
-    path = './static/images/404'
-    image = os.path.join(path, random.choice(os.listdir(path)))
-    return render_template('404.html', image=image, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
+    return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
 
 #thumbnail generation
 def thumbnail(image, board, filename, ext):
