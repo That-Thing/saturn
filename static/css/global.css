@@ -18,12 +18,11 @@ nav {
     padding-bottom: 15px;
     background-color: var(--nav-color);
     font-size: 80%;
+    display: flex;
 }
 nav span{
-    /*display: inline-block;*/
     text-decoration: none;
     margin: 0 0.2em;
-    float: left;
 }
 nav a{
     margin-left: 5px;
@@ -36,7 +35,12 @@ nav a{
     color: var(--link-hover);
 }
 #nav-secondary {
-    float: right;
+    display: flex;
+    margin-right: 5px;
+    order: 2;
+    margin-left: auto;
+}
+#nav-secondary span {
     margin-right: 5px;
 }
 footer {

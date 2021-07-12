@@ -10,5 +10,7 @@
     "enableRegistration": "on",
     "mimeTypes": "image/jpeg,image/png,image/gif",
     "maxFiles": "3",
-    "tripLength": "10"
+    "tripLength": "10",
+    "pageThreads": "20",
+    "boardPages": "5"
 }

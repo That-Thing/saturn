@@ -23,6 +23,13 @@
                 </select>
             </span>
             <span id="nav-secondary">
+                <span>
+                    [
+                    <a href="#banner"><i class="fas fa-arrow-up"></i></a>
+                    /
+                    <a href="#footer"><i class="fas fa-arrow-down"></i></a>
+                    ]
+                </span>
                 <div class="nav-button" onclick="showHiddenMenu()"><i class="fas fa-eye-slash text-icon"></i><label>Hidden Posts</label></div>
             </span>
         </nav>
@@ -256,7 +263,7 @@
             {%endif%}
             </div>
         </div>
-        <footer>
+        <footer id="footer">
             Any post made by a user is the responsibility of that user.
         </footer>
         <script src="{{ url_for('static', filename='js/themes.js') }}"></script>
