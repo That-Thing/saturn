@@ -732,6 +732,7 @@ def boardPage(board):
     for x in boards:
         if x['uri'] == board:
             posts = bumpOrder(board)
+            postLength = len(posts)
             posts = posts[0:1*int(x['perPage'])]
             path = os.path.join(globalSettings['bannerLocation'], board)
             if len(os.listdir(path)) > 0:
@@ -740,9 +741,9 @@ def boardPage(board):
                 banner = "static/banners/defaultbanner.png"
             if x['captcha'] == 1:
                 captcha = generateCaptcha(5)
-                return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, captcha=captcha, threads=posts, filePass=filePass, themes=themes)
+                return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, captcha=captcha, threads=posts, filePass=filePass, postLength=postLength, page=1, themes=themes)
             else:
-                return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, threads=posts, filePass=filePass, themes=themes)
+                return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, threads=posts, filePass=filePass, postLength=postLength, page=1, themes=themes)
     return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
 
 #individual pages
@@ -756,8 +757,8 @@ def boardNumPage(board, page):
     for x in boards:
         if x['uri'] == board:
             posts = bumpOrder(board)
+            postLength = len(posts)
             posts = posts[(page-1)*int(x['perPage']):page*int(x['perPage'])]
-            print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
             if posts:
                 path = os.path.join(globalSettings['bannerLocation'], board)
                 if len(os.listdir(path)) > 0:
@@ -766,9 +767,9 @@ def boardNumPage(board, page):
                     banner = "static/banners/defaultbanner.png"
                 if x['captcha'] == 1:
                     captcha = generateCaptcha(5)
-                    return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, captcha=captcha, threads=posts, filePass=filePass, themes=themes)
+                    return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, captcha=captcha, threads=posts, filePass=filePass, postLength=postLength, page=page, themes=themes)
                 else:
-                    return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, threads=posts, filePass=filePass, themes=themes)
+                    return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, threads=posts, filePass=filePass, postLength=postLength, page=page, themes=themes)
             else:
                 return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
     return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
