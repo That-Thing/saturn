@@ -282,6 +282,8 @@ def checkMarkdown(text, thread, board):
         elif bool(re.match(lqRegex, x[:8])) == True:
             number = re.findall(r"^[0-9]*$", x[8:])
             x = f"<a class='link-quote' href='/{board}/thread/{thread}#{x[8:]}'>{x}</a>"
+        elif bool(re.match(urlRegex, x)) == True:
+            x = f"<a href='{x}' target='_blank'>{x}</a>"
         elif bool(re.match(gtRegex, x[:4])) == True:
             x = f"<span class='greentext'>{x}</span>"
         elif bool(re.match(ptRegex, x[:4])):
