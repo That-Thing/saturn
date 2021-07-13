@@ -109,6 +109,8 @@ function formatText() {
       var text = posts[i].textContent;
       posts[i].innerHTML=textParser.bbcodeToHtml(text);
     }
+    var boardMessage = document.getElementById("board-message-content");
+    boardMessage.innerHTML=textParser.bbcodeToHtml(boardMessage.textContent);
 };
 formatText();
 
