@@ -84,8 +84,7 @@ def reloadSettings():
         maxFiles = int(configData["maxFiles"]),
         spoilerImage =  reloadData["spoilerImage"],
         tripLength = reloadData["tripLength"],
-        pageThreads = reloadData["pageThreads"],
-        boardPages = reloadData["boardPages"]
+        pageThreads = reloadData["pageThreads"]
     )
     return globalSettings
 globalSettings = reloadSettings()
@@ -497,7 +496,7 @@ def createBoard():
                 if board:
                     return redirect(url_for('boardManagement', msg="Board already exists"))
                 else:    
-                    cursor.execute("INSERT INTO boards VALUES (%s, %s, %s, %s, 'Anonymous', '', 0, 0, 0, 0, %s, %s)",(request.form['uri'].lower(), request.form['name'], request.form['description'], session['username'], globalSettings['pageThreads'], globalSettings['boardPages'])) #create the board in the MySQL database
+                    cursor.execute("INSERT INTO boards VALUES (%s, %s, %s, %s, 'Anonymous', '', 0, 0, 0, 0, %s)",(request.form['uri'].lower(), request.form['name'], request.form['description'], session['username'], globalSettings['pageThreads'])) #create the board in the MySQL database
                     mysql.connection.commit()
                     path = os.path.join(globalSettings['bannerLocation'], request.form['uri']) #make folder for banner. 
                     os.mkdir(path) 
@@ -564,9 +563,7 @@ def updateBoard():
                 message = request.form['message']
                 captcha = request.form['captcha']
                 perPage = request.form['perPage']
-                print(perPage)
-                pages = request.form['pages']
-                cursor.execute("UPDATE boards SET name=%s, description=%s, anonymous=%s, message=%s, captcha=%s, perPage=%s, pages=%s WHERE uri=%s", (name, desc, anonymous, message, captcha, perPage, pages, uri))
+                cursor.execute("UPDATE boards SET name=%s, description=%s, anonymous=%s, message=%s, captcha=%s, perPage=%s WHERE uri=%s", (name, desc, anonymous, message, captcha, perPage, uri))
                 mysql.connection.commit()
                 return redirect(url_for('manageBoard', uri=uri))
             else:
@@ -735,6 +732,7 @@ def boardPage(board):
     for x in boards:
         if x['uri'] == board:
             posts = bumpOrder(board)
+            posts = posts[0:1*int(x['perPage'])]
             path = os.path.join(globalSettings['bannerLocation'], board)
             if len(os.listdir(path)) > 0:
                 banner = os.path.join(path, random.choice(os.listdir(path)))
@@ -746,6 +744,35 @@ def boardPage(board):
             else:
                 return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, threads=posts, filePass=filePass, themes=themes)
     return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
+
+#individual pages
+@app.route('/<board>/<int:page>', methods=['GET'])
+def boardNumPage(board, page):
+    checkGroup()
+    filePass = checkFilePass()
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute('''SELECT * FROM boards''')
+    boards = cursor.fetchall()
+    for x in boards:
+        if x['uri'] == board:
+            posts = bumpOrder(board)
+            posts = posts[(page-1)*int(x['perPage']):page*int(x['perPage'])]
+            print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
+            if posts:
+                path = os.path.join(globalSettings['bannerLocation'], board)
+                if len(os.listdir(path)) > 0:
+                    banner = os.path.join(path, random.choice(os.listdir(path)))
+                else:
+                    banner = "static/banners/defaultbanner.png"
+                if x['captcha'] == 1:
+                    captcha = generateCaptcha(5)
+                    return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, captcha=captcha, threads=posts, filePass=filePass, themes=themes)
+                else:
+                    return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, threads=posts, filePass=filePass, themes=themes)
+            else:
+                return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
+    return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
+
 
 #thumbnail generation
 def thumbnail(image, board, filename, ext):
