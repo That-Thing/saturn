@@ -91,7 +91,6 @@ var BBCodeHTML = function() {
     // me.addFormat('[color=COLOR]{TEXT}[/color]', '<span style="{COLOR}">{TEXT}</span>'); //colored text
     // me.addFormat('[highlight={COLOR}]{TEXT}[/highlight]', '<span style="background-color:{COLOR}">{TEXT}</span>'); //highlighted text
     me.addFormat('[spoiler]{TEXT}[/spoiler]', '<span class="spoiler">{TEXT}</span>'); //spoiler
-    me.addFormat('[code]{TEXT}[/code]', '<code>{TEXT}</code>'); //code
     me.addFormat('*{TEXT}*', '<em>{TEXT}</em>'); //alternative italics
     me.addFormat('**{TEXT}**', '<strong>{TEXT}</strong>'); //alternative bold
     me.addFormat('__{TEXT}__', '<u>{TEXT}</u>'); //alternative underline
