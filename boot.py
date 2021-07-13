@@ -83,7 +83,9 @@ def reloadSettings():
         mimeTypes = reloadData["mimeTypes"],
         maxFiles = int(configData["maxFiles"]),
         spoilerImage =  reloadData["spoilerImage"],
-        tripLength = reloadData["tripLength"]
+        tripLength = reloadData["tripLength"],
+        pageThreads = reloadData["pageThreads"],
+        boardPages = reloadData["boardPages"]
     )
     return globalSettings
 globalSettings = reloadSettings()
@@ -495,7 +497,7 @@ def createBoard():
                 if board:
                     return redirect(url_for('boardManagement', msg="Board already exists"))
                 else:    
-                    cursor.execute("INSERT INTO boards VALUES (%s, %s, %s, %s, 'Anonymous', '', 0, 0, 0, 0)",(request.form['uri'].lower(), request.form['name'], request.form['description'], session['username'])) #create the board in the MySQL database
+                    cursor.execute("INSERT INTO boards VALUES (%s, %s, %s, %s, 'Anonymous', '', 0, 0, 0, 0, %s, %s)",(request.form['uri'].lower(), request.form['name'], request.form['description'], session['username'], globalSettings['pageThreads'], globalSettings['boardPages'])) #create the board in the MySQL database
                     mysql.connection.commit()
                     path = os.path.join(globalSettings['bannerLocation'], request.form['uri']) #make folder for banner. 
                     os.mkdir(path) 
@@ -556,13 +558,15 @@ def updateBoard():
         boardData = boardData[0]
         try:
             if boardData['owner'] == session['username'] or int(session['group']) <= 1:
-
                 name = request.form['name']
                 desc = request.form['description']
                 anonymous = request.form['anonymous']
                 message = request.form['message']
                 captcha = request.form['captcha']
-                cursor.execute("UPDATE boards SET name=%s, description=%s, anonymous=%s, message=%s, captcha=%s WHERE uri=%s", (name, desc, anonymous, message, captcha, uri))
+                perPage = request.form['perPage']
+                print(perPage)
+                pages = request.form['pages']
+                cursor.execute("UPDATE boards SET name=%s, description=%s, anonymous=%s, message=%s, captcha=%s, perPage=%s, pages=%s WHERE uri=%s", (name, desc, anonymous, message, captcha, perPage, pages, uri))
                 mysql.connection.commit()
                 return redirect(url_for('manageBoard', uri=uri))
             else:
@@ -570,7 +574,7 @@ def updateBoard():
         except Exception as e:
             print(e)
     else:
-        return render_template('error.html', errorMsg="Request must be POST", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)   
+        return "Request must be POST"
 #banner management
 
 #upload banner and create sql entry
