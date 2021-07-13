@@ -563,6 +563,8 @@ def updateBoard():
                 message = request.form['message']
                 captcha = request.form['captcha']
                 perPage = request.form['perPage']
+                if perPage > globalSettings['pageThreads']:
+                    perPage = globalSettings['pageThreads']
                 cursor.execute("UPDATE boards SET name=%s, description=%s, anonymous=%s, message=%s, captcha=%s, perPage=%s WHERE uri=%s", (name, desc, anonymous, message, captcha, perPage, uri))
                 mysql.connection.commit()
                 return redirect(url_for('manageBoard', uri=uri))
