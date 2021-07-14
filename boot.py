@@ -1083,7 +1083,6 @@ def postActions(board):
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
             cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (int(request.form['post']), board))
             post = cursor.fetchone()
-            print()
             if post['password'] == session['filePassword'] or session['group'] < 3 or post['password'] == request.form['password']:
                 if post['files'] != None: #delete files from disk
                     files = post['files'].split(',')

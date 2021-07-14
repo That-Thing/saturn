@@ -21,7 +21,7 @@
             </span>
         </nav>
         <div class="box alligned">
-            <h2 class="box-header">/{{sqlData['uri']}}/ - {{sqlData['name']}}</h2>
+            <h2 class="box-header"><a href="/{{sqlData['uri']}}/">/{{sqlData['uri']}}/ - {{sqlData['name']}}</a></h2>
             <hr>
             <h3 class="center">Board deletion</h3>
             <form class="center" action="/deleteboard?uri={{sqlData['uri']}}" method="POST">
@@ -72,8 +72,10 @@
                 </form>
             </div>
             <hr>
+        </div>
+        <div class="box">
+            <h2 class="box-header">Banners</h2>
             <div id="bannerManagement">
-                <h3 class="center">Banners</h3>
                 <h4 class="center">Upload banners</h4>
                 <div id="drop-area">
                     <form class="my-form">
