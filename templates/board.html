@@ -174,10 +174,18 @@
                                         <span class="name">{{thread['name']}}##<span class="{{thread['trip']}}">{{thread['trip']}}</span></a>
                                     {%endif%}
                                 {%else%}
-                                    {%if thread['options'] | length > 0%}
-                                        <a class="name optionsName" href="mailto:{{thread['options']}}" target="_blank">{{thread['name']}}</a>
+                                    {%if thread['trip'] != None%}
+                                        {%if thread['options'] | length > 0%}
+                                            <a class="name optionsName" href="mailto:{{thread['options']}}" target="_blank">{{thread['name']}}##{{thread['trip']}}</a>
+                                        {%else%}
+                                            <span class="name">{{thread['name']}}##{{thread['trip']}}</span>
+                                        {%endif%}
                                     {%else%}
-                                        <span class="name">{{thread['name']}}</span>
+                                        {%if thread['options'] | length > 0%}
+                                            <a class="name optionsName" href="mailto:{{thread['options']}}" target="_blank">{{thread['name']}}</a>
+                                        {%else%}
+                                            <span class="name">{{thread['name']}}</span>
+                                        {%endif%}
                                     {%endif%}
                                 {%endif%}
                                 <span>{{thread['date'] | ut}}</span>
@@ -222,19 +230,24 @@
                                             {%else%}
                                                 <span class="name">{{post['name']}}##<span class="{{post['trip']}}">{{post['trip']}}</span></a>
                                             {%endif%}
-                                            <span>{{post['date'] | ut}}</span>
-                                            <span><a class="postNumber" href="thread/{{thread['number']}}#{{post['number']}}">No.</a><a class="postNumber">{{post['number']}}</a></span>
-                                            <span>[<a class="reply">Reply</a>]</span>
                                         {%else%}
-                                            {%if post['options'] | length > 0%}
-                                                <a class="name optionsName" href="mailto:{{post['options']}}" target="_blank">{{post['name']}}</a>
+                                            {%if post['trip'] != None%}
+                                                {%if post['options'] | length > 0%}
+                                                    <a class="name optionsName" href="mailto:{{post['options']}}" target="_blank">{{post['name']}}##{{post['trip']}}</a>
+                                                {%else%}
+                                                    <span class="name">{{post['name']}}##{{post['trip']}}</span>
+                                                {%endif%}
                                             {%else%}
-                                                <span class="name">{{post['name']}}</span>
+                                                {%if post['options'] | length > 0%}
+                                                    <a class="name optionsName" href="mailto:{{post['options']}}" target="_blank">{{post['name']}}</a>
+                                                {%else%}
+                                                    <span class="name">{{post['name']}}</span>
+                                                {%endif%}
                                             {%endif%}
-                                            <span>{{post['date'] | ut}}</span>
-                                            <span><a class="postNumber" href="thread/{{thread['number']}}#{{post['number']}}">No.</a><a class="postNumber">{{post['number']}}</a></span>
-                                            <span>[<a class="reply">Reply</a>]</span>
                                         {%endif%}
+                                        <span>{{post['date'] | ut}}</span>
+                                        <span><a class="postNumber" href="thread/{{thread['number']}}#{{post['number']}}">No.</a><a class="postNumber">{{post['number']}}</a></span>
+                                        <span>[<a class="reply">Reply</a>]</span>
                                     </div>
                                     {%if post['files'] != None%}
                                         {%set files = post['files'].split(',')%}
