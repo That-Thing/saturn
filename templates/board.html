@@ -167,10 +167,18 @@
                                     </form>
                                 </span>
                                 <span class="subject">{{thread['subject']}}</span>
-                                {%if thread['options'] | length > 0%}
-                                    <a class="name optionsName" href="mailto:{{thread['options']}}" target="_blank">{{thread['name']}}</a>
+                                {%if thread['trip']|hasSignature == True%}
+                                    {%if thread['options'] | length > 0%}
+                                        <a class="name optionsName" href="mailto:{{thread['options']}}" target="_blank">{{thread['name']}}##<span class="{{thread['trip']}}">{{thread['trip']}}</span></a>
+                                    {%else%}
+                                        <span class="name">{{thread['name']}}##<span class="{{thread['trip']}}">{{thread['trip']}}</span></a>
+                                    {%endif%}
                                 {%else%}
-                                    <span class="name">{{thread['name']}}</span>
+                                    {%if thread['options'] | length > 0%}
+                                        <a class="name optionsName" href="mailto:{{thread['options']}}" target="_blank">{{thread['name']}}</a>
+                                    {%else%}
+                                        <span class="name">{{thread['name']}}</span>
+                                    {%endif%}
                                 {%endif%}
                                 <span>{{thread['date'] | ut}}</span>
                                 <span><a class="postNumber" href="thread/{{thread['number']}}#{{thread['number']}}">No.</a><a class="postNumber">{{thread['number']}}</a></span>
@@ -208,14 +216,25 @@
                                         </span>
                                         <input type="checkbox" name="{{post['number']}}-{{board}}">
                                         <span class="subject">{{post['subject']}}</span>
-                                        {%if post['options'] | length > 0%}
-                                            <a class="name optionsName" href="mailto:{{post['options']}}" target="_blank">{{post['name']}}</a>
+                                        {%if post['trip']|hasSignature == True%}
+                                            {%if post['options'] | length > 0%}
+                                                <a class="name optionsName" href="mailto:{{post['options']}}" target="_blank">{{post['name']}}##<span class="{{post['trip']}}">{{post['trip']}}</span></a>
+                                            {%else%}
+                                                <span class="name">{{post['name']}}##<span class="{{post['trip']}}">{{post['trip']}}</span></a>
+                                            {%endif%}
+                                            <span>{{post['date'] | ut}}</span>
+                                            <span><a class="postNumber" href="thread/{{thread['number']}}#{{post['number']}}">No.</a><a class="postNumber">{{post['number']}}</a></span>
+                                            <span>[<a class="reply">Reply</a>]</span>
                                         {%else%}
-                                            <span class="name">{{post['name']}}</span>
+                                            {%if post['options'] | length > 0%}
+                                                <a class="name optionsName" href="mailto:{{post['options']}}" target="_blank">{{post['name']}}</a>
+                                            {%else%}
+                                                <span class="name">{{post['name']}}</span>
+                                            {%endif%}
+                                            <span>{{post['date'] | ut}}</span>
+                                            <span><a class="postNumber" href="thread/{{thread['number']}}#{{post['number']}}">No.</a><a class="postNumber">{{post['number']}}</a></span>
+                                            <span>[<a class="reply">Reply</a>]</span>
                                         {%endif%}
-                                        <span>{{post['date'] | ut}}</span>
-                                        <span><a class="postNumber" href="thread/{{thread['number']}}#{{post['number']}}">No.</a><a class="postNumber">{{post['number']}}</a></span>
-                                        <span>[<a class="reply">Reply</a>]</span>
                                     </div>
                                     {%if post['files'] != None%}
                                         {%set files = post['files'].split(',')%}

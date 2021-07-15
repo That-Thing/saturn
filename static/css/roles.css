@@ -1,0 +1,12 @@
+.root {
+	color: rgb(54, 255, 104);
+}
+.administrator {
+	color: rgb(54, 248, 255);
+}
+.moderator {
+	color: rgb(54, 158, 255);
+}
+.janitor {
+	color: rgb(148, 54, 255);
+}
