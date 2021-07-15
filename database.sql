@@ -2,7 +2,7 @@
 -- Host:                         127.0.0.1
 -- Server version:               10.4.11-MariaDB - mariadb.org binary distribution
 -- Server OS:                    Win64
--- HeidiSQL Version:             11.2.0.6213
+-- HeidiSQL Version:             11.3.0.6295
 -- --------------------------------------------------------
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -49,7 +49,8 @@ CREATE TABLE IF NOT EXISTS `boards` (
   `posts` int(250) DEFAULT NULL,
   `PPH` int(250) DEFAULT NULL,
   `users` int(250) DEFAULT NULL,
-  `captcha` tinyint(1) NOT NULL DEFAULT 0
+  `captcha` tinyint(1) NOT NULL DEFAULT 0,
+  `perPage` int(250) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='The list of boards. ';
 
 -- Data exporting was unselected.
@@ -77,7 +78,8 @@ CREATE TABLE IF NOT EXISTS `posts` (
   `filenames` text DEFAULT NULL,
   `ip` tinytext DEFAULT NULL,
   `spoiler` int(11) NOT NULL DEFAULT 0 COMMENT '0 for normal, 1 for spoiler',
-  `password` text NOT NULL
+  `password` text NOT NULL,
+  `trip` text DEFAULT NULL COMMENT 'Tripcode or role signature'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Data exporting was unselected.
