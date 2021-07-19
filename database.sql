@@ -65,21 +65,22 @@ CREATE TABLE IF NOT EXISTS `groups` (
 
 -- Dumping structure for table saturn.posts
 CREATE TABLE IF NOT EXISTS `posts` (
-  `name` tinytext DEFAULT NULL,
-  `subject` tinytext DEFAULT NULL,
-  `options` tinytext DEFAULT NULL,
-  `message` text NOT NULL,
-  `number` int(11) NOT NULL,
+  `name` tinytext DEFAULT NULL COMMENT 'Post name',
+  `subject` tinytext DEFAULT NULL COMMENT 'Post subject',
+  `options` tinytext DEFAULT NULL COMMENT 'Post options',
+  `message` text NOT NULL COMMENT 'Post message content',
+  `number` int(11) NOT NULL COMMENT 'Post number',
   `date` int(11) NOT NULL COMMENT 'Unix Timestamp',
   `type` int(1) NOT NULL COMMENT '1 for thread, 2 for reply',
-  `thread` int(11) DEFAULT NULL,
-  `board` tinytext NOT NULL,
-  `files` text DEFAULT NULL,
-  `filenames` text DEFAULT NULL,
-  `ip` tinytext DEFAULT NULL,
+  `thread` int(11) DEFAULT NULL COMMENT 'Thread tied to a reply',
+  `board` tinytext NOT NULL COMMENT 'Board that the post was made on',
+  `files` text DEFAULT NULL COMMENT 'File paths',
+  `filenames` text DEFAULT NULL COMMENT 'Names of files tied to post',
+  `ip` tinytext DEFAULT NULL COMMENT 'User IP',
   `spoiler` int(11) NOT NULL DEFAULT 0 COMMENT '0 for normal, 1 for spoiler',
-  `password` text NOT NULL,
-  `trip` text DEFAULT NULL COMMENT 'Tripcode or role signature'
+  `password` text NOT NULL COMMENT 'Password for post deletion',
+  `trip` text DEFAULT NULL COMMENT 'Tripcode or role signature',
+  `replies` text DEFAULT NULL COMMENT 'Replies for posts'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Data exporting was unselected.

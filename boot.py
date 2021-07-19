@@ -261,7 +261,7 @@ def fivePosts(thread, board):
             break
     final.reverse()
     return final
-@app.template_filter('checkMarkdown') #checks if post has markdown. 
+@app.template_filter('checkMarkdown') #Handles markdown
 def checkMarkdown(text, thread, board):
     gtRegex = r"^&gt;$" #greentext regex
     ptRegex = r"^&lt;.*$" #pinktext regex
@@ -269,24 +269,24 @@ def checkMarkdown(text, thread, board):
     lqRegex = r"^&gt;&gt;$" #link post/quote regex
     codeSRegex = r"^\[code\]$" #code start regex ([code])
     codeERegex = r"^\[/code\]$" #code end regex ([/code])
-    urlRegex = r"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)"
-    text = stripHTML(text)
+    urlRegex = r"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)" #URL regex
+    text = stripHTML(text) #Turns potentially unsafe text into database-friendly text
     if bool(re.match(codeSRegex, text[:6])) and bool(re.match(codeERegex, text[-7:])): #checks if code tags are present at start and end of string
         text = f"<code>{text[6:-7]}</code>"
         return text
     lines = text.splitlines(True)
     result = ""
     for x in lines:
-        if bool(re.match(lbRegex, x[:12])) == True:
+        if bool(re.match(lbRegex, x[:12])) == True: #checks if a board was linked
             x = f"<a class='link-board' href='/{x[12:].strip('/')}/'>{x}</a>"
-        elif bool(re.match(lqRegex, x[:8])) == True:
+        elif bool(re.match(lqRegex, x[:8])) == True: #checks if another post was linked
             number = re.findall(r"^[0-9]*$", x[8:])
             x = f"<a class='link-quote' href='/{board}/thread/{thread}#{x[8:]}'>{x}</a>"
-        elif bool(re.match(urlRegex, x)) == True:
+        elif bool(re.match(urlRegex, x)) == True: #checks if a URL was entered
             x = f"<a href='{x}' target='_blank'>{x}</a>"
-        elif bool(re.match(gtRegex, x[:4])) == True:
+        elif bool(re.match(gtRegex, x[:4])) == True: #Checks for greentext
             x = f"<span class='greentext'>{x}</span>"
-        elif bool(re.match(ptRegex, x[:4])):
+        elif bool(re.match(ptRegex, x[:4])): #Checks for pinktext
             x = f"<span class='pinktext'>{x}</span>"
         result = result+x
     return result
@@ -871,7 +871,7 @@ def newThread():
                                     return "Incorrect file type submitted"
                             filenames = ','.join([str(x) for x in filenames])
                             filePaths = ','.join([str(x) for x in filePaths])
-                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s, %s, %s, %s, %s)', (name, subject, options, comment, x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode))
+                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s, %s, %s, %s, %s, NULL)', (name, subject, options, comment, x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode))
                         cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (x['posts']+1, x['uri']))
                         cursor.execute("SELECT * FROM server")
                         serverInfo = cursor.fetchone()
@@ -906,7 +906,7 @@ def newThread():
                                 return "Incorrect file type submitted"
                         filenames = ','.join([str(x) for x in filenames])
                         filePaths = ','.join([str(x) for x in filePaths])
-                    cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s, %s, %s, %s, %s)', (name, subject, options, comment, x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode))
+                    cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s, %s, %s, %s, %s, NULL)', (name, subject, options, comment, x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode))
                     cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (x['posts']+1, x['uri']))
                     cursor.execute("SELECT * FROM server")
                     serverInfo = cursor.fetchone()
@@ -1022,9 +1022,9 @@ def reply():
                         filenames = []
                         filePaths = []
                     if len(filePaths) == 0:
-                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s, %s, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(request.remote_addr), spoiler,filePass, tripcode))
+                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s, %s, %s, %s, NULL)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(request.remote_addr), spoiler,filePass, tripcode))
                     else:
-                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode))
+                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s, %s, %s, NULL)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode))
                     cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (board['posts']+1, board['uri']))
                     cursor.execute("SELECT * FROM server")
                     serverInfo = cursor.fetchone()
@@ -1065,9 +1065,9 @@ def reply():
                 filenames = []
                 filePaths = []
             if len(filePaths) == 0:
-                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s, %s, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(request.remote_addr), spoiler,filePass,tripcode))
+                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s, %s, %s, %s, NULL)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(request.remote_addr), spoiler,filePass,tripcode))
             else:
-                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s, %s, %s)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass,tripcode))
+                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s, %s, %s, NULL)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass,tripcode))
             cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (board['posts']+1, board['uri']))
             cursor.execute("SELECT * FROM server")
             serverInfo = cursor.fetchone()
