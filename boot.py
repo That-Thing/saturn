@@ -835,6 +835,7 @@ def newThread():
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("SELECT * FROM boards")
     boards = cursor.fetchall()
+    tripcode = None
     for x in boards:
         if x['uri'] == request.form['board']:
             mimeTypes = globalSettings['mimeTypes'].split(',')
@@ -847,7 +848,7 @@ def newThread():
                 if tripcode != False:
                     name = name.split("##",1)[0]
                 else:
-                    tripcode = "NULL"
+                    tripcode = None
             else:
                 name = x['anonymous']
             if 'subject' in request.form and len(request.form['subject']) > 0:
@@ -980,11 +981,10 @@ def reply():
         posts = cursor.fetchall()
         cursor.execute("SELECT * FROM boards where uri=%s", [request.form['board']])
         board = cursor.fetchone()
-        number = board['posts']+1
+        
         mimeTypes = globalSettings['mimeTypes'].split(',')
         curTime = time.time()
-
-        tripcode = "NULL"
+        tripcode = None
         if "name" in request.form and len(request.form['name']) > 0: #checks if the request has a name, if not, the name gets set to the board default anonymous name
             name = request.form['name']
             name = stripHTML(name)
@@ -993,7 +993,7 @@ def reply():
             if tripcode != False:
                 name = name.split("##",1)[0]
             else:
-                tripcode = "NULL"
+                tripcode = None
         else:
             name = board['anonymous']
         if 'subject' in request.form and len(request.form['subject']) > 0: #Checks if the request has a subject
@@ -1020,6 +1020,7 @@ def reply():
         comment = stripHTML(comment)
         postLink = checkPostLink(comment)
         print(postLink)
+        number = board['posts']+1
         if board['captcha'] == 1: #separate thing if captcha is enabled
             if 'comment' in request.form and 'captcha' in request.form:
                 if session['captcha'] == request.form['captcha']:
@@ -1078,7 +1079,7 @@ def reply():
                                     print(currentReplies)
                                     currentReplies = ",".join(currentReplies)
                                     cursor.execute("UPDATE posts SET replies = %s WHERE number = %s", (currentReplies, x))
-                        cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (number, board['uri']))
+                    cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (number, board['uri']))
                     cursor.execute("SELECT * FROM server")
                     serverInfo = cursor.fetchone()
                     cursor.execute("UPDATE server SET posts=%s", [serverInfo['posts']+1])
@@ -1151,7 +1152,7 @@ def reply():
                             print(currentReplies)
                             currentReplies = ",".join(currentReplies)
                             cursor.execute("UPDATE posts SET replies = %s WHERE number = %s", (currentReplies, x))
-                cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (number, board['uri']))
+            cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (board['posts']+1, board['uri']))
             cursor.execute("SELECT * FROM server")
             serverInfo = cursor.fetchone()
             cursor.execute("UPDATE server SET posts=%s", [serverInfo['posts']+1])
