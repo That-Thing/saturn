@@ -5,7 +5,7 @@
 }
 body {
     color: var(--text-color);
-    background: #1e2327 url(../images/clouds.svg);
+    background: var(--page-background) url(../images/clouds.svg);
     font-family: arial,helvetica,sans-serif;
     font-size: 100%;
     margin: 0px;

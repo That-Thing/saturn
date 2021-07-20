@@ -23,5 +23,10 @@
         "name": "Photon",
         "id": "photon",
         "class": "theme-photon"
+    },
+    "nord": {
+        "name": "Nord",
+        "id": "nord",
+        "class": "theme-nord"
     }
 }

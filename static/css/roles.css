@@ -1,8 +1,17 @@
+
 .root {
-	color: rgb(54, 255, 104);
+    color: #6e6cff;
+    text-shadow: #6e6cff 0px 0px 8px;
 }
 .administrator {
-	color: rgb(54, 248, 255);
+    color: #d46cff;
+    text-shadow: #d46cff 0px 0px 8px;
+}
+.administrator:after {
+	content: ' β';
+	font-size: 150%;
+    color: #6200ff;
+    text-shadow: none;
 }
 .moderator {
 	color: rgb(54, 158, 255);
@@ -10,3 +19,6 @@
 .janitor {
 	color: rgb(148, 54, 255);
 }
+
+
+

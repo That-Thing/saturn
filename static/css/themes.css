@@ -481,3 +481,40 @@ body.theme-photon {
 .theme-photon .dropdown-submit {
     border: none;
 }
+
+/*
+######
+#Nord#
+######
+*/
+
+.theme-nord {
+    --text-color: #ACACAC; /*Text color*/
+    --page-background: #2E3440; /*Background color for the entire page*/
+    --background-2: #3a4253; /*Background color for posts, boxes, etc*/
+    --nav-color: #3b4252f5; /*background color of nav bar*/
+    --border-color: #3a4253; /*color for things such as button borders */
+    --border-2: #434C5E; /*Alternative border color for things such as thread/reply boxes*/
+    --border-radius: 0px; /*Border radius for things like boxes, posts, etc.*/
+    --font-family: arial,helvetica,sans-serif; /*Default font*/
+    --link-color: #536da1; /*Links*/
+    --link-hover: #5e80c5; /*Link hover color*/
+    --input: #4C566A; /*Background for input fields*/
+    --hr: #4C566A; /*divider tags*/
+    --small-text: #767676; /*color of small text*/
+    --button-background: #3a4253;
+    --button-hover: #475165; /*Hover color of buttons*/
+    --button-border: #262b37; /*border for buttons*/
+    --post-subject: #b294bb; /*Color of the post subject text*/
+    --post-name: #536da1; /*Color of the name attatched to a post*/
+    --post-shadow: 3px 5px 10px rgb(0 0 0 / 33%); /*Shadow behind objects like posts*/
+    --marked-post: #1d2226; /*Background of marked post*/
+    --marked-post-border: 1px #2a313742 solid; /*Border of marked post*/
+    --header-color: #4C566A;
+}
+.theme-nord .box-header {
+    background-color: var(--header-color);
+}
+.theme-nord #boardsDiv .board-entry:nth-child(odd) {
+    background-color: #4c566a;
+}
