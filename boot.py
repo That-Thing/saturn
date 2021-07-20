@@ -213,6 +213,16 @@ def get404():
     image = os.path.join(path, random.choice(os.listdir(path)))
     return image
 
+
+#MAKE SURE THIS CHECKS MULTIPLE LINES AS AN ARRAY!!!!!
+def checkPostLink(text): #I know I already have this in the checkMarkdown function, but this is just an easier way of doing it (for me)
+    lines = text.splitlines(True)
+    replies = []#initialize array containting replies
+    for x in lines:
+        if bool(re.match(r"^&gt;&gt;$", x[:8])) == True:
+            replies.append(x[:8])
+        
+    return False
 #filters
 
 
@@ -262,11 +272,11 @@ def fivePosts(thread, board):
     final.reverse()
     return final
 @app.template_filter('checkMarkdown') #Handles markdown
-def checkMarkdown(text, thread, board):
+def checkMarkdown(text, thread, board, post):
     gtRegex = r"^&gt;$" #greentext regex
     ptRegex = r"^&lt;.*$" #pinktext regex
-    lbRegex = r"^&gt;&gt;&gt;$" #link board regex
-    lqRegex = r"^&gt;&gt;$" #link post/quote regex
+    lbRegex = r"^&gt;&gt;&gt;\/(.*?)\/$" #link board regex
+    lqRegex = r"^&gt;&gt;[0-9]+\W?$" #link post/quote regex
     codeSRegex = r"^\[code\]$" #code start regex ([code])
     codeERegex = r"^\[/code\]$" #code end regex ([/code])
     urlRegex = r"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)" #URL regex
@@ -277,14 +287,19 @@ def checkMarkdown(text, thread, board):
     lines = text.splitlines(True)
     result = ""
     for x in lines:
-        if bool(re.match(lbRegex, x[:12])) == True: #checks if a board was linked
-            x = f"<a class='link-board' href='/{x[12:].strip('/')}/'>{x}</a>"
-        elif bool(re.match(lqRegex, x[:8])) == True: #checks if another post was linked
-            number = re.findall(r"^[0-9]*$", x[8:])
-            x = f"<a class='link-quote' href='/{board}/thread/{thread}#{x[8:]}'>{x}</a>"
-        elif bool(re.match(urlRegex, x)) == True: #checks if a URL was entered
-            x = f"<a href='{x}' target='_blank'>{x}</a>"
-        elif bool(re.match(gtRegex, x[:4])) == True: #Checks for greentext
+        words = x.split(" ")
+        newWords = []
+        for word in words:
+            if bool(re.match(lqRegex, word)) == True:
+                number = re.findall(r"^[0-9]*$", word[8:])
+                word = f"<a class='link-quote' href='/{board}/thread/{thread}#{number}'>{word}</a>"
+            elif bool(re.match(lbRegex, word)) == True:
+                word = f"<a class='link-board' href='/{word.strip('&gt;&gt;&gt;').strip('/')}/'>{word}</a>"
+            elif bool(re.match(urlRegex, word)) == True: #checks if a URL was entered
+                word = f"<a href='{word}' target='_blank'>{word}</a>"
+            newWords.append(word) 
+        x = " ".join(newWords)
+        if bool(re.match(gtRegex, x[:4])) == True: #Checks for greentext
             x = f"<span class='greentext'>{x}</span>"
         elif bool(re.match(ptRegex, x[:4])): #Checks for pinktext
             x = f"<span class='pinktext'>{x}</span>"
@@ -964,7 +979,8 @@ def reply():
         board = board[0]
         mimeTypes = globalSettings['mimeTypes'].split(',')
         curTime = time.time()
-        if "name" in request.form and len(request.form['name']) > 0:
+        tripcode = "NULL"
+        if "name" in request.form and len(request.form['name']) > 0: #checks if the request has a name, if not, the name gets set to the board default anonymous name
             name = request.form['name']
             name = stripHTML(name)
             session['name'] = name
@@ -975,29 +991,30 @@ def reply():
                 tripcode = "NULL"
         else:
             name = board['anonymous']
-        if 'subject' in request.form and len(request.form['subject']) > 0:
+        if 'subject' in request.form and len(request.form['subject']) > 0: #Checks if the request has a subject
             subject = request.form['subject']
             subject = stripHTML(subject) #strip any html tags
         else:
             subject = ""
-        if 'options' in request.form and len(request.form['options']) > 0:
+        if 'options' in request.form and len(request.form['options']) > 0: #Checks if there are any options given in the request
             options = request.form['options'] #get options from the form
             options = stripHTML(options) #strip any html tags
             options = options.lower() #lowecase the entered text
         else:
             options = ""
-        if "spoiler" in request.form:
+        if "spoiler" in request.form: #Checks if the request is marked as a spoiler
             if request.form['spoiler'] == "on":
                 spoiler = 1
             else:
                 spoiler = 0
         else:
             spoiler = 0
-        if 'password' in request.form:
+        if 'password' in request.form: #checks if a password is given in the request
             filePass = request.form['password']
         comment = request.form['comment']
         comment = stripHTML(comment)
-        if board['captcha'] == 1:
+        #postLink == checkPostLink(comment) #Checks if the post contains a link to another post. 
+        if board['captcha'] == 1: #separate thing if captcha is enabled
             if 'comment' in request.form and 'captcha' in request.form:
                 if session['captcha'] == request.form['captcha']:
                     if request.files['file'].filename != '':
