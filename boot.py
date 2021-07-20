@@ -258,7 +258,7 @@ def getDimensions(file):
 @app.template_filter('fivePosts') #get last 5 posts in a thread
 def fivePosts(thread, board):
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT * FROM posts WHERE board=%s AND thread=%s", (board, thread))
+    cursor.execute("SELECT * FROM posts WHERE board=%s AND thread=%s AND type=2", (board, thread))
     posts = cursor.fetchall()
     numbers = []
     for post in posts:
@@ -871,6 +871,7 @@ def newThread():
                 spoiler = 0
             comment = request.form['comment']
             comment = stripHTML(comment)
+            postLink = checkPostLink(comment)
             if 'password' in request.form:
                 filePass = request.form['password']
             if x['captcha'] == 1:
@@ -891,7 +892,20 @@ def newThread():
                                     return "Incorrect file type submitted"
                             filenames = ','.join([str(x) for x in filenames])
                             filePaths = ','.join([str(x) for x in filePaths])
-                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s, %s, %s, %s, %s, NULL)', (name, subject, options, comment, x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode))
+                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, %s, %s, %s, %s, %s, %s, %s, %s, NULL)', (name, subject, options, comment, x['posts']+1, curTime, x['posts']+1, x['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode))
+                        if postLink != False:
+                            for x in postLink:
+                                cursor.execute("SELECT * FROM posts WHERE number = %s", [x])
+                                currentReplies = cursor.fetchone()
+                                if currentReplies:
+                                    currentReplies = currentReplies['replies']
+                                    if currentReplies != None:
+                                        currentReplies = currentReplies.split(",")
+                                    else:
+                                        currentReplies = []
+                                    currentReplies.append(f"{str(request.form['thread'])}/{str(number)}")
+                                    currentReplies = ",".join(currentReplies)
+                                    cursor.execute("UPDATE posts SET replies = %s WHERE number = %s", (currentReplies, x))
                         cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (x['posts']+1, x['uri']))
                         cursor.execute("SELECT * FROM server")
                         serverInfo = cursor.fetchone()
@@ -926,7 +940,20 @@ def newThread():
                                 return "Incorrect file type submitted"
                         filenames = ','.join([str(x) for x in filenames])
                         filePaths = ','.join([str(x) for x in filePaths])
-                    cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, NULL, %s, %s, %s, %s, %s, %s, %s, NULL)', (name, subject, options, comment, x['posts']+1, curTime, x['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode))
+                    cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, %s, %s, %s, %s, %s, %s, %s, %s, NULL)', (name, subject, options, comment, x['posts']+1, curTime, x['posts']+1,x['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode))
+                    if postLink != False:
+                        for x in postLink:
+                            cursor.execute("SELECT * FROM posts WHERE number = %s", [x])
+                            currentReplies = cursor.fetchone()
+                            if currentReplies:
+                                currentReplies = currentReplies['replies']
+                                if currentReplies != None:
+                                    currentReplies = currentReplies.split(",")
+                                else:
+                                    currentReplies = []
+                                currentReplies.append(f"{str(request.form['thread'])}/{str(number)}")
+                                currentReplies = ",".join(currentReplies)
+                                cursor.execute("UPDATE posts SET replies = %s WHERE number = %s", (currentReplies, x))
                     cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (x['posts']+1, x['uri']))
                     cursor.execute("SELECT * FROM server")
                     serverInfo = cursor.fetchone()
@@ -952,7 +979,7 @@ def thread(board, thread):
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("SELECT * FROM posts WHERE board=%s AND number=%s AND type=1", (board, thread))
     parentPost = cursor.fetchall()
-    cursor.execute("SELECT * FROM posts WHERE board=%s AND thread=%s", (board, thread))
+    cursor.execute("SELECT * FROM posts WHERE board=%s AND thread=%s and type=2", (board, thread))
     posts = cursor.fetchall()
     cursor.execute("SELECT * FROM boards")
     boards = cursor.fetchall()
@@ -981,7 +1008,6 @@ def reply():
         posts = cursor.fetchall()
         cursor.execute("SELECT * FROM boards where uri=%s", [request.form['board']])
         board = cursor.fetchone()
-        
         mimeTypes = globalSettings['mimeTypes'].split(',')
         curTime = time.time()
         tripcode = None
@@ -1019,7 +1045,6 @@ def reply():
         comment = request.form['comment']
         comment = stripHTML(comment)
         postLink = checkPostLink(comment)
-        print(postLink)
         number = board['posts']+1
         if board['captcha'] == 1: #separate thing if captcha is enabled
             if 'comment' in request.form and 'captcha' in request.form:
@@ -1048,7 +1073,6 @@ def reply():
                     if len(filePaths) == 0:
                         cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s, %s, %s, %s, NULL)', (name, subject, options, comment, number, curTime, request.form['thread'], board['uri'], str(request.remote_addr), spoiler,filePass, tripcode))
                         if postLink != False:
-                            print(postLink)
                             for x in postLink:
                                 cursor.execute("SELECT * FROM posts WHERE number = %s", [x])
                                 currentReplies = cursor.fetchone()
@@ -1058,14 +1082,12 @@ def reply():
                                         currentReplies = currentReplies.split(",")
                                     else:
                                         currentReplies = []
-                                    currentReplies.append(str(number))
-                                    print(currentReplies)
+                                    currentReplies.append(f"{str(request.form['thread'])}/{str(number)}")
                                     currentReplies = ",".join(currentReplies)
                                     cursor.execute("UPDATE posts SET replies = %s WHERE number = %s", (currentReplies, x))
                     else:
                         cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s, %s, %s, NULL)', (name, subject, options, comment, number, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode))
                         if postLink != False:
-                            print(postLink)
                             for x in postLink:
                                 cursor.execute("SELECT * FROM posts WHERE number = %s", [x])
                                 currentReplies = cursor.fetchone()
@@ -1075,8 +1097,7 @@ def reply():
                                         currentReplies = currentReplies.split(",")
                                     else:
                                         currentReplies = []
-                                    currentReplies.append(str(number))
-                                    print(currentReplies)
+                                    currentReplies.append(f"{str(request.form['thread'])}/{str(number)}")
                                     currentReplies = ",".join(currentReplies)
                                     cursor.execute("UPDATE posts SET replies = %s WHERE number = %s", (currentReplies, x))
                     cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (number, board['uri']))
@@ -1121,7 +1142,6 @@ def reply():
             if len(filePaths) == 0:
                 cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s, %s, %s, %s, NULL)', (name, subject, options, comment, number, curTime, request.form['thread'], board['uri'], str(request.remote_addr), spoiler,filePass,tripcode))
                 if postLink != False:
-                    print(postLink)
                     for x in postLink:
                         cursor.execute("SELECT * FROM posts WHERE number = %s", [x])
                         currentReplies = cursor.fetchone()
@@ -1131,14 +1151,12 @@ def reply():
                                 currentReplies = currentReplies.split(",")
                             else:
                                 currentReplies = []
-                            currentReplies.append(str(number))
-                            print(currentReplies)
+                            currentReplies.append(f"{str(request.form['thread'])}/{str(number)}")
                             currentReplies = ",".join(currentReplies)
                             cursor.execute("UPDATE posts SET replies = %s WHERE number = %s", (currentReplies, x))
             else:
                 cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s, %s, %s, NULL)', (name, subject, options, comment, number, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass,tripcode))
                 if postLink != False:
-                    print(postLink)
                     for x in postLink:
                         cursor.execute("SELECT * FROM posts WHERE number = %s", [x])
                         currentReplies = cursor.fetchone()
@@ -1148,8 +1166,7 @@ def reply():
                                 currentReplies = currentReplies.split(",")
                             else:
                                 currentReplies = []
-                            currentReplies.append(str(number))
-                            print(currentReplies)
+                            currentReplies.append(f"{str(request.form['thread'])}/{str(number)}")
                             currentReplies = ",".join(currentReplies)
                             cursor.execute("UPDATE posts SET replies = %s WHERE number = %s", (currentReplies, x))
             cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (board['posts']+1, board['uri']))

@@ -511,6 +511,8 @@ body.theme-photon {
     --marked-post: #1d2226; /*Background of marked post*/
     --marked-post-border: 1px #2a313742 solid; /*Border of marked post*/
     --header-color: #4C566A;
+    --marked-post: #2E3440; /*Background of marked post*/
+    --marked-post-border: 1px solid #3a4253; /*Border of marked post*/
 }
 .theme-nord .box-header {
     background-color: var(--header-color);
