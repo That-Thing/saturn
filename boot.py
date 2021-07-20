@@ -221,7 +221,8 @@ def checkPostLink(text): #I know I already have this in the checkMarkdown functi
         words = x.split(" ")
         for word in words:
             if bool(re.match(r"^&gt;&gt;[0-9]+\W?$", word)) == True:
-                replies.append(word.strip("&gt;&gt;"))
+                number = re.findall(r"[0-9]+", word[8:])
+                replies.append(number[0])
     if len(replies) > 0:
         return replies
     else:
@@ -978,10 +979,11 @@ def reply():
         cursor.execute("SELECT * FROM posts where thread=%s", [request.form['thread']])
         posts = cursor.fetchall()
         cursor.execute("SELECT * FROM boards where uri=%s", [request.form['board']])
-        board = cursor.fetchall()
-        board = board[0]
+        board = cursor.fetchone()
+        number = board['posts']+1
         mimeTypes = globalSettings['mimeTypes'].split(',')
         curTime = time.time()
+
         tripcode = "NULL"
         if "name" in request.form and len(request.form['name']) > 0: #checks if the request has a name, if not, the name gets set to the board default anonymous name
             name = request.form['name']
@@ -1016,7 +1018,8 @@ def reply():
             filePass = request.form['password']
         comment = request.form['comment']
         comment = stripHTML(comment)
-        #postLink == checkPostLink(comment) #Checks if the post contains a link to another post. 
+        postLink = checkPostLink(comment)
+        print(postLink)
         if board['captcha'] == 1: #separate thing if captcha is enabled
             if 'comment' in request.form and 'captcha' in request.form:
                 if session['captcha'] == request.form['captcha']:
@@ -1042,10 +1045,40 @@ def reply():
                         filenames = []
                         filePaths = []
                     if len(filePaths) == 0:
-                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s, %s, %s, %s, NULL)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(request.remote_addr), spoiler,filePass, tripcode))
+                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s, %s, %s, %s, NULL)', (name, subject, options, comment, number, curTime, request.form['thread'], board['uri'], str(request.remote_addr), spoiler,filePass, tripcode))
+                        if postLink != False:
+                            print(postLink)
+                            for x in postLink:
+                                cursor.execute("SELECT * FROM posts WHERE number = %s", [x])
+                                currentReplies = cursor.fetchone()
+                                if currentReplies:
+                                    currentReplies = currentReplies['replies']
+                                    if currentReplies != None:
+                                        currentReplies = currentReplies.split(",")
+                                    else:
+                                        currentReplies = []
+                                    currentReplies.append(str(number))
+                                    print(currentReplies)
+                                    currentReplies = ",".join(currentReplies)
+                                    cursor.execute("UPDATE posts SET replies = %s WHERE number = %s", (currentReplies, x))
                     else:
-                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s, %s, %s, NULL)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode))
-                    cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (board['posts']+1, board['uri']))
+                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s, %s, %s, NULL)', (name, subject, options, comment, number, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode))
+                        if postLink != False:
+                            print(postLink)
+                            for x in postLink:
+                                cursor.execute("SELECT * FROM posts WHERE number = %s", [x])
+                                currentReplies = cursor.fetchone()
+                                if currentReplies:
+                                    currentReplies = currentReplies['replies']
+                                    if currentReplies != None:
+                                        currentReplies = currentReplies.split(",")
+                                    else:
+                                        currentReplies = []
+                                    currentReplies.append(str(number))
+                                    print(currentReplies)
+                                    currentReplies = ",".join(currentReplies)
+                                    cursor.execute("UPDATE posts SET replies = %s WHERE number = %s", (currentReplies, x))
+                        cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (number, board['uri']))
                     cursor.execute("SELECT * FROM server")
                     serverInfo = cursor.fetchone()
                     cursor.execute("UPDATE server SET posts=%s", [serverInfo['posts']+1])
@@ -1054,8 +1087,8 @@ def reply():
                     if ownedPosts == None:
                         ownedPosts = "{}"
                     ownedPosts = json.loads(ownedPosts)
-                    ownedPosts[f"{board['uri']}/{board['posts']+1}"] = filePass
-                    resp = redirect(f"{board['uri']}/thread/{request.form['thread']}#{board['posts']+1}")
+                    ownedPosts[f"{board['uri']}/{number}"] = filePass
+                    resp = redirect(f"{board['uri']}/thread/{request.form['thread']}#{number}")
                     resp.set_cookie('ownedPosts', json.dumps(ownedPosts))
                     return resp
                 else:
@@ -1085,10 +1118,40 @@ def reply():
                 filenames = []
                 filePaths = []
             if len(filePaths) == 0:
-                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s, %s, %s, %s, NULL)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(request.remote_addr), spoiler,filePass,tripcode))
+                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s, %s, %s, %s, NULL)', (name, subject, options, comment, number, curTime, request.form['thread'], board['uri'], str(request.remote_addr), spoiler,filePass,tripcode))
+                if postLink != False:
+                    print(postLink)
+                    for x in postLink:
+                        cursor.execute("SELECT * FROM posts WHERE number = %s", [x])
+                        currentReplies = cursor.fetchone()
+                        if currentReplies:
+                            currentReplies = currentReplies['replies']
+                            if currentReplies != None:
+                                currentReplies = currentReplies.split(",")
+                            else:
+                                currentReplies = []
+                            currentReplies.append(str(number))
+                            print(currentReplies)
+                            currentReplies = ",".join(currentReplies)
+                            cursor.execute("UPDATE posts SET replies = %s WHERE number = %s", (currentReplies, x))
             else:
-                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s, %s, %s, NULL)', (name, subject, options, comment, board['posts']+1, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass,tripcode))
-            cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (board['posts']+1, board['uri']))
+                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s, %s, %s, NULL)', (name, subject, options, comment, number, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass,tripcode))
+                if postLink != False:
+                    print(postLink)
+                    for x in postLink:
+                        cursor.execute("SELECT * FROM posts WHERE number = %s", [x])
+                        currentReplies = cursor.fetchone()
+                        if currentReplies:
+                            currentReplies = currentReplies['replies']
+                            if currentReplies != None:
+                                currentReplies = currentReplies.split(",")
+                            else:
+                                currentReplies = []
+                            currentReplies.append(str(number))
+                            print(currentReplies)
+                            currentReplies = ",".join(currentReplies)
+                            cursor.execute("UPDATE posts SET replies = %s WHERE number = %s", (currentReplies, x))
+                cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (number, board['uri']))
             cursor.execute("SELECT * FROM server")
             serverInfo = cursor.fetchone()
             cursor.execute("UPDATE server SET posts=%s", [serverInfo['posts']+1])
@@ -1097,8 +1160,8 @@ def reply():
             if ownedPosts == None:
                 ownedPosts = "{}"
             ownedPosts = json.loads(ownedPosts)
-            ownedPosts[f"{board['uri']}/{board['posts']+1}"] = filePass
-            resp = redirect(f"{board['uri']}/thread/{request.form['thread']}#{board['posts']+1}")
+            ownedPosts[f"{board['uri']}/{number}"] = filePass
+            resp = redirect(f"{board['uri']}/thread/{request.form['thread']}#{number}")
             resp.set_cookie('ownedPosts', json.dumps(ownedPosts))
             return resp
     else:
