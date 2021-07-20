@@ -214,18 +214,21 @@ def get404():
     return image
 
 
-#MAKE SURE THIS CHECKS MULTIPLE LINES AS AN ARRAY!!!!!
 def checkPostLink(text): #I know I already have this in the checkMarkdown function, but this is just an easier way of doing it (for me)
     lines = text.splitlines(True)
-    replies = []#initialize array containting replies
+    replies = []
     for x in lines:
-        if bool(re.match(r"^&gt;&gt;$", x[:8])) == True:
-            replies.append(x[:8])
-        
-    return False
+        words = x.split(" ")
+        for word in words:
+            if bool(re.match(r"^&gt;&gt;[0-9]+\W?$", word)) == True:
+                replies.append(word.strip("&gt;&gt;"))
+    if len(replies) > 0:
+        return replies
+    else:
+        return False
+
+
 #filters
-
-
 @app.template_filter('ut') #convert unix time to normal datetime
 def normalizetime(timestamp):
     return datetime.utcfromtimestamp(timestamp).strftime('%m/%d/%Y %H:%M:%S')
@@ -291,8 +294,8 @@ def checkMarkdown(text, thread, board, post):
         newWords = []
         for word in words:
             if bool(re.match(lqRegex, word)) == True:
-                number = re.findall(r"^[0-9]*$", word[8:])
-                word = f"<a class='link-quote' href='/{board}/thread/{thread}#{number}'>{word}</a>"
+                number = re.findall(r"[0-9]+", word[8:])
+                word = f"<a class='link-quote' href='/{board}/thread/{thread}#{number[0]}'>{word}</a>"
             elif bool(re.match(lbRegex, word)) == True:
                 word = f"<a class='link-board' href='/{word.strip('&gt;&gt;&gt;').strip('/')}/'>{word}</a>"
             elif bool(re.match(urlRegex, word)) == True: #checks if a URL was entered
