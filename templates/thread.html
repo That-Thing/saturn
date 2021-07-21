@@ -49,7 +49,7 @@
                         </tr>
                         <tr>
                             <td class="author-label">Subject</td>
-                            <td><input class="author-input" tabindex="3" type="text" name="subject" autocomplete="off"><input class="btn" id="post-button" type="submit" value="Post" tabindex="6"></td>
+                            <td><input class="author-input" tabindex="3" type="text" name="subject" autocomplete="off"><input class="btn" id="post-button" type="submit" value="Reply" tabindex="6"></td>
                         </tr>
                         <tr>
                             <td class="author-label">Comment</td>
@@ -110,34 +110,82 @@
                 {%for file in files%}
                         <div class="fileDiv">
                             <div class="file-info">
-                                <a class="filename" href="../../{{file}}" target="_blank">{{filenames[files.index(file)]}}</a>
-                                <a href="../../{{file}}" download="{{filenames[files.index(file)]}}"><i class="fas fa-download text-icon"></i></a>
+                                <a class="filename" href="/{{file}}" target="_blank">{{filenames[files.index(file)]}}</a>
+                                <a href="/{{file}}" download="{{filenames[files.index(file)]}}"><i class="fas fa-download text-icon"></i></a>
                                 {%if file | checkimage == True%}
                                     <span class="fileSize text-icon">({{file | filesize}}, {{file | dimensions}})</span>
                                 {%else%}
                                     <span class="fileSize text-icon">({{file | filesize}})</span>
                                 {%endif%}
                             </div>
-                            <a class="linkImg" target="_blank" href="../../{{file}}">
+                            <a class="linkImg" target="_blank" href="/{{file}}">
                                 {%if op['spoiler'] == 1%}
-                                    <img loading="lazy" class="thumbnail" src="../../{{data['spoilerImage']}}">
+                                    <img loading="lazy" class="thumbnail" src="/{{data['spoilerImage']}}">
                                 {%else%}
-                                    <img loading="lazy" class="thumbnail" src="../../{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
+                                    <img loading="lazy" class="thumbnail" src="/{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
                                 {%endif%}
                             </a>
                         </div>
                 {%endfor%}
                 </div>
                 <div class="postInfo">
+                    <span class="post-dropdown">
+                        <span class="dropdown-button dropdown-button-marker" onclick="dropdownFunction(this)"><i class="fas fa-caret-right dropdown-button-marker"></i></span>
+                        <form action="/{{board}}/postActions" method="POST">
+                            <div class="dropdown-content">
+                                <div class="dropdown-link" onclick="hidePostThread(this)">Hide post</div>
+                                <hr>
+                                <input type="hidden" name="post" value="{{op['number']}}">
+                                {%if session['filePassword'] == op['password']%}
+                                    <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete">
+                                {%elif session['group'] is defined and session['group'] <= 3%}
+                                    <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete">
+                                {%else%}
+                                    <input type="hidden" name="password">
+                                    <div class="dropdown-link dropdown-submit" onclick="deletePrompt(this)">Delete</div>
+                                    <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete" style="display: none;">
+                                {%endif%}
+                                <hr>  
+                                <div class="dropdown-link" type="submit">Report</div>
+                                <hr>  
+                                <div class="dropdown-link" onclick="">Filter</div>
+                            </div>
+                        </form>
+                    </span>
                     <span class="subject">{{op['subject']}}</span>
-                    {%if op['options'] | length > 0%}
-                        <a class="name optionsName" href="mailto:{{op['options']}}" target="_blank">{{op['name']}}</a>
+                    {%if op['trip']|hasSignature == True%}
+                        {%if op['options'] | length > 0%}
+                            <a class="name optionsName" href="mailto:{{op['options']}}" target="_blank">{{op['name']}}##<span class="{{op['trip']}}">{{op['trip']}}</span></a>
+                        {%else%}
+                            <span class="name">{{op['name']}}##<span class="{{op['trip']}}">{{op['trip']}}</span></a>
+                        {%endif%}
                     {%else%}
-                        <span class="name">{{op['name']}}</span>
+                        {%if op['trip'] != None%}
+                            {%if op['options'] | length > 0%}
+                                <a class="name optionsName" href="mailto:{{op['options']}}" target="_blank">{{op['name']}}##{{op['trip']}}</a>
+                            {%else%}
+                                <span class="name">{{op['name']}}##{{op['trip']}}</span>
+                            {%endif%}
+                        {%else%}
+                            {%if op['options'] | length > 0%}
+                                <a class="name optionsName" href="mailto:{{op['options']}}" target="_blank">{{op['name']}}</a>
+                            {%else%}
+                                <span class="name">{{op['name']}}</span>
+                            {%endif%}
+                        {%endif%}
                     {%endif%}
                     <span>{{op['date'] | ut}}</span>
-                    <span><a class="postNumber" href="#{{op['number']}}">No.</a><a class="postNumber">{{op['number']}}</a></span>
+                    <span><a class="postNumber" href="#{{op['number']}}">No.</a><a href="#q{{op['number']}}" class="postNumber">{{op['number']}}</a></span>
                     <span>[<a class="reply">Reply</a>]</span>
+                    {%if op['replies'] != None and op['replies'].split(',')%}
+                        <span>
+                            {%set replies = op['replies'].split(',')%}
+                            {%for reply in replies%}
+                                {%set reply = reply.split("/")%}
+                                <a href="/{{board}}/thread/{{reply[0]}}#{{reply[1]}}">>>{{reply[1]}}</a>
+                            {%endfor%}
+                        </span>
+                    {%endif%}
                 </div>
                 <blockquote class="comment">{{op['message'] | checkMarkdown(op['number'], board, op['number'])}}</blockquote>
             </div>
@@ -145,15 +193,64 @@
                 <div class="replyDiv" id="{{post['number']}}">
                     <div class="innerPost">
                         <div class="postInfo">
+                            <span class="post-dropdown">
+                                <i class="fas fa-caret-right dropdown-button-marker dropdown-button" onclick="dropdownFunction(this)"></i>
+                                <form action="/{{board}}/postActions" method="POST">
+                                    <div class="dropdown-content">
+                                        <div class="dropdown-link" onclick="hidePostop(this)">Hide post</div>
+                                        <hr>
+                                        <input type="hidden" name="post" value="{{post['number']}}">
+                                        {%if session['filePassword'] == post['password']%}
+                                            <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete">
+                                        {%elif session['group'] is defined and session['group'] <= 3%}
+                                            <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete">
+                                        {%else%}
+                                            <input type="hidden" name="password">
+                                            <div class="dropdown-link dropdown-submit" onclick="deletePrompt(this)">Delete</div>
+                                            <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete" style="display: none;">
+                                        {%endif%}
+                                        <hr>  
+                                        <div class="dropdown-link" type="submit">Report</div>
+                                        <hr>  
+                                        <div class="dropdown-link" onclick="">Filter</div>
+                                    </div>
+                                </form>
+                            </span>
+                            <input type="checkbox" name="{{post['number']}}-{{board}}">
                             <span class="subject">{{post['subject']}}</span>
-                            {%if post['options'] | length > 0%}
-                                <a class="name optionsName" href="mailto:{{post['options']}}" target="_blank">{{post['name']}}</a>
+                            {%if post['trip']|hasSignature == True%}
+                                {%if post['options'] | length > 0%}
+                                    <a class="name optionsName" href="mailto:{{post['options']}}" target="_blank">{{post['name']}}##<span class="{{post['trip']}}">{{post['trip']}}</span></a>
+                                {%else%}
+                                    <span class="name">{{post['name']}}##<span class="{{post['trip']}}">{{post['trip']}}</span></a>
+                                {%endif%}
                             {%else%}
-                                <span class="name">{{post['name']}}</span>
+                                {%if post['trip'] != None%}
+                                    {%if post['options'] | length > 0%}
+                                        <a class="name optionsName" href="mailto:{{post['options']}}" target="_blank">{{post['name']}}##{{post['trip']}}</a>
+                                    {%else%}
+                                        <span class="name">{{post['name']}}##{{post['trip']}}</span>
+                                    {%endif%}
+                                {%else%}
+                                    {%if post['options'] | length > 0%}
+                                        <a class="name optionsName" href="mailto:{{post['options']}}" target="_blank">{{post['name']}}</a>
+                                    {%else%}
+                                        <span class="name">{{post['name']}}</span>
+                                    {%endif%}
+                                {%endif%}
                             {%endif%}
                             <span>{{post['date'] | ut}}</span>
-                            <span><a class="postNumber" href="#{{post['number']}}">No.</a><a class="postNumber">{{post['number']}}</a></span>
+                            <span><a class="postNumber" href="#{{post['number']}}">No.</a><a href="#q{{post['number']}}" class="postNumber">{{post['number']}}</a></span>
                             <span>[<a class="reply">Reply</a>]</span>
+                            {%if post['replies'] != None and post['replies'].split(',')%}
+                                <span>
+                                    {%set replies = post['replies'].split(',')%}
+                                    {%for reply in replies%}
+                                        {%set reply = reply.split("/")%}
+                                        <a href="/{{board}}/op/{{reply[0]}}#{{reply[1]}}">>>{{reply[1]}}</a>
+                                    {%endfor%}
+                                </span>
+                            {%endif%}
                         </div>
                         {%if post['files'] != None%}
                             {%set files = post['files'].split(',')%}
@@ -164,24 +261,24 @@
                                 <div class="uploads">
                             {%endif%}
                             {%for file in files%}
-                                    <div class="fileDiv">
-                                        <div class="file-info">
-                                            <a class="filename" href="../../{{file}}" target="_blank">{{filenames[files.index(file)]}}</a>
-                                            <a href="../../{{file}}" download="{{filenames[files.index(file)]}}"><i class="fas fa-download text-icon"></i></a>
-                                            {%if file | checkimage == True%}
-                                                <span class="fileSize text-icon">({{file | filesize}}, {{file | dimensions}})</span>
-                                            {%else%}
-                                                <span class="fileSize text-icon">({{file | filesize}})</span>
-                                            {%endif%}
-                                        </div>
-                                        <a class="linkImg" target="_blank" href="../../{{file}}">
-                                            {%if post['spoiler'] == 1%}
-                                                <img loading="lazy" class="thumbnail" src="../../{{data['spoilerImage']}}">
-                                            {%else%}
-                                                <img loading="lazy" class="thumbnail" src="../../{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
-                                            {%endif%}
-                                        </a>
+                                <div class="fileDiv">
+                                    <div class="file-info">
+                                        <a class="filename" href="/{{file}}" target="_blank">{{filenames[files.index(file)]}}</a>
+                                        <a href="/{{file}}" download="{{filenames[files.index(file)]}}"><i class="fas fa-download text-icon"></i></a>
+                                        {%if file | checkimage == True%}
+                                            <span class="fileSize text-icon">({{file | filesize}}, {{file | dimensions}})</span>
+                                        {%else%}
+                                            <span class="fileSize text-icon">({{file | filesize}})</span>
+                                        {%endif%}
                                     </div>
+                                    <a class="linkImg" target="_blank" href="/{{file}}">
+                                        {%if post['spoiler'] == 1%}
+                                            <img loading="lazy" class="thumbnail" src="/{{data['spoilerImage']}}">
+                                        {%else%}
+                                            <img loading="lazy" class="thumbnail" src="/{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
+                                        {%endif%}
+                                    </a>
+                                </div>
                             {%endfor%}
                             </div>
                         {%endif%}
@@ -189,6 +286,7 @@
                         </div>
                     </div>
             {%endfor%}
+            </div>
         </div>
         <script src="{{ url_for('static', filename='js/markdown.js') }}"></script>
         <script src="{{ url_for('static', filename='js/posting.js') }}"></script>

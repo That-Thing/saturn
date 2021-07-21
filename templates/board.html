@@ -189,14 +189,14 @@
                                     {%endif%}
                                 {%endif%}
                                 <span>{{thread['date'] | ut}}</span>
-                                <span><a class="postNumber" href="thread/{{thread['number']}}#{{thread['number']}}">No.</a><a class="postNumber">{{thread['number']}}</a></span>
+                                <span><a class="postNumber" href="thread/{{thread['number']}}#{{thread['number']}}">No.</a><a href="thread/{{thread['number']}}#q{{thread['number']}}" class="postNumber">{{thread['number']}}</a></span>
                                 <span>[<a class="reply">Reply</a>]</span>
                                 {%if thread['replies'] != None and thread['replies'].split(',')%}
                                     <span>
                                         {%set replies = thread['replies'].split(',')%}
                                         {%for reply in replies%}
                                             {%set reply = reply.split("/")%}
-                                            <a href="thread/{{reply[0]}}#{{reply[1]}}">>>{{reply[1]}}</a>
+                                            <a href="/{{board}}/thread/{{reply[0]}}#{{reply[1]}}">>>{{reply[1]}}</a>
                                         {%endfor%}
                                     </span>
                                 {%endif%}
@@ -255,14 +255,14 @@
                                             {%endif%}
                                         {%endif%}
                                         <span>{{post['date'] | ut}}</span>
-                                        <span><a class="postNumber" href="thread/{{thread['number']}}#{{post['number']}}">No.</a><a class="postNumber">{{post['number']}}</a></span>
+                                        <span><a class="postNumber" href="thread/{{thread['number']}}#{{post['number']}}">No.</a><a href="thread/{{thread['number']}}#q{{post['number']}}" class="postNumber">{{post['number']}}</a></span>
                                         <span>[<a class="reply">Reply</a>]</span>
                                         {%if post['replies'] != None and post['replies'].split(',')%}
                                             <span>
                                                 {%set replies = post['replies'].split(',')%}
                                                 {%for reply in replies%}
                                                     {%set reply = reply.split("/")%}
-                                                    <a href="thread/{{reply[0]}}#{{reply[1]}}">>>{{reply[1]}}</a>
+                                                    <a href="/{{board}}/thread/{{reply[0]}}#{{reply[1]}}">>>{{reply[1]}}</a>
                                                 {%endfor%}
                                             </span>
                                         {%endif%}
