@@ -759,7 +759,10 @@ def getThreads(uri):
 @app.route('/<board>', methods=['GET'])
 def boardPage(board):
     checkGroup()
-    ownedPosts = json.loads(request.cookies.get('ownedPosts')) #gets posts the current user has made for (you)s
+    if request.cookies.get('ownedPosts') != None:
+        ownedPosts = json.loads(request.cookies.get('ownedPosts')) #gets posts the current user has made for (you)s
+    else:
+        ownedPosts = {}
     filePass = checkFilePass() #gets user's password for files
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("SELECT * FROM boards")
@@ -785,7 +788,10 @@ def boardPage(board):
 @app.route('/<board>/<int:page>', methods=['GET'])
 def boardNumPage(board, page):
     checkGroup()
-    ownedPosts = json.loads(request.cookies.get('ownedPosts'))
+    if request.cookies.get('ownedPosts') != None:
+        ownedPosts = json.loads(request.cookies.get('ownedPosts')) #gets posts the current user has made for (you)s
+    else:
+        ownedPosts = {}
     filePass = checkFilePass()
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute('''SELECT * FROM boards''')
