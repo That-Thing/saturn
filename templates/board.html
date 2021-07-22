@@ -188,6 +188,9 @@
                                         {%endif%}
                                     {%endif%}
                                 {%endif%}
+                                {%if board+"/"+thread["number"]|string in owned%}
+                                    <span class="you">(you)</span>
+                                {%endif%}
                                 <span>{{thread['date'] | ut}}</span>
                                 <span><a class="postNumber" href="thread/{{thread['number']}}#{{thread['number']}}">No.</a><a href="thread/{{thread['number']}}#q{{thread['number']}}" class="postNumber">{{thread['number']}}</a></span>
                                 <span>[<a class="reply">Reply</a>]</span>
@@ -253,6 +256,9 @@
                                                     <span class="name">{{post['name']}}</span>
                                                 {%endif%}
                                             {%endif%}
+                                        {%endif%}
+                                        {%if board+"/"+post["number"]|string in owned%}
+                                            <span class="you">(you)</span>
                                         {%endif%}
                                         <span>{{post['date'] | ut}}</span>
                                         <span><a class="postNumber" href="thread/{{thread['number']}}#{{post['number']}}">No.</a><a href="thread/{{thread['number']}}#q{{post['number']}}" class="postNumber">{{post['number']}}</a></span>

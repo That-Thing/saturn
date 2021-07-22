@@ -759,7 +759,8 @@ def getThreads(uri):
 @app.route('/<board>', methods=['GET'])
 def boardPage(board):
     checkGroup()
-    filePass = checkFilePass()
+    ownedPosts = json.loads(request.cookies.get('ownedPosts')) #gets posts the current user has made for (you)s
+    filePass = checkFilePass() #gets user's password for files
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("SELECT * FROM boards")
     boards = cursor.fetchall()
@@ -775,15 +776,16 @@ def boardPage(board):
                 banner = "static/banners/defaultbanner.png"
             if x['captcha'] == 1:
                 captcha = generateCaptcha(5)
-                return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, captcha=captcha, threads=posts, filePass=filePass, postLength=postLength, page=1, themes=themes)
+                return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, captcha=captcha, threads=posts, filePass=filePass, postLength=postLength, owned=ownedPosts, page=1, themes=themes)
             else:
-                return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, threads=posts, filePass=filePass, postLength=postLength, page=1, themes=themes)
+                return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, threads=posts, filePass=filePass, postLength=postLength, owned=ownedPosts, page=1, themes=themes)
     return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
 
 #individual pages
 @app.route('/<board>/<int:page>', methods=['GET'])
 def boardNumPage(board, page):
     checkGroup()
+    ownedPosts = json.loads(request.cookies.get('ownedPosts'))
     filePass = checkFilePass()
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute('''SELECT * FROM boards''')
@@ -801,9 +803,9 @@ def boardNumPage(board, page):
                     banner = "static/banners/defaultbanner.png"
                 if x['captcha'] == 1:
                     captcha = generateCaptcha(5)
-                    return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, captcha=captcha, threads=posts, filePass=filePass, postLength=postLength, page=page, themes=themes)
+                    return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, captcha=captcha, threads=posts, filePass=filePass, postLength=postLength, owned=ownedPosts, page=page, themes=themes)
                 else:
-                    return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, threads=posts, filePass=filePass, postLength=postLength, page=page, themes=themes)
+                    return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, threads=posts, filePass=filePass, postLength=postLength, owned=ownedPosts, page=page, themes=themes)
             else:
                 return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
     return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404

@@ -318,6 +318,9 @@ p {
     color: var(--post-subject);
     font-weight: bold;
 }
+.you {
+    color: var(--link-color);
+}
 .name {
     color: var(--post-name);
     font-weight: bold;
