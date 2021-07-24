@@ -1052,6 +1052,8 @@ def reply():
             filePass = request.form['password']
         comment = request.form['comment']
         comment = stripHTML(comment)
+        print(comment)
+        print(len(comment))
         postLink = checkPostLink(comment)
         number = board['posts']+1
         if board['captcha'] == 1: #separate thing if captcha is enabled
@@ -1074,7 +1076,7 @@ def reply():
                             filenames = ','.join([str(x) for x in filenames])
                             filePaths = ','.join([str(x) for x in filePaths])
                     else:
-                        if 'comment' not in request.form:
+                        if 'comment' not in request.form or len(comment) <= 0 or bool(re.match(r"^\s*$", comment)) == True:
                             return "A file or message is required"
                         filenames = []
                         filePaths = []
@@ -1143,7 +1145,7 @@ def reply():
                     filenames = ','.join([str(x) for x in filenames])
                     filePaths = ','.join([str(x) for x in filePaths])
             else:
-                if 'comment' not in request.form:
+                if 'comment' not in request.form or len(comment) <= 0 or bool(re.match(r"^\s*$", comment)) == True:
                     return "A file or message is required"
                 filenames = []
                 filePaths = []
