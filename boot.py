@@ -1057,7 +1057,7 @@ def reply():
         postLink = checkPostLink(comment)
         number = board['posts']+1
         if board['captcha'] == 1: #separate thing if captcha is enabled
-            if 'comment' in request.form and 'captcha' in request.form:
+            if 'captcha' in request.form:
                 if session['captcha'] == request.form['captcha']:
                     if request.files['file'].filename != '':
                         files = request.files.getlist("file")

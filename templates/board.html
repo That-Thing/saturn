@@ -199,7 +199,7 @@
                                         {%set replies = thread['replies'].split(',')%}
                                         {%for reply in replies%}
                                             {%set reply = reply.split("/")%}
-                                            <a href="/{{board}}/thread/{{reply[0]}}#{{reply[1]}}">>>{{reply[1]}}</a>
+                                            <a href="/{{board}}/thread/{{reply[0]}}#{{reply[1]}}">>>{{reply[1]}}{%if board+"/"+reply[1]|string in owned%}(you){%endif%}</a>
                                         {%endfor%}
                                     </span>
                                 {%endif%}
@@ -268,7 +268,7 @@
                                                 {%set replies = post['replies'].split(',')%}
                                                 {%for reply in replies%}
                                                     {%set reply = reply.split("/")%}
-                                                    <a href="/{{board}}/thread/{{reply[0]}}#{{reply[1]}}">>>{{reply[1]}}</a>
+                                                    <a href="/{{board}}/thread/{{reply[0]}}#{{reply[1]}}">>>{{reply[1]}}{%if board+"/"+reply[1]|string in owned%}(you){%endif%}</a>
                                                 {%endfor%}
                                             </span>
                                         {%endif%}
