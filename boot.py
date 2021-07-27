@@ -1052,8 +1052,6 @@ def reply():
             filePass = request.form['password']
         comment = request.form['comment']
         comment = stripHTML(comment)
-        print(comment)
-        print(len(comment))
         postLink = checkPostLink(comment)
         number = board['posts']+1
         if board['captcha'] == 1: #separate thing if captcha is enabled

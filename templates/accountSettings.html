@@ -23,7 +23,7 @@
         <div id="settings-div" class="box">
             <h2 class="box-header">Account settings Settings</h2>
              <div id="accountSettings" class="settings-category">
-                <h3 style="text-align: center;">Welcome {{session['username']}} [{{session['group'] | checkRole}}]</h3>    
+                <h3 style="text-align: center;">Welcome {{session['username']}} [<span class="{{session['group'] | checkRole}}">{{session['group'] | checkRole}}</span>]</h3>    
                 <div id="serverSettings" class="settings-category">
                     <form action="/updatePassword" method="POST">
                         <hr>

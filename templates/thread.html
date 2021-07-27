@@ -24,7 +24,7 @@
             </span>
         </nav>
         <div id="board-info">
-            <img src="../../{{banner}}" id="banner" alt="banner">
+            <img src="/{{banner}}" id="banner" alt="banner">
             <h1 class="center" id="board-name">/{{board}}/ - {{boardData['name']}}</h1>
             <h4 class="center">{{boardData['description']}}</h4>
         </div>
@@ -53,12 +53,12 @@
                         </tr>
                         <tr>
                             <td class="author-label">Comment</td>
-                            <td><textarea class="author-input" name="comment" cols="48" rows="4" wrap="soft" tabindex="4" style="width: 292px;"></textarea></td>
+                            <td><textarea id="message" class="author-input" name="comment" cols="48" rows="4" wrap="soft" tabindex="4" style="width: 292px;"></textarea></td>
                         </tr>
                         {% if boardData['captcha'] == 1 %}
                             <tr>
                                 <td class="author-label">Verification</td>
-                                <td style="display: grid;"><img src="../../{{captcha}}" tabindex="5" class="captcha"><input class="author-input" tabindex="6" type="text" name="captcha" autocomplete="off" required></td>
+                                <td style="display: grid;"><img src="/{{captcha}}" tabindex="5" class="captcha"><input class="author-input" tabindex="6" type="text" name="captcha" autocomplete="off" required></td>
                                 
                             </tr>
                         {% endif %}
@@ -76,7 +76,7 @@
                         <tr id="rules">
                             <td colspan="2">
                                 <ul id="rules">
-                                    <li class="small">Please read the <a href="../rules">Board Rules</a> and <a href="../../globalRules">Global Rules</a> before posting.</li>
+                                    <li class="small">Please read the <a href="/{{board}}/rules">Board Rules</a> and <a href="/globalRules">Global Rules</a> before posting.</li>
                                 </ul>
                             </td>
                         </tr>
