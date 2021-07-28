@@ -405,8 +405,8 @@ def saveSettings():
         return render_template('error.html', errorMsg="Request must be POST", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 
 #Global Rules page
-@app.route('/globalRules', methods=['GET'])
-def globalRules():
+@app.route('/rules', methods=['GET'])
+def rules():
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("SELECT * FROM rules WHERE type = 0")
     rules = cursor.fetchall()
@@ -421,7 +421,7 @@ def addRule():
                 board = None
             else:
                 board = request.form['board']
-            cursor.execute("INSERT INTO rules VALUES (%s, %s, %s)", (request.form['newRule'], request.form['type'], board))
+            cursor.execute("INSERT INTO rules VALUES (NULL, %s, %s, %s)", (request.form['newRule'], request.form['type'], board))
             mysql.connection.commit()
             if request.form['type'] == "0":
                 return redirect(url_for("siteSettings"))
