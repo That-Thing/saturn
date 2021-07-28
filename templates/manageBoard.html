@@ -104,7 +104,7 @@
         <div class="box">
             <h2 class="box-header">Board Rules</h2>
             <div>
-                <form action="/addRule" method="POST">
+                <form action="{{url_for('addRule')}}" method="POST">
                     <input type="hidden" name="type" value="1">
                     <input type="hidden" name="board" value="{{sqlData['uri']}}">
                     <input type="text" name="newRule" id="newRule" autocomplete="off">
@@ -113,7 +113,7 @@
                 <ol type="1">
                     {%for rule in rules%}
                         <li>
-                            <form action="/deleteRule" method="POST">
+                            <form action="{{url_for('deleteRule')}}" method="POST">
                                 <input type="hidden" name="type" value="1">
                                 <input type="hidden" name="board" value="{{sqlData['uri']}}">
                                 <input type="hidden" name="id" value="{{rule['id']}}">
