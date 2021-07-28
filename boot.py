@@ -415,16 +415,19 @@ def rules():
 @app.route('/addRule', methods=['POST'])
 def addRule():
     if request.method == 'POST':
-        if int(session['group']) <= 1:
-            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            if request.form['board'] == "NULL":
-                board = None
-            else:
-                board = request.form['board']
-            cursor.execute("INSERT INTO rules VALUES (NULL, %s, %s, %s)", (request.form['newRule'], request.form['type'], board))
-            mysql.connection.commit()
-            if request.form['type'] == "0":
-                return redirect(url_for("siteSettings"))
+        if request.form['board'] == "NULL":
+            board = None
+        else:
+            board = request.form['board']
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT * FROM boards WHERE uri = %s", [board])
+        currentBoard = cursor.fetchone()
+        if currentBoard != None or int(session['group']) <= 1: #checks if the board exists or the user has admin+ perms
+            if int(session['group']) <= 1 or currentBoard['owner'] == session['username']: #checks if the user has admin+ perms first
+                cursor.execute("INSERT INTO rules VALUES (NULL, %s, %s, %s)", (request.form['newRule'], request.form['type'], board))
+                mysql.connection.commit()
+                if request.form['type'] == "0":
+                    return redirect(url_for("siteSettings"))
         else: #Add exceptions for board rules. 
             return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)        
     else:
