@@ -596,52 +596,47 @@ def createBoard():
             return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
             print(e)
 #delete board
-@app.route('/deleteboard', methods=['POST'])
-def deleteBoard():
+@app.route('/<board>/delete', methods=['POST'])
+def deleteBoard(board):
     checkGroup()
     if request.method == 'POST':
-        uri = request.args.get('uri', type=str)
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute("SELECT * FROM boards WHERE uri=%s", [uri])
-        boardData = cursor.fetchall()
-        boardData = boardData[0]
-        cursor.execute("SELECT * FROM boards WHERE uri=%s", [uri])
-        sqlData = cursor.fetchall()
-        sqlData = sqlData[0]
+        cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
+        boardData = cursor.fetchone()
+        cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
+        sqlData = cursor.fetchone()
         try:
             if boardData['owner'] == session['username'] or int(session['group']) <= 1:
                 try:
                     if request.form["deleteBoard"] == "on":
-                        cursor.execute("DELETE FROM boards WHERE  uri=%s AND owner=%s LIMIT 1", (uri, session['username']))
-                        cursor.execute("DELETE FROM posts WHERE board=%s", [uri])
+                        cursor.execute("DELETE FROM boards WHERE  uri=%s AND owner=%s LIMIT 1", (board, session['username']))
+                        cursor.execute("DELETE FROM posts WHERE board=%s", [board])
                         mysql.connection.commit()
-                        path = os.path.join(globalSettings['bannerLocation'], uri) #path for banner folder for specific board. 
+                        path = os.path.join(globalSettings['bannerLocation'], board) #path for banner folder for specific board. 
                         os.rmdir(path)#remove banner folder
-                        path = os.path.join(globalSettings['mediaLocation'], uri) #path for banner folder for specific board. 
+                        path = os.path.join(globalSettings['mediaLocation'], board) #path for banner folder for specific board. 
                         for x in os.listdir(path):
                             os.remove(os.path.join(path, x))
                         os.rmdir(path)#remove media sub-folder
-                        return redirect(url_for('boardManagement', msg=uri + " successfully deleted"))
+                        return redirect(url_for('boardManagement', msg=board + " successfully deleted"))
                     else:
-                        return redirect(url_for('manageboard', uri=uri, msg="Please confirm board deletion"))
+                        return redirect(url_for('manageboard', board=board, msg="Please confirm board deletion"))
                 except Exception as e:
                     print(e)
-                    return render_template('manageBoard.html', data=globalSettings, currentTheme=request.cookies.get('theme'), sqlData=sqlData, msg="Please confirm board deletion") #probably could have done better, themes=themes
+                    return render_template('manageBoard.html', data=globalSettings, currentTheme=request.cookies.get('theme'), sqlData=sqlData, themes=themes, msg="Please confirm board deletion") #probably could have done better
             else:
                 return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         except Exception as e:
              print(e)
     else:
         return render_template('error.html', errorMsg="Request must be POST", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-@app.route('/updateBoard', methods=['POST'])
-def updateBoard():
+@app.route('/<board>/update', methods=['POST'])
+def updateBoard(board):
     checkGroup()
     if request.method == 'POST':
-        uri = request.args.get('uri', type=str)
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute("SELECT * FROM boards WHERE uri=%s", [uri])
-        boardData = cursor.fetchall()
-        boardData = boardData[0]
+        cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
+        boardData = cursor.fetchone()
         try:
             if boardData['owner'] == session['username'] or int(session['group']) <= 1:
                 name = request.form['name']
@@ -652,9 +647,9 @@ def updateBoard():
                 perPage = request.form['perPage']
                 if perPage > globalSettings['pageThreads']:
                     perPage = globalSettings['pageThreads']
-                cursor.execute("UPDATE boards SET name=%s, description=%s, anonymous=%s, message=%s, captcha=%s, perPage=%s WHERE uri=%s", (name, desc, anonymous, message, captcha, perPage, uri))
+                cursor.execute("UPDATE boards SET name=%s, description=%s, anonymous=%s, message=%s, captcha=%s, perPage=%s WHERE uri=%s", (name, desc, anonymous, message, captcha, perPage, board))
                 mysql.connection.commit()
-                return redirect(url_for('manageBoard', uri=uri))
+                return redirect(url_for('manageBoard', board=board))
             else:
                 return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         except Exception as e:
@@ -664,57 +659,51 @@ def updateBoard():
 #banner management
 
 #upload banner and create sql entry
-@app.route('/uploadbanner', methods=['POST'])
-def uploadBanner():
+@app.route('/<board>/uploadbanner', methods=['POST'])
+def uploadBanner(board):
     checkGroup()
     globalSettings = reloadSettings()
-    uri = request.args.get('uri', type=str)
     if request.method == 'POST':
         banner = request.files['file']
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute("SELECT * FROM boards WHERE uri=%s", [uri])
-        sqlData = cursor.fetchall()
-        sqlData = sqlData[0]
+        cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
+        sqlData = cursor.fetchone()
         try:
             if sqlData['owner'] == session['username'] or int(session['group']) <= 1:
-                path = os.path.join(globalSettings['bannerLocation'], uri)
+                path = os.path.join(globalSettings['bannerLocation'], board)
                 filename = secure_filename(banner.filename)
                 extention = pathlib.Path(filename).suffix
                 filename = str(time.time())+extention
                 banner.save(os.path.join(path, filename))
                 size = os.path.getsize(os.path.join(path, filename))
-                cursor.execute("INSERT INTO banners VALUES (%s, %s, %s)",(uri, filename, size))
+                cursor.execute("INSERT INTO banners VALUES (%s, %s, %s)",(board, filename, size))
                 mysql.connection.commit()
-                cursor.execute("SELECT * FROM banners WHERE board=%s", [uri])
-                bannerData = cursor.fetchall()
-                return redirect(url_for('manageBoard', uri=uri)) #Find a better solution for this. 
+                return redirect(url_for('manageBoard', board=board)) #Find a better solution for this. 
         except Exception as e:
             print(e)
             return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
     else:
         return render_template('error.html', errorMsg="Request must be POST", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)    
-@app.route('/deletebanner', methods=['POST'])
-def deleteBanner():
+@app.route('/<board>/deletebanner', methods=['POST'])
+def deleteBanner(board):
     checkGroup()
     globalSettings = reloadSettings()
-    uri = request.args.get('uri', type=str)
     name = request.args.get('name', type=str)
     if request.method == 'POST':
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute("SELECT * FROM boards WHERE uri=%s", [uri])
-        sqlData = cursor.fetchall()
-        sqlData = sqlData[0]
+        cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
+        sqlData = cursor.fetchone()
         try:
             if sqlData['owner'] == session['username'] or int(session['group']) <= 1:
                 cursor.execute("DELETE FROM banners WHERE filename=%s LIMIT 1", [name]) 
                 mysql.connection.commit()
-                cursor.execute("SELECT * FROM banners WHERE board=%s", [uri])
+                cursor.execute("SELECT * FROM banners WHERE board=%s", [board])
                 bannerData = cursor.fetchall()
-                path = os.path.join(globalSettings['bannerLocation'], uri)
+                path = os.path.join(globalSettings['bannerLocation'], board)
                 os.remove(os.path.join(path, name))
-                return redirect(url_for('manageBoard', uri=uri)) #Find a better solution for this. 
+                return redirect(url_for('manageBoard', board=board))
         except Exception as e:
-            return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
+            return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
 
 #Account stuff  Most of it isn't mine lol. 
 @app.route('/login/', methods=['GET', 'POST'])

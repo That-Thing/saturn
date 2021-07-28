@@ -125,7 +125,7 @@
                                     <div class="fileDiv">
                                         <div class="file-info">
                                             <a class="filename" href="/{{file}}" target="_blank">{{filenames[files.index(file)]}}</a>
-                                            <a href="../{{file}}" download="{{filenames[files.index(file)]}}"><i class="fas fa-download text-icon"></i></a>
+                                            <a href="/{{file}}" download="{{filenames[files.index(file)]}}"><i class="fas fa-download text-icon"></i></a>
                                             {%if file | checkimage == True%}
                                                 <span class="fileSize text-icon">({{file | filesize}}, {{file | dimensions}})</span>
                                             {%else%}
