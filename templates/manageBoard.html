@@ -101,6 +101,31 @@
             {% endfor %}
             </div>
         </div>
+        <div class="box">
+            <h2 class="box-header">Board Rules</h2>
+            <div>
+                <form action="/addRule" method="POST">
+                    <input type="hidden" name="type" value="1">
+                    <input type="hidden" name="board" value="{{sqlData['uri']}}">
+                    <input type="text" name="newRule" id="newRule" autocomplete="off">
+                    <input class="btn btn-primary" type="submit" value="Add rule">
+                </form>
+                <ol type="1">
+                    {%for rule in rules%}
+                        <li>
+                            <form action="/deleteRule" method="POST">
+                                <input type="hidden" name="type" value="1">
+                                <input type="hidden" name="board" value="{{sqlData['uri']}}">
+                                <input type="hidden" name="id" value="{{rule['id']}}">
+                                <span>{{rule['content']}}</span>
+                                <input class="btn btn-primary" type="submit" value="Delete rule">
+                            </form>
+                        </li>
+                        <hr>
+                    {%endfor%}
+                </ol>
+            </div>
+        </div>
         <script>
             let dropArea = document.getElementById('drop-area')
             ;['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {

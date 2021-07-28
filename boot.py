@@ -428,6 +428,8 @@ def addRule():
                 mysql.connection.commit()
                 if request.form['type'] == "0":
                     return redirect(url_for("siteSettings"))
+                else:
+                    return redirect(url_for("manageBoard", board=board))
         else:
             return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)        
     else:
@@ -454,6 +456,8 @@ def deleteRule():
                 mysql.connection.commit()
             if request.form['type'] == "0":
                 return redirect(url_for("siteSettings"))
+            else:
+                return redirect(url_for("manageBoard", board=board))
         else:
             return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)        
     else:
@@ -556,6 +560,9 @@ def manageBoard(board):
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
     sqlData = cursor.fetchone()
+    cursor.execute("SELECT * FROM rules WHERE type = 1 and board = %s", [board])
+    rules = cursor.fetchall()
+    print(rules)
     if sqlData == None:
         return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
     msg=""
@@ -563,7 +570,7 @@ def manageBoard(board):
     bannerData = cursor.fetchall()
     try:
         if int(session['group']) <= 1 or sqlData['owner'] == session['username']:
-            return render_template('manageBoard.html', data=globalSettings, currentTheme=request.cookies.get('theme'), sqlData=sqlData, bannerData=bannerData, msg=msg, themes=themes)
+            return render_template('manageBoard.html', data=globalSettings, currentTheme=request.cookies.get('theme'), sqlData=sqlData, bannerData=bannerData, msg=msg, themes=themes, rules=rules)
         else:
             return render_template('error.html', errorMsg="Insufficient permissions", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     except Exception as e:
@@ -618,7 +625,7 @@ def deleteBoard(board):
                         for x in os.listdir(path):
                             os.remove(os.path.join(path, x))
                         os.rmdir(path)#remove media sub-folder
-                        return redirect(url_for('boardManagement', msg=board + " successfully deleted"))
+                        return redirect(url_for('boardManagement'))
                     else:
                         return redirect(url_for('manageboard', board=board, msg="Please confirm board deletion"))
                 except Exception as e:
