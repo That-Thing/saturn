@@ -16,3 +16,8 @@ function checkUrl() {
 }
 checkUrl();
 window.addEventListener("hashchange", checkUrl);
+
+//add reply to textarea
+// function addReply(reply) {
+//     document.getElementById("message").innerHTML = document.getElementById("message").innerHTML + ">>" + "\n"
+// }

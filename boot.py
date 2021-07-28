@@ -369,6 +369,14 @@ def faq():
     globalSettings = reloadSettings()
     return render_template('faq.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 
+#Global Rules page
+@app.route('/globalRules', methods=['GET'])
+def globalRules():
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT * FROM rules WHERE type = 0")
+    rules = cursor.fetchall()
+    return render_template('rules.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes, rules=rules, board="Global")
+
 #global settings redirect
 @app.route('/globalsettings', methods=['GET'])
 def siteSettings():
@@ -983,6 +991,10 @@ def newThread():
 @app.route('/<board>/thread/<thread>', methods=['GET'])
 def thread(board, thread):
     checkGroup()
+    if request.cookies.get('ownedPosts') != None:
+        ownedPosts = json.loads(request.cookies.get('ownedPosts')) #gets posts the current user has made for (you)s
+    else:
+        ownedPosts = {}
     filePass = checkFilePass()
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("SELECT * FROM posts WHERE board=%s AND number=%s AND type=1", (board, thread))
@@ -1000,9 +1012,9 @@ def thread(board, thread):
                 banner = "static/banners/defaultbanner.png"
             if x['captcha'] == 1:
                 captcha = generateCaptcha(5)
-                return render_template('thread.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, captcha=captcha, posts=posts, op=parentPost[0], filePass=filePass, themes=themes)
+                return render_template('thread.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, captcha=captcha, posts=posts, owned=ownedPosts, op=parentPost[0], filePass=filePass, themes=themes)
             else:
-                return render_template('thread.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, posts=posts, op=parentPost[0], filePass=filePass, themes=themes)
+                return render_template('thread.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, posts=posts, op=parentPost[0], owned=ownedPosts, filePass=filePass, themes=themes)
     return render_template('error.html', errorMsg="Board not found", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
 
 

@@ -15,7 +15,7 @@
                 <a href="{{ url_for('index') }}"><i class="fas fa-home text-icon"></i>Home</a>
                 <a href="{{ url_for('boards') }}"><i class="fas fa-stream text-icon"></i>Boards</a>
                 <a href="{{ url_for('help') }}"><i class="fas fa-question text-icon"></i>Help</a>
-                <a href="settings"><i class="fas fa-cog text-icon"></i>Settings</a>
+                <a href="/settings"><i class="fas fa-cog text-icon"></i>Settings</a>
                 <select onchange="changeTheme(this.value, {{themes}})" id="theme-select">
                     {% for theme in themes %}
                         <option id="{{themes[theme]['class']}}" value="{{themes[theme]['id']}}">{{themes[theme]['name']}}</option>
@@ -174,6 +174,9 @@
                             {%endif%}
                         {%endif%}
                     {%endif%}
+                    {%if board+"/"+op["number"]|string in owned%}
+                        <span class="you">(you)</span>
+                    {%endif%}
                     <span>{{op['date'] | ut}}</span>
                     <span><a class="postNumber" href="#{{op['number']}}">No.</a><a href="#q{{op['number']}}" class="postNumber">{{op['number']}}</a></span>
                     <span>[<a class="reply">Reply</a>]</span>
@@ -182,7 +185,7 @@
                             {%set replies = op['replies'].split(',')%}
                             {%for reply in replies%}
                                 {%set reply = reply.split("/")%}
-                                <a href="/{{board}}/thread/{{reply[0]}}#{{reply[1]}}">>>{{reply[1]}}</a>
+                                <a href="/{{board}}/thread/{{reply[0]}}#{{reply[1]}}">>>{{reply[1]}}{%if board+"/"+reply[1]|string in owned%}(you){%endif%}</a>
                             {%endfor%}
                         </span>
                     {%endif%}
@@ -222,7 +225,7 @@
                                 {%if post['options'] | length > 0%}
                                     <a class="name optionsName" href="mailto:{{post['options']}}" target="_blank">{{post['name']}}##<span class="{{post['trip']}}">{{post['trip']}}</span></a>
                                 {%else%}
-                                    <span class="name">{{post['name']}}##<span class="{{post['trip']}}">{{post['trip']}}</span></a>
+                                    <span class="name">{{post['name']}}##<span class="{{post['trip']}}">{{post['trip']}}</span></a></span>
                                 {%endif%}
                             {%else%}
                                 {%if post['trip'] != None%}
@@ -239,6 +242,9 @@
                                     {%endif%}
                                 {%endif%}
                             {%endif%}
+                            {%if board+"/"+post["number"]|string in owned%}
+                                <span class="you">(you)</span>
+                            {%endif%}
                             <span>{{post['date'] | ut}}</span>
                             <span><a class="postNumber" href="#{{post['number']}}">No.</a><a href="#q{{post['number']}}" class="postNumber">{{post['number']}}</a></span>
                             <span>[<a class="reply">Reply</a>]</span>
@@ -247,7 +253,7 @@
                                     {%set replies = post['replies'].split(',')%}
                                     {%for reply in replies%}
                                         {%set reply = reply.split("/")%}
-                                        <a href="/{{board}}/op/{{reply[0]}}#{{reply[1]}}">>>{{reply[1]}}</a>
+                                        <a href="/{{board}}/thread/{{reply[0]}}#{{reply[1]}}">>>{{reply[1]}}{%if board+"/"+reply[1]|string in owned%}(you){%endif%}</a>
                                     {%endfor%}
                                 </span>
                             {%endif%}

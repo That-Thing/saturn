@@ -471,10 +471,10 @@ p {
 }
 
 /*FAQ page*/
-.box-faq {
+.box-readable {
     width: 50%;
 }
-#faq-content {
+.view-content {
     margin-top: 5%;
 }
 .faq-box-content {
