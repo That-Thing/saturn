@@ -369,22 +369,16 @@ def faq():
     globalSettings = reloadSettings()
     return render_template('faq.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 
-#Global Rules page
-@app.route('/globalRules', methods=['GET'])
-def globalRules():
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT * FROM rules WHERE type = 0")
-    rules = cursor.fetchall()
-    return render_template('rules.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes, rules=rules, board="Global")
-
 #global settings redirect
 @app.route('/globalsettings', methods=['GET'])
 def siteSettings():
     checkGroup()
-    globalSettings = reloadSettings()
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT * FROM rules WHERE type = 0")
+    rules = cursor.fetchall()
     try:
         if int(session['group']) <= 1:
-            return render_template('siteSettings.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes, groups=groups)
+            return render_template('siteSettings.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes, groups=groups, rules=rules)
         else:
             return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     except Exception as e:
@@ -410,7 +404,56 @@ def saveSettings():
     else:
         return render_template('error.html', errorMsg="Request must be POST", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 
+#Global Rules page
+@app.route('/globalRules', methods=['GET'])
+def globalRules():
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT * FROM rules WHERE type = 0")
+    rules = cursor.fetchall()
+    return render_template('rules.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes, rules=rules, board="Global")
+#Add rule
+@app.route('/addRule', methods=['POST'])
+def addRule():
+    if request.method == 'POST':
+        if int(session['group']) <= 1:
+            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            if request.form['board'] == "NULL":
+                board = None
+            else:
+                board = request.form['board']
+            cursor.execute("INSERT INTO rules VALUES (%s, %s, %s)", (request.form['newRule'], request.form['type'], board))
+            mysql.connection.commit()
+            if request.form['type'] == "0":
+                return redirect(url_for("siteSettings"))
+        else: #Add exceptions for board rules. 
+            return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)        
+    else:
+        return render_template('error.html', errorMsg="Request must be POST", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 
+#Delete Rule
+#Add checks so you can't delete rules from other boards or global settings by changing the HTML of rules on board management pages. 
+@app.route('/deleteRule', methods=['POST'])
+def deleteRule():
+    if request.method == 'POST':
+        if int(session['group']) <= 1:
+            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            print(request.form['board'])
+            print(request.form['id'])
+            if request.form['board'] == "NULL":
+                board = None
+                print("board is null")
+            else:
+                board = request.form['board']
+            cursor.execute("SELECT * FROM rules WHERE id = %s", [int(request.form['id'])])
+            print(cursor.fetchone())
+            cursor.execute("DELETE FROM rules WHERE id = %s", [int(request.form['id'])])
+            mysql.connection.commit()
+            if request.form['type'] == "0":
+                return redirect(url_for("siteSettings"))
+        else: #Add check for board owners.
+            return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)        
+    else:
+        return render_template('error.html', errorMsg="Request must be POST", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 
 @app.route('/accountsettings', methods=['GET'])
 def accountSettings():

@@ -67,7 +67,7 @@ s{
     text-decoration: line-through;
 }
 /*List*/
-li{
+ul li {
     list-style: none;
 }
 hr {
@@ -158,7 +158,7 @@ input, select, textarea {
     text-align: center;
 }
 /*Settings box*/
-#settings-div {
+.box-settings {
     margin-top: 10%;
     width: 50%;
     display: table;
