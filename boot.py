@@ -422,13 +422,13 @@ def addRule():
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute("SELECT * FROM boards WHERE uri = %s", [board])
         currentBoard = cursor.fetchone()
-        if currentBoard != None or int(session['group']) <= 1: #checks if the board exists or the user has admin+ perms
+        if int(session['group']) <= 1 or currentBoard != None: #checks if the board exists or the user has admin+ perms
             if int(session['group']) <= 1 or currentBoard['owner'] == session['username']: #checks if the user has admin+ perms first
                 cursor.execute("INSERT INTO rules VALUES (NULL, %s, %s, %s)", (request.form['newRule'], request.form['type'], board))
                 mysql.connection.commit()
                 if request.form['type'] == "0":
                     return redirect(url_for("siteSettings"))
-        else: #Add exceptions for board rules. 
+        else:
             return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)        
     else:
         return render_template('error.html', errorMsg="Request must be POST", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
@@ -438,22 +438,23 @@ def addRule():
 @app.route('/deleteRule', methods=['POST'])
 def deleteRule():
     if request.method == 'POST':
-        if int(session['group']) <= 1:
-            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            print(request.form['board'])
-            print(request.form['id'])
-            if request.form['board'] == "NULL":
-                board = None
-                print("board is null")
-            else:
-                board = request.form['board']
-            cursor.execute("SELECT * FROM rules WHERE id = %s", [int(request.form['id'])])
-            print(cursor.fetchone())
-            cursor.execute("DELETE FROM rules WHERE id = %s", [int(request.form['id'])])
-            mysql.connection.commit()
+        if request.form['board'] == "NULL":
+            board = None
+        else:
+            board = request.form['board']
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT * FROM boards WHERE uri = %s", [board])
+        currentBoard = cursor.fetchone()
+        if int(session['group']) <= 1 or currentBoard != None:
+            if int(session['group']) <= 1 or currentBoard['owner'] == session['username']:
+                if board == None:
+                    cursor.execute("DELETE FROM rules WHERE id = %s AND board IS NULL", [int(request.form['id'])])
+                else:
+                    cursor.execute("DELETE FROM rules WHERE id = %s AND board = %s", (int(request.form['id']), board))
+                mysql.connection.commit()
             if request.form['type'] == "0":
                 return redirect(url_for("siteSettings"))
-        else: #Add check for board owners.
+        else:
             return render_template('error.html', errorMsg="Insufficient Permissions", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)        
     else:
         return render_template('error.html', errorMsg="Request must be POST", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
