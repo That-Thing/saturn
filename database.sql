@@ -85,6 +85,17 @@ CREATE TABLE IF NOT EXISTS `posts` (
 
 -- Data exporting was unselected.
 
+-- Dumping structure for table saturn.rules
+CREATE TABLE IF NOT EXISTS `rules` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `content` text NOT NULL COMMENT 'Rule content',
+  `type` int(11) NOT NULL COMMENT '0 for global 1 for board',
+  `board` text DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4;
+
+-- Data exporting was unselected.
+
 -- Dumping structure for table saturn.server
 CREATE TABLE IF NOT EXISTS `server` (
   `posts` int(11) NOT NULL DEFAULT 0,

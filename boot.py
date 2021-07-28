@@ -562,7 +562,6 @@ def manageBoard(board):
     sqlData = cursor.fetchone()
     cursor.execute("SELECT * FROM rules WHERE type = 1 and board = %s", [board])
     rules = cursor.fetchall()
-    print(rules)
     if sqlData == None:
         return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
     msg=""
