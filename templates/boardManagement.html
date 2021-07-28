@@ -23,14 +23,14 @@
         <div class="box box-settings">
             <h2 class="box-header">Board Management</h2>
              <div id="boardManagement" class="settings-category">
-                 <span id="board-label-manage">Board</span><span class="board-management-label">Posts</span><span class="board-management-label">PPH</span><span class="board-management-label">Users</span>
+                 <span id="board-label-manage">Board</span><span class="board-list-label">Posts</span><span class="board-list-label">PPH</span><span class="board-list-label">Users</span>
                 {% for board in sqlData %}
                     <hr>
                     <div class="boardManagementDiv">
                         <a href="/{{board['uri']}}/">/{{board['uri']}}/ - {{board['name']}}</a>
-                        <span class="board-management-label">{{board['posts']}}</span>
-                        <span class="board-management-label">{{board['PPH']}}</span>
-                        <span class="board-management-label">{{board['users']}}</span>
+                        <span class="board-list-label">{{board['posts']}}</span>
+                        <span class="board-list-label">{{board['PPH']}}</span>
+                        <span class="board-list-label">{{board['users']}}</span>
                         <a href="{{ url_for('manageBoard', board=board['uri']) }}" style="float: left; margin-right: 20px;"><i class="fas fa-cog manage-link"></i></a>
                     </div>
                 {% endfor %}
