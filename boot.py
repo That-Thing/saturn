@@ -871,7 +871,17 @@ def boardNumPage(board, page):
                 return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
     return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
 
-
+@app.route('/<board>/rules', methods=['GET'])
+def boardRules(board):
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT * FROM boards WHERE uri = %s", [board])
+    board = cursor.fetchone()
+    if board != None:
+        cursor.execute("SELECT * FROM rules WHERE board = %s", [board['uri']])
+        rules = cursor.fetchall()
+        return render_template('rules.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes, rules=rules, board=f"/{board['uri']}/")
+    else:
+        return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
 #thumbnail generation
 def thumbnail(image, board, filename, ext):
     try:
