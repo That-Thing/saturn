@@ -549,23 +549,23 @@ def boardManagement():
 
 
 #Individual board management
-@app.route('/manageboard', methods=['GET'])
-def manageBoard():
+@app.route('/<board>/manage', methods=['GET'])
+def manageBoard(board):
     checkGroup()
     globalSettings = reloadSettings()
-    uri = request.args.get('uri', type=str)
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT * FROM boards WHERE uri=%s", [uri])
-    sqlData = cursor.fetchall()
-    sqlData = sqlData[0]
+    cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
+    sqlData = cursor.fetchone()
+    if sqlData == None:
+        return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
     msg=""
-    cursor.execute("SELECT * FROM banners WHERE board=%s", [uri])
+    cursor.execute("SELECT * FROM banners WHERE board=%s", [board])
     bannerData = cursor.fetchall()
     try:
         if int(session['group']) <= 1 or sqlData['owner'] == session['username']:
             return render_template('manageBoard.html', data=globalSettings, currentTheme=request.cookies.get('theme'), sqlData=sqlData, bannerData=bannerData, msg=msg, themes=themes)
         else:
-            return render_template('error.html', errorMsg="Not logged in", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+            return render_template('error.html', errorMsg="Insufficient permissions", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     except Exception as e:
         return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         print(e)

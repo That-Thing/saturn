@@ -325,21 +325,28 @@
                     <div id="boardManagement">
                         <hr>
                         <span>
-                            [<a href="{{ url_for('manageBoard', uri=boardData['uri']) }}">Board Settings</a>]
+                            [<a href="{{ url_for('manageBoard', board=board) }}">Board Settings</a>]
                         </span>
                     </div>
                 {%elif session['group'] is defined and session['group'] <= 1%}
                     <div id="boardManagement">
                         <hr>
                         <span>
-                            [<a href="{{ url_for('manageBoard', uri=boardData['uri']) }}">Board Settings</a>]
+                            [<a href="{{ url_for('manageBoard', board=board) }}">Board Settings</a>]
                         </span>
                     </div>
                 {%endif%}
             </div>
         </div>
         <footer id="footer">
-            Any post made by a user is the responsibility of that user.
+            <p>Any post made by a user is the responsibility of that user.</p>
+            <span id="footer-links">
+                <a href="{{url_for('faq')}}" target="_blank">FAQ</a>
+                •
+                <a href="{{url_for('rules')}}" target="_blank">Rules</a>
+                •
+                <a href="{{url_for('boardRules', board=board)}}" target="_blank">Board Rules</a>
+            </span>
         </footer>
         <script src="{{ url_for('static', filename='js/themes.js') }}"></script>
         <script src="{{ url_for('static', filename='js/posting.js') }}"></script>

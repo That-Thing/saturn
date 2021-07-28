@@ -180,15 +180,24 @@ input, select, textarea {
     border: 1px var(--input) solid;
 }
 
-.boardManagement-label {
+
+.mange-link {
+    float: left;
+    margin-right: 20px;
+}
+#board-label-manage {
+    text-align: left;
+    margin: 5px;
+    margin-left: 40px;
+}
+.board-management-label {
     float: right;
     margin-right: 15px;
     width: 6%;
     text-align: center;
     display: inherit;
+    margin-left: 40px;
 }
-
-
 /*boards*/
 #board-label {
     text-align: left;
