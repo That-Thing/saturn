@@ -28,5 +28,10 @@
         "name": "Nord",
         "id": "nord",
         "class": "theme-nord"
+    },
+    "gruvbox": {
+        "name": "Gruvbox",
+        "id": "gruvbox",
+        "class": "theme-gruvbox"
     }
 }

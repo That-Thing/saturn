@@ -276,7 +276,7 @@ body.theme-yotsuba-b {
     --link-color: #81a2be; /*Links*/
     --link-hover: #5f89ac; /*Link hover color*/
     --input: #282a2e; /*Background for input fields*/
-    --hr: #282a2e; /*divider tags*/
+    --hr: #111; /*divider tags*/
     --small-text: #767676; /*color of small text*/
     --button-background: #d0d0d0;
     --button-hover: #dcdcdc; /*Hover color of buttons*/
@@ -352,8 +352,8 @@ body.theme-tomorrow {
     background-color: var(--input);
     transition: background-color 0.2s;
 }
-.theme-tomorrow #boardsDiv hr, .theme-tomorrow #help-box hr {
-    border-color: #111;
+.theme-tomorrow #thread-list hr, .theme-tomorrow #board-message hr {
+    border-color: #282a2e;
 }
 .theme-tomorrow #board-list-header {
     background-color: var(--page-background);
@@ -519,4 +519,36 @@ body.theme-photon {
 }
 .theme-nord #boardsDiv .board-entry:nth-child(odd) {
     background-color: #4c566a;
+}
+.theme-gruvbox {
+    --text-color: #ebdbb2; /*Text color*/
+    --page-background: #282828; /*Background color for the entire page*/
+    --background-2: #3c3836; /*Background color for posts, boxes, etc*/
+    --nav-color: #3c3836; /*background color of nav bar*/
+    --border-color: #3c3836; /*color for things such as button borders */
+    --border-2: #1d2021; /*Alternative border color for things such as thread/reply boxes*/
+    --border-radius: 0px; /*Border radius for things like boxes, posts, etc.*/
+    --font-family: arial,helvetica,sans-serif; /*Default font*/
+    --link-color: #83a598; /*Links*/
+    --link-hover: #458588; /*Link hover color*/
+    --input: #32302f; /*Background for input fields*/
+    --hr: #3c3836; /*divider tags*/
+    --small-text: #928374; /*color of small text*/
+    --button-background: #32302f;
+    --button-hover: #282828; /*Hover color of buttons*/
+    --button-border: #1d2021; /*border for buttons*/
+    --post-subject: #d3869b; /*Color of the post subject text*/
+    --post-name: #8ec07c; /*Color of the name attatched to a post*/
+    --post-shadow: 3px 5px 10px rgb(0 0 0 / 33%); /*Shadow behind objects like posts*/
+    --marked-post: #1d2226; /*Background of marked post*/
+    --marked-post-border: 1px #2a313742 solid; /*Border of marked post*/
+    --header-color: #665c54;
+    --marked-post: #504945; /*Background of marked post*/
+    --marked-post-border: 1px solid #3c3836; /*Border of marked post*/
+}
+.theme-gruvbox .box-header {
+    background-color: var(--header-color);
+}
+.theme-gruvbox #boardsDiv .board-entry:nth-child(odd) {
+    background-color: #504945;
 }

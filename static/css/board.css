@@ -88,3 +88,9 @@ li {
 #boardPages {
     clear: left;
 }
+#comment {
+    width: 295px;
+}
+#captcha-td {
+    display: grid;
+}

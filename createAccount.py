@@ -2,6 +2,7 @@ import mysql.connector
 import argparse
 import json
 parser = argparse.ArgumentParser()
+print("Usage: python createAccount.py -u Username -p Password -g 4 -e username@test.com")
 with open('./config/database.json') as configFile:
     databaseConfig = json.load(configFile)
 database = mysql.connector.connect(

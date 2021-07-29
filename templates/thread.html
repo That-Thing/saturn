@@ -53,12 +53,12 @@
                         </tr>
                         <tr>
                             <td class="author-label">Comment</td>
-                            <td><textarea id="message" class="author-input" name="comment" cols="48" rows="4" wrap="soft" tabindex="4" style="width: 292px;"></textarea></td>
+                            <td><textarea class="author-input" id="comment" name="comment" cols="48" rows="4" wrap="soft" tabindex="4"></textarea></td>
                         </tr>
                         {% if boardData['captcha'] == 1 %}
                             <tr>
                                 <td class="author-label">Verification</td>
-                                <td style="display: grid;"><img src="/{{captcha}}" tabindex="5" class="captcha"><input class="author-input" tabindex="6" type="text" name="captcha" autocomplete="off" required></td>
+                                <td id="captcha-td"><img src="/{{captcha}}" tabindex="5" class="captcha"><input class="author-input" tabindex="6" type="text" name="captcha" autocomplete="off" required></td>
                                 
                             </tr>
                         {% endif %}
