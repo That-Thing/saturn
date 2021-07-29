@@ -140,6 +140,9 @@ body.theme-yotsuba {
 .theme-yotsuba #boardsDiv .board-entry:nth-child(odd) {
     background-color: white;
 }
+.theme-yotsuba .rule-list>li:nth-child(odd){
+    background-color: white;
+}
 .theme-yotsuba .dropdown-submit {
     border: none;
 }
@@ -255,6 +258,9 @@ body.theme-yotsuba-b {
 .theme-yotsuba-b #boardsDiv .board-entry:nth-child(odd) {
     background-color: white;
 }
+.theme-yotsuba-b .rule-list>li:nth-child(odd){
+    background-color: white;
+}
 .theme-yotsuba-b .dropdown-submit {
     border: none;
 }
@@ -362,6 +368,12 @@ body.theme-tomorrow {
     background-color: var(--page-background);
 }
 .theme-tomorrow #boardsDiv .board-entry:nth-child(odd) {
+    background-color: rgba(255,255,255,.1);
+}
+.theme-tomorrow .rule-list {
+    background-color: var(--page-background);
+}
+.theme-tomorrow .rule-list>li:nth-child(odd){
     background-color: rgba(255,255,255,.1);
 }
 .theme-tomorrow .board-entry {
@@ -475,6 +487,9 @@ body.theme-photon {
 .theme-photon #boardsDiv .board-entry:nth-child(odd) {
     background-color: var(--page-background);
 }
+.theme-photon .rule-list>li:nth-child(odd){
+    background-color: var(--page-background);
+}
 .theme-photon .dropdown-content hr {
     border: 1px solid var(--border-color);
 }
@@ -496,7 +511,7 @@ body.theme-photon {
     --border-color: #3a4253; /*color for things such as button borders */
     --border-2: #434C5E; /*Alternative border color for things such as thread/reply boxes*/
     --border-radius: 0px; /*Border radius for things like boxes, posts, etc.*/
-    --font-family: arial,helvetica,sans-serif; /*Default font*/
+    --font-family: Hack,monospace,sans-serif; /*Default font*/
     --link-color: #536da1; /*Links*/
     --link-hover: #5e80c5; /*Link hover color*/
     --input: #4C566A; /*Background for input fields*/
@@ -518,7 +533,10 @@ body.theme-photon {
     background-color: var(--header-color);
 }
 .theme-nord #boardsDiv .board-entry:nth-child(odd) {
-    background-color: #4c566a;
+    background-color: var(--header-color);
+}
+.theme-nord .rule-list>li:nth-child(odd){
+    background-color: var(--header-color);
 }
 .theme-gruvbox {
     --text-color: #ebdbb2; /*Text color*/
@@ -528,11 +546,11 @@ body.theme-photon {
     --border-color: #3c3836; /*color for things such as button borders */
     --border-2: #1d2021; /*Alternative border color for things such as thread/reply boxes*/
     --border-radius: 0px; /*Border radius for things like boxes, posts, etc.*/
-    --font-family: arial,helvetica,sans-serif; /*Default font*/
+    --font-family: Hack,monospace,sans-serif; /*Default font*/
     --link-color: #83a598; /*Links*/
     --link-hover: #458588; /*Link hover color*/
     --input: #32302f; /*Background for input fields*/
-    --hr: #3c3836; /*divider tags*/
+    --hr: #1d2021; /*divider tags*/
     --small-text: #928374; /*color of small text*/
     --button-background: #32302f;
     --button-hover: #282828; /*Hover color of buttons*/
@@ -550,5 +568,8 @@ body.theme-photon {
     background-color: var(--header-color);
 }
 .theme-gruvbox #boardsDiv .board-entry:nth-child(odd) {
-    background-color: #504945;
+    background-color: var(--marked-post);
+}
+.theme-gruvbox .rule-list>li:nth-child(odd){
+    background-color: var(--marked-post);
 }

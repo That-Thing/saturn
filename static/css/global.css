@@ -489,3 +489,16 @@ p {
     padding: 5px;
 }
 
+/*Rules page*/
+.rule-list {
+    padding-left: 0px;
+    margin-bottom: 0px;
+    margin-top: 0px;
+    background-color: var(--nav-color);
+}
+.rule-list>li:nth-child(odd){
+    background-color: var(--background-2);
+}
+.rule-list>li{
+    list-style-position: inside;
+}
