@@ -782,11 +782,25 @@ def register():
     else:
         return render_template('register.html', msg="Registrations are currently disabled.", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 
-
+#Checks if captcha has expired. If it has, returns true so generateCaptcha() can generate a new one. 
+def checkCaptchaState():
+    if "captchaExpire" in session and "captcha" in session and "captchaF" in session:
+        print("captcha expire!!")
+        if datetime.now() >= session["captchaExpire"]:
+            print("Captcha has expired, generating new captcha!")
+            return True
+        else:
+            return False
+    else:
+        return True #Generates a new captcha if required information is missing from the session. 
 
 #generate captcha for the board
 #Syntax: generateCaptcha(captcha length)
 def generateCaptcha(difficulty):
+    if checkCaptchaState() == False: #If current session captcha is not expired, return current captcha. 
+        return session["captchaF"]
+    if "captchaF" in session: #removes old captcha file.
+        os.remove(session["captchaF"])
     captchaText = randomString(difficulty)
     print("#########################")
     print(captchaText)
@@ -794,7 +808,10 @@ def generateCaptcha(difficulty):
     currentCaptcha = captcha.generate(captchaText)
     filename = time.time()
     captcha.write(captchaText, f'./static/captchas/{filename}.png')
-    session["captcha"] = captchaText #find a better solution for this
+    session["captcha"] = captchaText
+    session["captchaF"] = f'./static/captchas/{filename}.png'
+    session["captchaExpire"] = datetime.now() + timedelta(minutes = 1) #Set expire time for captcha. Add into global settings later. 
+    print(session["captchaExpire"])
     return f'./static/captchas/{filename}.png'
 
 #get all threads for a board
