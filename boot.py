@@ -21,8 +21,21 @@ with open('./config/config.json') as configFile: #global config file
     configData = json.load(configFile)
 with open('./config/database.json') as configFile: #database config
     databaseConfig = json.load(configFile)
-
 captcha = ImageCaptcha(fonts=['./static/fonts/quicksand.ttf']) #Fonts for captcha. 
+
+
+
+
+#Startup tasks
+
+#Deletes all the orphaned captchas
+for f in os.listdir("./static/captchas"):
+    os.remove(os.path.join("./static/captchas", f))
+
+
+
+
+
 
 
 #           _                        
@@ -784,10 +797,8 @@ def register():
 
 #Checks if captcha has expired. If it has, returns true so generateCaptcha() can generate a new one. 
 def checkCaptchaState():
-    if "captchaExpire" in session and "captcha" in session and "captchaF" in session:
-        print("captcha expire!!")
+    if "captchaExpire" in session and "captcha" in session and "captchaF" in session and os.path.isfile(session["captchaF"]):
         if datetime.now() >= session["captchaExpire"]:
-            print("Captcha has expired, generating new captcha!")
             return True
         else:
             return False
@@ -799,7 +810,7 @@ def checkCaptchaState():
 def generateCaptcha(difficulty):
     if checkCaptchaState() == False: #If current session captcha is not expired, return current captcha. 
         return session["captchaF"]
-    if "captchaF" in session: #removes old captcha file.
+    if "captchaF" in session and os.path.isfile(session["captchaF"]): #removes old captcha file.
         os.remove(session["captchaF"])
     captchaText = randomString(difficulty)
     print("#########################")
@@ -813,6 +824,13 @@ def generateCaptcha(difficulty):
     session["captchaExpire"] = datetime.now() + timedelta(minutes = 1) #Set expire time for captcha. Add into global settings later. 
     print(session["captchaExpire"])
     return f'./static/captchas/{filename}.png'
+
+def clearCaptcha():
+    session.pop('captcha', None)
+    if os.path.isfile(session["captchaF"]): #deletes captcha file if it somehow hasn't been deleted already. (Just to make sure)
+        os.remove(session["captchaF"])
+    session.pop('captchaF', None)
+    session.pop('captchaExpire', None)
 
 #get all threads for a board
 def getThreads(uri):
@@ -960,6 +978,7 @@ def newThread():
             if 'password' in request.form:
                 filePass = request.form['password']
             if x['captcha'] == 1:
+                clearCaptcha() #clears captcha so it can't be used again to make a new thread.
                 if request.method == 'POST' and 'comment' in request.form and 'captcha' in request.form and request.files['file'].filename != '':
                     if session['captcha'] == request.form['captcha']:
                         files = request.files.getlist("file")
