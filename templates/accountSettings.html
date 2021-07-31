@@ -55,7 +55,7 @@
                     <h4>Owned Boards</h4>
                     {% for board in sqlData %}
                         {% if board['owner'] == session['username'] %}
-                            <a href="/manageboard?uri={{board['uri']}}" style="float: left; margin-right: 20px;"><i class="fas fa-cog"></i></a>
+                            <a href="{{url_for('manageBoard', board=board['uri']) }}"><i class="fas fa-cog manage-link"></i></a>
                             <a href="/{{board['uri']}}/">/{{board['uri']}}/ - {{board['name']}}</a>
                             <br>
                         {% endif %}  

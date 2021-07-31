@@ -573,3 +573,6 @@ body.theme-photon {
 .theme-gruvbox .rule-list>li:nth-child(odd){
     background-color: var(--marked-post);
 }
+.theme-gruvbox nav {
+    border-bottom: 1px solid var(--hr);
+}
