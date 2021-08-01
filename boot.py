@@ -154,7 +154,7 @@ def lastHour():
     cursor.execute("SELECT * FROM posts")
     posts = cursor.fetchall()
     count = 0
-    now = datetime.now()
+    now = datetime.utcnow()
     for post in posts:
         if now-timedelta(hours=1) <= datetime.utcfromtimestamp(post['date']) <= now+timedelta(hours=1):
             count = count+1
