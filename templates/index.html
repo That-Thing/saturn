@@ -52,7 +52,7 @@
                 <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt text-icon"></i>Log Out</a>
             {% else %}
                 <span>Not logged in</span><br>
-                <a href="login"><i class="fas fa-user text-icon"></i>Log in</a> / <a href="register">Register</a>
+                <a href="{{ url_for('login') }}"><i class="fas fa-user text-icon"></i>Log in</a> / <a href="{{ url_for('register') }}">Register</a>
 
             {% endif %}     
         </div>

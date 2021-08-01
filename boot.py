@@ -725,7 +725,7 @@ def deleteBanner(board):
             return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
 
 #Account stuff  Most of it isn't mine lol. 
-@app.route('/login/', methods=['GET', 'POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     checkGroup()
     globalSettings = reloadSettings()

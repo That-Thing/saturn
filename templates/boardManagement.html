@@ -37,7 +37,7 @@
             </div>
         </div>
         <div class="msg center">{{msg}}</div>
-        {% if data['requiredRole'] == session['group'] or session['group'] == 'administrator' %}
+        {% if session['group'] is defined and session['group'] <= data['requiredRole']|int %}
             <div class="box" style="width: 40%;">
                 <h2 class="box-header">Create board</h2>
                 <form id="create-board" action="/createboard" method="POST">
