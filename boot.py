@@ -388,6 +388,7 @@ def faq():
 @app.route('/globalsettings', methods=['GET'])
 def siteSettings():
     checkGroup()
+    globalSettings = reloadSettings()
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("SELECT * FROM rules WHERE type = 0")
     rules = cursor.fetchall()
