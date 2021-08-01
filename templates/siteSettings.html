@@ -79,7 +79,7 @@
                     </label>
                     <label>
                         Allowed MIME types:
-                        <input type="text" name="mimeTypes" id="mimeTypeInput" value="{{data['mimeTypes']}}" required autocomplete="off"> <span class="small">Seperate with ,</span>
+                        <input type="text" name="mimeTypes" id="mimeTypeInput" value="{{data['mimeTypes']}}" required autocomplete="off"> <span class="small">Separate with ,</span>
                     </label>
                     <label>
                         Maximum files:
@@ -92,6 +92,15 @@
                     <label>
                         Max number of threads per page:
                         <input type="text" name="pageThreads" id="pageThreads" value="{{data['pageThreads']}}" required autocomplete="off"> <span class="small">This sets how many threads to display on a board before creating a new page</span>
+                    </label>
+                    <h4>captcha</h3>
+                    <label>
+                        Captcha difficulty:
+                        <input type="text" name="captchaDifficulty" id="captchaDifficulty" value="{{data['captchaDifficulty']}}" required autocomplete="off"> <span class="small">Sets the length of the captcha (must be a number)</span>
+                    </label>
+                    <label>
+                        Captcha expire time:
+                        <input type="text" name="captchaExpire" id="captchaExpire" value="{{data['captchaExpire']}}" required autocomplete="off"> <span class="small">How long the captcha is active before a new one is generated</span>
                     </label>
                     <p><input class="btn btn-primary" type="submit" value="save settings"></p>
                 </form>

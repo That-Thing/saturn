@@ -97,7 +97,9 @@ def reloadSettings():
         maxFiles = int(configData["maxFiles"]),
         spoilerImage =  reloadData["spoilerImage"],
         tripLength = reloadData["tripLength"],
-        pageThreads = reloadData["pageThreads"]
+        pageThreads = reloadData["pageThreads"],
+        captchaDifficulty = int(reloadData['captchaDifficulty']),
+        captchaExpire = int(reloadData['captchaExpire'])
     )
     return globalSettings
 globalSettings = reloadSettings()
@@ -821,7 +823,7 @@ def generateCaptcha(difficulty):
     captcha.write(captchaText, f'./static/captchas/{filename}.png')
     session["captcha"] = captchaText
     session["captchaF"] = f'./static/captchas/{filename}.png'
-    session["captchaExpire"] = datetime.now() + timedelta(minutes = 1) #Set expire time for captcha. Add into global settings later. 
+    session["captchaExpire"] = datetime.now() + timedelta(minutes = globalSettings['captchaExpire']) #Set expire time for captcha. Add into global settings later. 
     print(session["captchaExpire"])
     return f'./static/captchas/{filename}.png'
 
@@ -863,7 +865,7 @@ def boardPage(board):
             else:
                 banner = "static/banners/defaultbanner.png"
             if x['captcha'] == 1:
-                captcha = generateCaptcha(5)
+                captcha = generateCaptcha(globalSettings['captchaDifficulty'])
                 return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, captcha=captcha, threads=posts, filePass=filePass, postLength=postLength, owned=ownedPosts, page=1, themes=themes)
             else:
                 return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, threads=posts, filePass=filePass, postLength=postLength, owned=ownedPosts, page=1, themes=themes)
@@ -893,7 +895,7 @@ def boardNumPage(board, page):
                 else:
                     banner = "static/banners/defaultbanner.png"
                 if x['captcha'] == 1:
-                    captcha = generateCaptcha(5)
+                    captcha = generateCaptcha(globalSettings['captchaDifficulty'])
                     return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, captcha=captcha, threads=posts, filePass=filePass, postLength=postLength, owned=ownedPosts, page=page, themes=themes)
                 else:
                     return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, threads=posts, filePass=filePass, postLength=postLength, owned=ownedPosts, page=page, themes=themes)
@@ -1099,7 +1101,7 @@ def thread(board, thread):
             else:
                 banner = "static/banners/defaultbanner.png"
             if x['captcha'] == 1:
-                captcha = generateCaptcha(5)
+                captcha = generateCaptcha(globalSettings['captchaDifficulty'])
                 return render_template('thread.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, captcha=captcha, posts=posts, owned=ownedPosts, op=parentPost[0], filePass=filePass, themes=themes)
             else:
                 return render_template('thread.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, posts=posts, op=parentPost[0], owned=ownedPosts, filePass=filePass, themes=themes)
