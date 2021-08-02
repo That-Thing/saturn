@@ -21,6 +21,8 @@ with open('./config/config.json') as configFile: #global config file
     configData = json.load(configFile)
 with open('./config/database.json') as configFile: #database config
     databaseConfig = json.load(configFile)
+with open('./config/markdown.json') as markdownFile: #Loads markdown config
+    markdown = json.load(markdownFile)
 captcha = ImageCaptcha(fonts=['./static/fonts/quicksand.ttf']) #Fonts for captcha. 
 
 
@@ -293,14 +295,20 @@ def checkMarkdown(text, thread, board, post):
     ptRegex = r"^&lt;.*$" #pinktext regex
     lbRegex = r"^&gt;&gt;&gt;\/(.*?)\/$" #link board regex
     lqRegex = r"^&gt;&gt;[0-9]+\W?$" #link post/quote regex
-    codeRegex = r"(?<=\[code])((.|\n)*)(?=\[\/code])" #Code regex. Matches anything in between code tags (ex: [code]text[/code])
     urlRegex = r"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)" #URL regex
     text = stripHTML(text) #Turns potentially unsafe text into database-friendly text
-    if bool(re.search(codeRegex, text)): #checks if code tags are present at start and end of string
-        text = f"<code>{re.search(codeRegex, text).group(1)}</code>"
-        return text
+    for x in markdown:
+        m = markdown[x]
+        borders = m['text'].split("{TEXT}")
+        html = m['html'].split("{TEXT}")
+        currentRegex = fr"(?<={re.escape(borders[0])})((.|\n)*)(?={re.escape(borders[1])})"
+        if bool(re.search(currentRegex, text)) == True:
+            text = text.replace(re.search(currentRegex, text).group(1), html[0]+re.search(currentRegex, text).group(0)+html[1])
+            text = text.replace(borders[0], "")
+            text = text.replace(borders[1], "")
     lines = text.splitlines(True)
     result = ""
+    #This is the part that handles reply quotes, link-quotes, greentext- etc. 
     for x in lines:
         words = x.split(" ")
         newWords = []

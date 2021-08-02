@@ -204,7 +204,7 @@
                                     </span>
                                 {%endif%}
                             </div>
-                            <blockquote class="comment">{{thread['message'] | checkMarkdown(thread['number'], board, thread['number'])}}</blockquote>
+                            <blockquote class="comment">{{thread['message'] | checkMarkdown(thread['number'], board, thread['number']) | safe}}</blockquote>
                         </div>
                         {%set posts = thread['number'] | fivePosts(board)%}
                         {%for post in posts%}
@@ -303,7 +303,7 @@
                                         {%endfor%}
                                         </div>
                                     {%endif%}
-                                    <blockquote class="comment">{{post['message'] | checkMarkdown(thread['number'], board, post['number'])}}</blockquote>
+                                    <blockquote class="comment">{{post['message'] | checkMarkdown(thread['number'], board, post['number']) | safe}}</blockquote>
                                     </div>
                                 </div>
                         {%endfor%}
@@ -350,6 +350,6 @@
         </footer>
         <script src="{{ url_for('static', filename='js/themes.js') }}"></script>
         <script src="{{ url_for('static', filename='js/posting.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/markdown.js') }}"></script>
+        <!-- <script src="{{ url_for('static', filename='js/markdown.js') }}"></script> -->
     </body>
 </html>

@@ -190,7 +190,7 @@
                         </span>
                     {%endif%}
                 </div>
-                <blockquote class="comment">{{op['message'] | checkMarkdown(op['number'], board, op['number'])}}</blockquote>
+                <blockquote class="comment">{{op['message'] | checkMarkdown(op['number'], board, op['number']) | safe}}</blockquote>
             </div>
             {%for post in posts%}
                 <div class="replyDiv" id="{{post['number']}}">
@@ -288,13 +288,12 @@
                             {%endfor%}
                             </div>
                         {%endif%}
-                        <blockquote class="comment">{{post['message'] | checkMarkdown(op['number'], board, post['number'])}}</blockquote>
+                        <blockquote class="comment">{{post['message'] | checkMarkdown(op['number'], board, post['number']) | safe}}</blockquote>
                         </div>
                     </div>
             {%endfor%}
             </div>
         </div>
-        <script src="{{ url_for('static', filename='js/markdown.js') }}"></script>
         <script src="{{ url_for('static', filename='js/posting.js') }}"></script>
         <script src="{{ url_for('static', filename='js/thread.js') }}"></script>
         <script src="{{ url_for('static', filename='js/themes.js') }}"></script>

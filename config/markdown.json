@@ -1,0 +1,58 @@
+{
+    "bold": {
+        "text": "[b]{TEXT}[/b]",
+        "html": "<b>{TEXT}</b>"
+    },
+    "bold2": {
+        "text": "**{TEXT}**",
+        "html": "<b>{TEXT}</b>"
+    },
+    "italics": {
+        "text": "[i]{TEXT}[/i]",
+        "html": "<i>{TEXT}</i>"
+    },
+    "italics2": {
+        "text": "*{TEXT}*",
+        "html": "<i>{TEXT}</i>"
+    },
+    "underline": {
+        "text": "[u]{TEXT}[/u]",
+        "html": "<u>{TEXT}</u>"
+    },
+    "underline2": {
+        "text": "__{TEXT}__",
+        "html": "<u>{TEXT}</u>"
+    },
+    "strikethrough": {
+        "text": "[s]{TEXT}[/s]",
+        "html": "<s>{TEXT}</s>"
+    },
+    "strikethrough2": {
+        "text": "~~{TEXT}~~",
+        "html": "<s>{TEXT}</s>"
+    },
+    "spoiler": {
+        "text": "[spoiler]{TEXT}[/spoiler]",
+        "html": "<span class='spoiler'>{TEXT}</span>"
+    },
+    "spoiler2": {
+        "text": "||{TEXT}||",
+        "html": "<span class='spoiler'>{TEXT}</span>"
+    },
+    "code": {
+        "text": "[code]{TEXT}[/code]",
+        "html": "<code>{TEXT}</code>"
+    },
+    "rainbow": {
+        "text": "##{TEXT}##",
+        "html": "<span class='rainbow'>{TEXT}</span>"
+    },
+    "detected": {
+        "text": "((({TEXT})))",
+        "html": "<span class='detected'>{TEXT}</span>"
+    },
+    "red": {
+        "text": "=={TEXT}==",
+        "html": "<span class='redtext'>{TEXT}</span>"
+    }
+}
