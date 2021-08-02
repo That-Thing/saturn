@@ -58,10 +58,7 @@ for f in os.listdir("./static/captchas"):
 
 #TO DO:
 #add more board settings
-#polish up thread creation
 #add expansion of thumbnail on click for posts
-#Add captcha deletion
-#add post deletion
 #catalog
 #add floating reply thing.
 #add replying by clicking on the post number
@@ -296,12 +293,11 @@ def checkMarkdown(text, thread, board, post):
     ptRegex = r"^&lt;.*$" #pinktext regex
     lbRegex = r"^&gt;&gt;&gt;\/(.*?)\/$" #link board regex
     lqRegex = r"^&gt;&gt;[0-9]+\W?$" #link post/quote regex
-    codeSRegex = r"^\[code\]$" #code start regex ([code])
-    codeERegex = r"^\[/code\]$" #code end regex ([/code])
+    codeRegex = r"(?<=\[code])((.|\n)*)(?=\[\/code])" #Code regex. Matches anything in between code tags (ex: [code]text[/code])
     urlRegex = r"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)" #URL regex
     text = stripHTML(text) #Turns potentially unsafe text into database-friendly text
-    if bool(re.match(codeSRegex, text[:6])) and bool(re.match(codeERegex, text[-7:])): #checks if code tags are present at start and end of string
-        text = f"<code>{text[6:-7]}</code>"
+    if bool(re.search(codeRegex, text)): #checks if code tags are present at start and end of string
+        text = f"<code>{re.search(codeRegex, text).group(1)}</code>"
         return text
     lines = text.splitlines(True)
     result = ""
