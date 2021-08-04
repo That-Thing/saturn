@@ -303,9 +303,12 @@ def checkMarkdown(text, thread, board, post):
         html = m['html'].split("{TEXT}")
         currentRegex = fr"(?<={re.escape(borders[0])})((.|\n)*)(?={re.escape(borders[1])})"
         if bool(re.search(currentRegex, text)) == True:
-            text = text.replace(re.search(currentRegex, text).group(1), html[0]+re.search(currentRegex, text).group(0)+html[1])
+            if len(re.search(currentRegex, text).group(0)) > 0:
+                text = text.replace(re.search(currentRegex, text).group(0), html[0]+re.search(currentRegex, text).group(0)+html[1])
             text = text.replace(borders[0], "")
             text = text.replace(borders[1], "")
+            if m['include'] == "no": #This checks if the text needs to be returned after the tags are matched so other tags aren't added on. This is for something like the [code] tags so that you can safely add something like *text* into the text
+                print("")
     lines = text.splitlines(True)
     result = ""
     #This is the part that handles reply quotes, link-quotes, greentext- etc. 
@@ -1338,6 +1341,44 @@ def postActions(board):
             #handle reports
     else:
         return "Request must be POST"
+
+
+
+#Moderation pages. 
+
+
+#Account moderation
+@app.route('/users', methods=['GET'])
+def users():
+    checkGroup()
+    if session['group'] <= 1:
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT * FROM accounts")
+        users = cursor.fetchall()
+        cursor.execute("SELECT * FROM groups")
+        groups = cursor.fetchall()
+        cursor.execute("SELECT * FROM boards")
+        boards = cursor.fetchall()
+        return render_template('users.html', users=users, groups=groups, boards=boards,data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+    else:
+        return render_template('error.html', errorMsg="Insufficient permissions", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+
+#Manage individual user
+@app.route('/manage/<user>', methods=['GET'])
+def manageUser(user):
+    checkGroup()
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT * FROM accounts WHERE username = %s", [user])
+    user = cursor.fetchone()
+    if user == None: 
+        return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
+    print(user)
+    if user['group'] <= session['group']: #Returns an insufficient permission error if the user's group has less permissions than the requested user
+        return render_template('error.html', errorMsg="Insufficient permissions", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+    if session['group'] <= 1:
+        return render_template('manageUser.html', user=user, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+    else:
+        return render_template('error.html', errorMsg="Insufficient permissions", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=configData["port"])

@@ -5,7 +5,6 @@
 }
 .root:after {
 	content: ' α';
-	font-size: 150%;
     color: #bf00ff;
     text-shadow: none;
 }
@@ -15,16 +14,11 @@
 }
 .administrator:after {
 	content: ' β';
-	font-size: 150%;
     color: #6200ff;
     text-shadow: none;
 }
 .moderator {
 	color: rgb(54, 158, 255);
-}
-.moderator:after {
-	font-family: "Font Awesome 5 Free";
-	content: "\f51a";
 }
 .janitor {
 	color: rgb(148, 54, 255);

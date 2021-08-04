@@ -12,6 +12,6 @@
     "maxFiles": "3",
     "tripLength": "10",
     "pageThreads": "20",
-    "captchaDifficulty": "20",
+    "captchaDifficulty": "5",
     "captchaExpire": "5"
 }

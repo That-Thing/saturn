@@ -3,6 +3,7 @@
     --text-color: #ACACAC; /*Text color*/
     --page-background: #1e2327; /*Background color for the entire page*/
     --background-2: #2a3137; /*Background color for posts, boxes, etc*/
+    --background-3: #131618; /*Background color for lists, floating boxes, box headers*/
     --nav-color: #131618e0; /*background color of nav bar*/
     --border-color: #353535; /*color for things such as button borders */
     --border-2: #464f57; /*Alternative border color for things such as thread/reply boxes*/
@@ -44,6 +45,7 @@
     --text-color: #800000; /*Text color*/
     --page-background: #ffe url(../images/fade.png) top center repeat-x; /*Background color for the entire page*/
     --background-2: #f0e0d6; /*Background color for posts, boxes, etc*/
+    --background-3: rgba(240,224,214,0.98); /*Background color for lists, floating boxes, box headers*/
     --nav-color: rgba(240,224,214,0.98); /*background color of nav bar*/
     --border-color: #d9bfb7; /*color for things such as button borders */
     --border-radius: 0px; /*Border radius for things like boxes, posts, etc.*/
@@ -147,6 +149,12 @@ body.theme-yotsuba {
     border: none;
 }
 
+.theme-yotsuba #box-user-list .manage-user:nth-child(even) {
+    background-color: white;
+}
+
+
+
 /*
 ###########
 #Yotsuba B#
@@ -157,6 +165,7 @@ body.theme-yotsuba {
     --text-color: black; /*Text color*/
     --page-background: #eef2ff url(../images/fade-blue.png) top center repeat-x; /*Background color for the entire page*/
     --background-2: #d6daf0; /*Background color for posts, boxes, etc*/
+    --background-3: rgba(214,218,240,0.98); /*Background color for lists, floating boxes, box headers*/
     --nav-color: rgba(214,218,240,0.98); /*background color of nav bar*/
     --border-color: #b7c5d9; /*color for things such as button borders */
     --border-radius: 0px; /*Border radius for things like boxes, posts, etc.*/
@@ -265,6 +274,12 @@ body.theme-yotsuba-b {
     border: none;
 }
 
+.theme-yotsuba-b #box-user-list .manage-user:nth-child(even) {
+    background-color: white;
+}
+
+
+
 /*
 ##########
 #Tomorrow#
@@ -275,6 +290,7 @@ body.theme-yotsuba-b {
     --text-color: #c5c8c6; /*Text color*/
     --page-background: #1d1f21; /*Background color for the entire page*/
     --background-2: #282a2e; /*Background color for posts, boxes, etc*/
+    --background-3: rgb(40, 42, 46); /*Background color for lists, floating boxes, box headers*/
     --nav-color: rgb(40, 42, 46); /*background color of nav bar*/
     --border-color: #282a2e; /*color for things such as button borders */
     --border-radius: 0px; /*Border radius for things like boxes, posts, etc.*/
@@ -389,6 +405,17 @@ body.theme-tomorrow {
     border: none;
 }
 
+.theme-tomorrow #box-user-list {
+    background-color: var(--page-background);
+}
+.theme-tomorrow .manage-user {
+    border-top: 1px solid #111;
+}
+.theme-tomorrow #box-user-list .manage-user:nth-child(even) {
+    background-color: rgba(255,255,255,.1);
+}
+
+
 /*
 ########
 #photon#
@@ -399,6 +426,7 @@ body.theme-tomorrow {
     --text-color: #333; /*Text color*/
     --page-background: #eee; /*Background color for the entire page*/
     --background-2: #ddd; /*Background color for posts, boxes, etc*/
+    --background-3: rgba(221,221,221); /*Background color for lists, floating boxes, box headers*/
     --nav-color: rgba(221,221,221); /*background color of nav bar*/
     --border-color: #ccc; /*color for things such as button borders */
     --border-radius: 0px; /*Border radius for things like boxes, posts, etc.*/
@@ -496,7 +524,9 @@ body.theme-photon {
 .theme-photon .dropdown-submit {
     border: none;
 }
-
+.theme-photon #box-user-list .manage-user:nth-child(even) {
+    background-color: var(--page-background);
+}
 /*
 ######
 #Nord#
@@ -507,6 +537,7 @@ body.theme-photon {
     --text-color: #ACACAC; /*Text color*/
     --page-background: #2E3440; /*Background color for the entire page*/
     --background-2: #3a4253; /*Background color for posts, boxes, etc*/
+    --background-3: #3b4252; /*Background color for lists, floating boxes, box headers*/
     --nav-color: #3b4252f5; /*background color of nav bar*/
     --border-color: #3a4253; /*color for things such as button borders */
     --border-2: #434C5E; /*Alternative border color for things such as thread/reply boxes*/
@@ -538,10 +569,14 @@ body.theme-photon {
 .theme-nord .rule-list>li:nth-child(odd){
     background-color: var(--header-color);
 }
+.theme-nord #box-user-list .manage-user:nth-child(even) {
+    background-color: var(--header-color);
+}
 .theme-gruvbox {
     --text-color: #ebdbb2; /*Text color*/
     --page-background: #282828; /*Background color for the entire page*/
     --background-2: #3c3836; /*Background color for posts, boxes, etc*/
+    --background-3: #3c3836; /*Background color for lists, floating boxes, box headers*/
     --nav-color: #3c3836; /*background color of nav bar*/
     --border-color: #3c3836; /*color for things such as button borders */
     --border-2: #1d2021; /*Alternative border color for things such as thread/reply boxes*/
@@ -575,4 +610,7 @@ body.theme-photon {
 }
 .theme-gruvbox nav {
     border-bottom: 1px solid var(--hr);
+}
+.theme-gruvbox #box-user-list .manage-user:nth-child(even) {
+    background-color: var(--marked-post);
 }

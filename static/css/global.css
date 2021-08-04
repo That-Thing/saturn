@@ -146,7 +146,7 @@ input, select, textarea {
 }
 /*Box label*/
 .box-header {
-    background-color: var(--nav-color);
+    background-color: var(--background-3);
     border: none;
     border-top-left-radius: var(--border-radius);
     border-top-right-radius: var(--border-radius);
@@ -181,7 +181,7 @@ input, select, textarea {
 }
 
 
-.mange-link {
+.manage-link {
     float: left;
     margin-right: 20px;
 }
@@ -208,13 +208,13 @@ input, select, textarea {
     padding: 3px;
 }
 #boardsDiv {
-    background-color: var(--nav-color);
+    background-color: var(--background-3);
 }
 #boardsDiv .settings-category {
     margin: 0px;
 }
 #board-list-header {
-    background-color: var(--nav-color);
+    background-color: var(--background-3);
 }
 #boardsDiv .board-entry:nth-child(odd) {
     background-color: var(--background-2);
@@ -416,7 +416,7 @@ p {
 } 
 .dropdown-content {
     display: none;
-    background-color: var(--nav-color);
+    background-color: var(--background-3);
     min-width: 160px;
     box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
     padding: 5px;
@@ -446,7 +446,7 @@ p {
     border: var(--marked-post-border);
 }
 .floating-menu {
-    background-color: var(--nav-color);
+    background-color: var(--background-3);
     width: 25%;
     position: fixed;
     z-index: 9;
@@ -494,11 +494,30 @@ p {
     padding-left: 0px;
     margin-bottom: 0px;
     margin-top: 0px;
-    background-color: var(--nav-color);
+    background-color: var(--background-3);
 }
 .rule-list>li:nth-child(odd){
     background-color: var(--background-2);
 }
 .rule-list>li{
     list-style-position: inside;
+}
+
+#box-user-list {
+    background-color: var(--background-3);
+}
+#box-user-list .manage-user:nth-child(even) {
+    background-color: var(--background-2);
+}
+.manage-user {
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    border-top: 1px solid var(--border-color);
+}
+.manage-user span {
+    margin-right: 5px;
+}
+.user-owned-boards {
+    margin-left: 10%;
 }

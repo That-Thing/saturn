@@ -53,9 +53,20 @@
             {% else %}
                 <span>Not logged in</span><br>
                 <a href="{{ url_for('login') }}"><i class="fas fa-user text-icon"></i>Log in</a> / <a href="{{ url_for('register') }}">Register</a>
-
-            {% endif %}     
+            {% endif %}
         </div>
+        {% if session['group']%}
+            {% if session['group'] | int<=2%}
+                <div class="box center" id="moderation-box">
+                    <h2 class="box-header">Moderation</h2>
+                    <a href="/reports"><i class="fas fa-flag text-icon"></i>Reports</a>
+                    <a href="/latest"><i class="fas fa-list text-icon"></i>Latest Posts</a>
+                    {% if session['group'] | int<=1%}
+                        <a href="{{url_for('users')}}"><i class="fas fa-users-cog text-icon"></i>Users</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% endif %}
         <script src="{{ url_for('static', filename='js/themes.js') }}"></script>
     </body>
 </html>

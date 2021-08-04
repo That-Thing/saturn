@@ -1,58 +1,72 @@
 {
     "bold": {
         "text": "[b]{TEXT}[/b]",
-        "html": "<b>{TEXT}</b>"
+        "html": "<b>{TEXT}</b>",
+        "include": "yes"
     },
     "bold2": {
         "text": "**{TEXT}**",
-        "html": "<b>{TEXT}</b>"
+        "html": "<b>{TEXT}</b>",
+        "include": "yes"
     },
     "italics": {
         "text": "[i]{TEXT}[/i]",
-        "html": "<i>{TEXT}</i>"
+        "html": "<i>{TEXT}</i>",
+        "include": "yes"
     },
     "italics2": {
         "text": "*{TEXT}*",
-        "html": "<i>{TEXT}</i>"
+        "html": "<i>{TEXT}</i>",
+        "include": "yes"
     },
     "underline": {
         "text": "[u]{TEXT}[/u]",
-        "html": "<u>{TEXT}</u>"
+        "html": "<u>{TEXT}</u>",
+        "include": "yes"
     },
     "underline2": {
         "text": "__{TEXT}__",
-        "html": "<u>{TEXT}</u>"
+        "html": "<u>{TEXT}</u>",
+        "include": "yes"
     },
     "strikethrough": {
         "text": "[s]{TEXT}[/s]",
-        "html": "<s>{TEXT}</s>"
+        "html": "<s>{TEXT}</s>",
+        "include": "yes"
     },
     "strikethrough2": {
         "text": "~~{TEXT}~~",
-        "html": "<s>{TEXT}</s>"
+        "html": "<s>{TEXT}</s>",
+        "include": "yes"
     },
     "spoiler": {
         "text": "[spoiler]{TEXT}[/spoiler]",
-        "html": "<span class='spoiler'>{TEXT}</span>"
+        "html": "<span class='spoiler'>{TEXT}</span>",
+        "include": "yes"
     },
     "spoiler2": {
         "text": "||{TEXT}||",
-        "html": "<span class='spoiler'>{TEXT}</span>"
+        "html": "<span class='spoiler'>{TEXT}</span>",
+        "include": "yes"
     },
     "code": {
         "text": "[code]{TEXT}[/code]",
-        "html": "<code>{TEXT}</code>"
+        "html": "<code>{TEXT}</code>",
+        "include": "no"
     },
     "rainbow": {
         "text": "##{TEXT}##",
-        "html": "<span class='rainbow'>{TEXT}</span>"
+        "html": "<span class='rainbow'>{TEXT}</span>",
+        "include": "yes"
     },
     "detected": {
         "text": "((({TEXT})))",
-        "html": "<span class='detected'>{TEXT}</span>"
+        "html": "<span class='detected'>{TEXT}</span>",
+        "include": "yes"
     },
     "red": {
         "text": "=={TEXT}==",
-        "html": "<span class='redtext'>{TEXT}</span>"
+        "html": "<span class='redtext'>{TEXT}</span>",
+        "include": "yes"
     }
 }
