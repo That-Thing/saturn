@@ -1,6 +1,6 @@
 <html>
     <head>
-        <title>{{user}} - Manage</title>
+        <title>{{user['username']}} - Manage</title>
         <meta charset="UTF-8">
         <link href="{{ url_for('static', filename='css/global.css') }}" type="text/css" rel="stylesheet">
         <link href="{{ url_for('static', filename='css/index.css') }}" type="text/css" rel="stylesheet">
@@ -21,8 +21,19 @@
                 </select>
             </span>
         </nav>
-        <div class="box">
-            <h2 class="box-header">{{user}}</h2>
+        <div class="box box-settings">
+            <h2 class="box-header">{{user['username']}}</h2>
+            <div id="user-information">
+                <span>User ID: {{user['id']}}</span><br>
+                <span>Permissions group: {{user['group']}} [{{groups[user['group']|int]['name']}}]</span><br>
+                <span>Username: {{user['username']}}</span><br>
+                {%if user['email'] == None%}
+                    <span>Email: N/A</span><br>
+                {%else%}
+                    <span>Email: <a href="mailto:{{user['email']}}">{{user['email']}}</a></span><br>
+                {%endif%}
+                <span>Creation Date: {{user['date'] | ut}}</span>
+            </div>
         </div>
     </body>
     <script src="{{ url_for('static', filename='js/themes.js') }}"></script>
