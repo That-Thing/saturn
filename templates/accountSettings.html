@@ -25,7 +25,7 @@
              <div id="accountSettings" class="settings-category">
                 <h3 style="text-align: center;">Welcome {{session['username']}} [<span class="{{session['group'] | checkRole}}">{{session['group'] | checkRole}}</span>]</h3>    
                 <div id="serverSettings" class="settings-category">
-                    <form action="/updatePassword" method="POST">
+                    <form action="{{url_for('updatePassword')}}" method="POST">
                         <hr>
                         <h4>Password Change <span class="small">You will have to log back in</span></h4> 
                         <label> 
@@ -43,7 +43,7 @@
                         <p><input class="btn btn-primary" type="submit" value="update password"></p>
                     </form>
                     <hr>
-                    <form action="/updateemail" method="POST">
+                    <form action="{{url_for('updateEmail')}}" method="POST">
                         <label> 
                             E-mail:
                             <input type="text" name="email" id="emailInput" value="{{session['email']}}" autocomplete="off" required>

@@ -793,7 +793,7 @@ def register():
             else:
                 # Account doesnt exists and the form data is valid, now insert new account into accounts table
                 password = returnHash(password)
-                cursor.execute('INSERT INTO accounts VALUES (NULL, %s, %s, %s, 4, %s)', (username, password, email, time.time()))
+                cursor.execute('INSERT INTO accounts VALUES (NULL, %s, %s, %s, 4, %s, %s)', (username, password, email, time.time(), str(request.remote_addr)))
                 mysql.connection.commit()
                 msg = 'You have successfully registered!'
                 return render_template('login.html', msg="Registration complete, please log in", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
@@ -1370,12 +1370,13 @@ def manageUser(user):
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("SELECT * FROM accounts WHERE username = %s", [user])
     user = cursor.fetchone()
-    cursor.execute("SELECT * FROM groups")
+    cursor.execute("SELECT * FROM groups WHERE id > %s", [session['group']])
     groups = cursor.fetchall()
+    print(groups)
     if user == None: 
         return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
     print(user)
-    if user['group'] < session['group']: #Returns an insufficient permission error if the user's group has less permissions than the requested user
+    if user['group'] <= session['group']: #Returns an insufficient permission error if the user's group has less permissions than the requested user
         return render_template('error.html', errorMsg="Insufficient permissions", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     if session['group'] <= 1:
         return render_template('manageUser.html', user=user, groups=groups, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)

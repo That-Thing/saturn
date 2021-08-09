@@ -1,13 +1,24 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>/{{board}}/ - {{op['message']}}</title>
+        <title>/{{board}}/ - {{op['message']|truncate(10)}}</title>
         <meta charset="UTF-8">
         <link href="{{ url_for('static', filename='css/global.css') }}" type="text/css" rel="stylesheet">
         <link href="{{ url_for('static', filename='css/board.css') }}" type="text/css" rel="stylesheet">
         <link href="{{ url_for('static', filename='css/markdown.css') }}" type="text/css" rel="stylesheet">
         <link rel="shortcut icon" type="image/png" href="/{{data['faviconUrl']}}"/>
         <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+        {%if op['message']|length > 10%}
+            <meta name="title" content="/{{board}}/ - {{op['message']|truncate(15)}}">
+            <meta property="og:title" content="/{{board}}/ - {{op['message']|truncate(15)}}">
+        {%else%}
+            <meta name="title" content="/{{board}}/ - {{op['message']}}">
+            <meta property="og:title" content="/{{board}}/ - {{op['message']}}">
+        {%endif%}
+        <meta name="description" content="{{op['message']|truncate(150)}}">
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="#">
+        <meta property="og:description" content="{{op['message']|truncate(150)}}">
     </head>
     <body class="{{currentTheme}}">
         <nav>

@@ -26,7 +26,7 @@
             {% for user in users %}
                 <div class="manage-user">
                     <a href="{{ url_for('manageUser', user=user['username']) }}" class='manage-link'><i class="fas fa-cog"></i></a>
-                    <span>{{user['username']}}</span>
+                    <span>{{user['id']}}. {{user['username']}}</span>
                     [<span class="{{groups[user['group']|int]['name']}}">{{groups[user['group']|int]['name']}}</span>]
                     <span class="user-owned-boards">
                         Owned boards: 
