@@ -777,16 +777,14 @@ def register():
             username = request.form['username']
             password = request.form['password'] + salt
             email = request.form['email']
-            # Check if account exists
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
             cursor.execute('SELECT * FROM accounts WHERE username = %s', (username,))
             account = cursor.fetchone()
-            # If account exists show error and validation checks
             if account:
                 msg = 'Account already exists!'
             elif not re.match(r'[^@]+@[^@]+\.[^@]+', email):
                 msg = 'Invalid email address!'
-            elif not re.match(r'[A-Za-z0-9]+', username):
+            elif not re.match(r'^[a-zA-Z0-9_.-]*$', username):
                 msg = 'Username must contain only characters and numbers!'
             elif not username or not password or not email:
                 msg = 'Please fill out the form!'
@@ -798,9 +796,7 @@ def register():
                 msg = 'You have successfully registered!'
                 return render_template('login.html', msg="Registration complete, please log in", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         elif request.method == 'POST':
-            # Form is empty... (no POST data)
             msg = 'Please fill out the form!'
-        # Show registration form with message (if any)
         return render_template('register.html', msg=msg, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     else:
         return render_template('register.html', msg="Registrations are currently disabled.", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)

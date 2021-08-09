@@ -23,7 +23,8 @@
         </nav>
         <div class="box box-settings">
             <h2 class="box-header">{{user['username']}}</h2>
-            <div id="user-information">
+            <div id="user-information" class="settings-category">
+                <h4>User Details</h4>
                 <span>User ID: {{user['id']}}</span><br>
                 <span>Permissions group: {{user['group']}} [{%for group in groups%}{%if group['id'] == user['group']%}{{group['name']}}{%endif%}{%endfor%}]</span><br>
                 <span>Username: {{user['username']}}</span><br>
@@ -39,8 +40,8 @@
                     <span>Registration IP: {{user['ip']}}</span>
                 {%endif%}
             </div>
-            <h4>Change user details</h4>
             <div id="update-user" class="settings-category">
+                <h4>Change user details</h4>
                 <form action="{{url_for('updateUser', user=user['username'])}}" method="POST">
                     <label> 
                         User group:
