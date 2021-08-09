@@ -41,7 +41,7 @@
             </div>
             <h4>Change user details</h4>
             <div id="update-user" class="settings-category">
-                <form action="/updateUser">
+                <form action="{{url_for('updateUser', user=user['username'])}}" method="POST">
                     <label> 
                         User group:
                         <select name="group" id="userRole">

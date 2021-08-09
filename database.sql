@@ -19,13 +19,15 @@ USE `saturn`;
 
 -- Dumping structure for table saturn.accounts
 CREATE TABLE IF NOT EXISTS `accounts` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `username` varchar(50) NOT NULL,
-  `password` text NOT NULL,
-  `email` varchar(100) DEFAULT NULL,
-  `group` int(11) NOT NULL DEFAULT 0,
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'User ID',
+  `username` varchar(50) NOT NULL COMMENT 'Username',
+  `password` text NOT NULL COMMENT 'Encrypted password',
+  `email` varchar(100) DEFAULT NULL COMMENT 'Optional email',
+  `group` int(11) NOT NULL DEFAULT 0 COMMENT 'User permissions group',
+  `date` int(11) NOT NULL COMMENT 'User creation date',
+  `ip` varchar(50) DEFAULT NULL COMMENT 'Registration IP',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=84 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=85 DEFAULT CHARSET=utf8;
 
 -- Data exporting was unselected.
 
@@ -92,7 +94,7 @@ CREATE TABLE IF NOT EXISTS `rules` (
   `type` int(11) NOT NULL COMMENT '0 for global 1 for board',
   `board` text DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4;
 
 -- Data exporting was unselected.
 

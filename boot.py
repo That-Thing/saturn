@@ -1364,7 +1364,7 @@ def users():
         return render_template('error.html', errorMsg="Insufficient permissions", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 
 #Manage individual user
-@app.route('/manage/<user>', methods=['GET'])
+@app.route('/user/<user>/manage', methods=['GET'])
 def manageUser(user):
     checkGroup()
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
@@ -1372,16 +1372,40 @@ def manageUser(user):
     user = cursor.fetchone()
     cursor.execute("SELECT * FROM groups WHERE id > %s", [session['group']])
     groups = cursor.fetchall()
-    print(groups)
     if user == None: 
         return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
-    print(user)
     if user['group'] <= session['group']: #Returns an insufficient permission error if the user's group has less permissions than the requested user
         return render_template('error.html', errorMsg="Insufficient permissions", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     if session['group'] <= 1:
         return render_template('manageUser.html', user=user, groups=groups, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     else:
         return render_template('error.html', errorMsg="Insufficient permissions", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-
+#Update user information
+@app.route("/user/<user>/update", methods=['POST'])
+def updateUser(user):
+    checkGroup()
+    if request.method == 'POST':
+        if session['group'] <= 1:
+            try:
+                cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+                cursor.execute("SELECT * FROM accounts WHERE username = %s", [user])
+                if cursor.fetchone() == None:
+                    return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
+                if 'newPassword' and 'confirmPassword' in request.form and len(request.form['newPassword']) > 0 and len(request.form['confirmPassword']) > 0:
+                    if request.form['newPassword'] == request.form['confirmPassword']:
+                        cursor.execute("UPDATE accounts SET password=%s, `email`=%s, `group`=%s WHERE username=%s", (returnHash(request.form['newPassword']+salt), request.form['email'], int(request.form['group']), user))
+                    else:
+                        return render_template('error.html', errorMsg="Passwords do not match", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                else:
+                    cursor.execute("UPDATE accounts SET email=%s, `group`=%s WHERE username=%s", (request.form['email'], int(request.form['group']), user))
+                mysql.connection.commit()
+                return redirect(url_for("manageUser", user=user))
+            except Exception as e:
+               print(e)
+               return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        else:
+            return render_template('error.html', errorMsg="Insufficient permissions", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+    else:
+        return "Request must be POST"
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=configData["port"])
