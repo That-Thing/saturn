@@ -24,6 +24,9 @@
         <div class="box box-settings">
             <h2 class="box-header">{{user['username']}}</h2>
             <div id="user-information" class="settings-category">
+                {%if user['banned'] == 1%}
+                <h3 class="banned-user bold">This user has been banned</h3>
+                {%endif%}
                 <h4>User Details</h4>
                 <span>User ID: {{user['id']}}</span><br>
                 <span>Permissions group: {{user['group']}} [{%for group in groups%}{%if group['id'] == user['group']%}{{group['name']}}{%endif%}{%endfor%}]</span><br>

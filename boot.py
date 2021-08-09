@@ -791,7 +791,7 @@ def register():
             else:
                 # Account doesnt exists and the form data is valid, now insert new account into accounts table
                 password = returnHash(password)
-                cursor.execute('INSERT INTO accounts VALUES (NULL, %s, %s, %s, 4, %s, %s)', (username, password, email, time.time(), str(request.remote_addr)))
+                cursor.execute('INSERT INTO accounts VALUES (NULL, %s, %s, %s, 4, %s, %s, NULL)', (username, password, email, time.time(), str(request.remote_addr)))
                 mysql.connection.commit()
                 msg = 'You have successfully registered!'
                 return render_template('login.html', msg="Registration complete, please log in", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)

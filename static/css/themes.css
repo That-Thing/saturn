@@ -22,6 +22,7 @@
     --post-shadow: 3px 5px 10px rgb(0 0 0 / 33%); /*Shadow behind objects like posts*/
     --marked-post: #1d2226; /*Background of marked post*/
     --marked-post-border: 1px #2a313742 solid; /*Border of marked post*/
+    --banned-user: red; /*Banned user style*/
 }
 
 

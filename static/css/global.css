@@ -118,7 +118,7 @@ input, select, textarea {
     margin-left: 5px;
 }
 .msg {
-    color: #767676;
+    color: var(--small-text);
 }
 /*Boxes containing content*/
 .box {
@@ -520,4 +520,8 @@ p {
 }
 .user-owned-boards {
     margin-left: 10%;
+}
+
+.banned-user {
+    color: var(--banned-user);
 }
