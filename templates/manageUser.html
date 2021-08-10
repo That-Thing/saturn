@@ -68,6 +68,14 @@
                     </label>
                     <p><input class="btn btn-primary" type="submit" value="Update"></p>
                 </form>
+                <h4>Delete user</h4>
+                <form action="{{url_for('deleteUser', user=user['username'])}}" method="POST">
+                    <label>
+                        Confirm user deletion
+                        <input type="checkbox" id="delete-checkbox" name="confirm-delete" value="confirm">
+                    </label>
+                    <p><input class="btn btn-primary" type="submit" value="Delete"></p>
+                </form>
             </div>
         </div>
     </body>

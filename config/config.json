@@ -6,7 +6,7 @@
     "siteFavicon": "static/images/favicon.png",
     "spoilerImage": "static/images/spoiler.png",
     "bannerLocation": "static/banners",
-    "requiredRole": "1",
+    "requiredRole": "4",
     "enableRegistration": "on",
     "mimeTypes": "image/jpeg,image/png,image/gif",
     "maxFiles": "3",

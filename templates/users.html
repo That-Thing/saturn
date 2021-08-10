@@ -27,7 +27,7 @@
                 <div class="manage-user">
                     <a href="{{ url_for('manageUser', user=user['username']) }}" class='manage-link'><i class="fas fa-cog"></i></a>
                     {%if user['banned'] == 1%}
-                        <span title="This is banned">{{user['id']}}. <span class="banned-user">{{user['username']}}</span></span>
+                        <span title="{{user['username']}} is banned">{{user['id']}}. <span class="banned-user">{{user['username']}}</span></span>
                     {%else%}
                         <span>{{user['id']}}. {{user['username']}}</span>
                     {%endif%}

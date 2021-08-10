@@ -605,7 +605,7 @@ def createBoard():
     globalSettings = reloadSettings()
     if request.method == 'POST':
         try:
-            if int(session['group']) <= 1 or globalSettings['requiredRole'] <= int(session['group']):
+            if globalSettings['requiredRole'] >= int(session['group']):
                 cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
                 cursor.execute("SELECT * FROM boards WHERE uri=%s", [request.form['uri']])
                 board = cursor.fetchone()
@@ -746,7 +746,9 @@ def login():
         cursor.execute('SELECT * FROM accounts WHERE username = %s AND password = %s', (request.form['username'], passwordHash))
         account = cursor.fetchone()
         if account:
-            if account['password'] == passwordHash and account['username'] == request.form['username']:
+            if account['banned'] == 1:
+                msg = 'This user is banned.'
+            elif account['password'] == passwordHash and account['username'] == request.form['username']:
                 session['loggedin'] = True
                 session['id'] = account['id']
                 session['username'] = account['username']
@@ -1399,6 +1401,39 @@ def updateUser(user):
             except Exception as e:
                print(e)
                return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        else:
+            return render_template('error.html', errorMsg="Insufficient permissions", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+    else:
+        return "Request must be POST"
+#Delete user
+@app.route("/user/<user>/delete", methods=['POST'])
+def deleteUser(user):
+    checkGroup()
+    if request.method == 'POST':
+        if session['group'] <= 1:
+            if 'confirm-delete' in request.form and request.form['confirm-delete'] == 'confirm':
+                try:
+                    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+                    cursor.execute("SELECT * FROM accounts WHERE username=%s", [user])
+                    userData = cursor.fetchone()
+                    if userData == None: #User doesn't exist
+                        return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
+                    if userData['group'] < session['group']: #Permissions are too low
+                        return render_template('error.html', errorMsg="Insufficient permissions", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                    cursor.execute("SELECT * FROM boards WHERE owner=%s", [user]) #Checks if the deleted user owned any boards, and if so, transfers ownership of the boards to the current user. 
+                    boards = cursor.fetchall()
+                    if boards != None:
+                        for board in boards:
+                            cursor.execute("UPDATE boards SET owner=%s WHERE owner=%s", (session['username'], user))
+                    mysql.connection.commit()
+                    cursor.execute("DELETE FROM accounts WHERE username=%s AND id=%s", (user, userData['id'])) #Delete account
+                    mysql.connection.commit()
+                    return redirect(url_for("users"))
+                except Exception as e:
+                    print(e)
+                    return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+            else:
+                return render_template('error.html', errorMsg="You must confirm user deletion", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         else:
             return render_template('error.html', errorMsg="Insufficient permissions", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     else:
