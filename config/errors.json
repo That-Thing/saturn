@@ -1,0 +1,11 @@
+{
+    "insufficientPermissions": "Insufficient permissions",
+    "passwordsDoNotMatch": "Entered passwords do not match",
+    "unfilledFields": "Please fill out all the required fields",
+    "RequestNotPost": "Request must be post",
+    "notLoggedIn": "You are not logged in",
+    "incorrectPassword": "The password you entered is incorrect",
+    "usernameRegexFail": "Username can only contain letters and numbers",
+    "accountExists": "An account with that username already exists, please enter a different username",
+    "emailRegexFail": "Incorrectly formatted email address"
+}

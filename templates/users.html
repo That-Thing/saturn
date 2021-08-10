@@ -43,6 +43,38 @@
                 </div>
             {%endfor%}
         </div>
+        <div class="box box-settings" id="box-create-user">
+            <h2 class="box-header">Create User</h2>
+            <div class="settings-category">
+                <form action="{{url_for("createUser")}}" method="POST">
+                    <label>
+                        Username:
+                        <input type="text" name="username" id="username-input" required autocomplete="off" pattern="^[a-zA-Z0-9_.-]*$">
+                    </label>
+                    <label>
+                        Password:
+                        <input type="password" name="password" id="password-input" required autocomplete="off">
+                    </label>
+                    <label>
+                        Confirm password:
+                        <input type="password" name="confirm-password" id="confirm-password-input" required autocomplete="off">
+                    </label>
+                    <label> 
+                        User group:
+                        <select name="group" id="userRole">
+                            {% for group in aGroups %}
+                                <option value="{{group['id']}}">{{group['name']}}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                    <label>
+                        email (optional):
+                        <input type="email" name="email" id="email-input" autocomplete="off">
+                    </label>
+                    <p><input class="btn btn-primary" type="submit" value="Create"></p>
+                </form>
+            </div>
+        </div>
     </body>
     <script src="{{ url_for('static', filename='js/themes.js') }}"></script>
 </html>
