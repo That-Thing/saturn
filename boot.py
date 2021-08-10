@@ -1410,12 +1410,12 @@ def updateUser(user):
 def deleteUser(user):
     checkGroup()
     if request.method == 'POST':
-        if session['group'] <= 1:
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT * FROM accounts WHERE username=%s", [user])
+        userData = cursor.fetchone()
+        if session['group'] < userData['group']:
             if 'confirm-delete' in request.form and request.form['confirm-delete'] == 'confirm':
                 try:
-                    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-                    cursor.execute("SELECT * FROM accounts WHERE username=%s", [user])
-                    userData = cursor.fetchone()
                     if userData == None: #User doesn't exist
                         return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
                     if userData['group'] < session['group']: #Permissions are too low

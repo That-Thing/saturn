@@ -94,3 +94,6 @@ li {
 #captcha-td {
     display: grid;
 }
+#refresh-link {
+    cursor: pointer;
+}
