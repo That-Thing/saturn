@@ -195,7 +195,6 @@
                     {%endif%}
                     <span>{{op['date'] | ut}}</span>
                     <span><a class="postNumber" href="#{{op['number']}}">No.</a><a href="#q{{op['number']}}" class="postNumber">{{op['number']}}</a></span>
-                    <span>[<a class="reply">Reply</a>]</span>
                     {%if op['replies'] != None and op['replies'].split(',')%}
                         <span>
                             {%set replies = op['replies'].split(',')%}
@@ -265,7 +264,6 @@
                             {%endif%}
                             <span>{{post['date'] | ut}}</span>
                             <span><a class="postNumber" href="#{{post['number']}}">No.</a><a href="#q{{post['number']}}" onclick="reply(this)" class="postNumber">{{post['number']}}</a></span>
-                            <span>[<a class="reply">Reply</a>]</span>
                             {%if post['replies'] != None and post['replies'].split(',')%}
                                 <span>
                                     {%set replies = post['replies'].split(',')%}

@@ -195,7 +195,7 @@
                                 {%endif%}
                                 <span>{{thread['date'] | ut}}</span>
                                 <span><a class="postNumber" href="thread/{{thread['number']}}#{{thread['number']}}">No.</a><a href="thread/{{thread['number']}}#q{{thread['number']}}" class="postNumber">{{thread['number']}}</a></span>
-                                <span>[<a class="reply">Reply</a>]</span>
+                                <span>[<a class="reply" href="thread/{{thread['number']}}#q{{thread['number']}}">Reply</a>]</span>
                                 {%if thread['replies'] != None and thread['replies'].split(',')%}
                                     <span>
                                         {%set replies = thread['replies'].split(',')%}
@@ -266,7 +266,6 @@
                                         {%endif%}
                                         <span>{{post['date'] | ut}}</span>
                                         <span><a class="postNumber" href="thread/{{thread['number']}}#{{post['number']}}">No.</a><a href="thread/{{thread['number']}}#q{{post['number']}}" class="postNumber">{{post['number']}}</a></span>
-                                        <span>[<a class="reply">Reply</a>]</span>
                                         {%if post['replies'] != None and post['replies'].split(',')%}
                                             <span>
                                                 {%set replies = post['replies'].split(',')%}

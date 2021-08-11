@@ -26,6 +26,7 @@
             <div id="user-information" class="settings-category">
                 {%if user['banned'] == 1%}
                 <h3 class="banned-user bold">This user has been banned</h3>
+                <span class="banned-user">Banned for: {{ban['length'] | simplifyTime}}</span>
                 {%endif%}
                 <h4>User Details</h4>
                 <span>User ID: {{user['id']}}</span><br>
@@ -68,6 +69,21 @@
                     </label>
                     <p><input class="btn btn-primary" type="submit" value="Update"></p>
                 </form>
+                {%if user['banned'] == 0%}
+                    <h4>Ban user</h4>
+                    <form action="{{url_for('banUser', user=user['username'])}}" method="POST">
+                        <label>
+                            Reason:
+                            <input type="text" name="reason" id="reason-input" autocomplete="off">
+                        </label>
+                        <label>
+                            Length:
+                            <input type="text" name="length" id="length-input" autocomplete="off">
+                            <span class="small">ex: 1y2m3d4h5</span>
+                        </label>
+                        <p><input class="btn btn-primary" type="submit" value="Ban"></p>
+                    </form>
+                {%endif%}
                 <h4>Delete user</h4>
                 <form action="{{url_for('deleteUser', user=user['username'])}}" method="POST">
                     <label>

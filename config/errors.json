@@ -10,5 +10,6 @@
     "emailRegexFail": "Incorrectly formatted email address",
     "fileLimitExceeded": "Maximum file limit exceeded",
     "incorrectFiletype": "Incorrect file type submitted",
-    "incorrectCaptcha": "Incorrect captcha"
+    "incorrectCaptcha": "Incorrect captcha",
+    "alreadyBanned": "User is already banned"
 }

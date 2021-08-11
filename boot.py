@@ -242,7 +242,23 @@ def checkPostLink(text): #I know I already have this in the checkMarkdown functi
     else:
         return False
 
-
+#Returns time in minutes
+def getMinutes(text):
+    time = { #time in minutes
+        'y':525600,
+        'm':43800,
+        'd':1440,
+        'h':60     
+    }
+    minutes = 0
+    individual = re.findall(r'[0-9]+[y|m|d|h]|[0-9]+', text.lower())
+    for x in individual:
+        x = re.findall(r'[0-9]+|[y|m|d|h]', x)
+        if len(x) == 2:
+            minutes += int(time[x[1]])*int(x[0])
+        else:
+            minutes += int(x[0])
+    return minutes
 #filters
 @app.template_filter('ut') #convert unix time to normal datetime
 def normalizetime(timestamp):
@@ -351,6 +367,30 @@ def hasSignature(trip):
         if group['name'] == trip:
             return True
     return False
+
+@app.template_filter("simplifyTime")
+def simplifyTime(minutes):
+    time = {
+        'Year':525600,
+        'Month':43800,
+        'Day':1440,
+        'Hour':60,
+        'Minute':1     
+    }
+    if minutes == None:
+        return "Forever"
+    result = ""
+    for unit in time:
+        if minutes >= time[unit]:
+            name = unit
+            floor = math.floor(minutes/time[unit])
+            if floor > 1:
+                name = unit+"s"
+            result += f"{str(floor)} {name} "
+            print(result)
+            print(minutes)
+            minutes = minutes - floor*time[unit]
+    return result
 #Make local timestamps
 #add relative times
 
@@ -1212,12 +1252,15 @@ def manageUser(user):
     user = cursor.fetchone()
     cursor.execute("SELECT * FROM groups WHERE id > %s", [session['group']])
     groups = cursor.fetchall()
+    cursor.execute("SELECT * FROM bans WHERE user = %s", [user['username']])
+    ban = cursor.fetchone()
+    print(ban)
     if user == None: 
         return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
     if user['group'] <= session['group']: #Returns an insufficient permission error if the user's group has less permissions than the requested user
         return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     if session['group'] <= 1:
-        return render_template('manageUser.html', user=user, groups=groups, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        return render_template('manageUser.html', user=user, groups=groups, ban=ban, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     else:
         return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 #Update user information
@@ -1309,6 +1352,37 @@ def createUser():
             return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     else:
         return errors['RequestNotPost']
+
+#Ban User
+@app.route("/user/<user>/ban", methods=['POST'])
+def banUser(user):
+    if request.method == 'POST':
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT * FROM accounts WHERE username=%s", [user])
+        userData = cursor.fetchone()
+        if userData == None: #Checks if the user exists. 
+            return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
+        if userData['banned'] == 1: #Checks if the user is already banned. 
+            return render_template('error.html', errorMsg=errors['alreadyBanned'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        if int(session['group']) <= 1 and session['group'] < userData['group']:
+            if 'reason' in request.form and len(request.form['reason']) > 0: #Checks if a reason was given
+                reason = request.form['reason']
+            else:
+                reason = None
+            if 'length' in request.form and len(request.form['length']) > 0: #Checks if a reason was given
+                length = getMinutes(request.form['length'])
+                print(length)
+            else:
+                reason = None
+            cursor.execute("UPDATE accounts SET banned=1 WHERE username=%s", [user])
+            cursor.execute("INSERT INTO bans VALUES(NULL, %s, %s, %s, NULL, %s)", (reason, length, user, time.time()))
+            mysql.connection.commit()
+            print("Connection done")
+            return redirect(url_for("manageUser", user=user))
+        else:
+            return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+    else:
+        return errors['RequestNotPost']  
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=configData["port"])
