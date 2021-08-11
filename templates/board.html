@@ -166,22 +166,24 @@
                                         </div>
                                     </form>
                                 </span>
-                                <span class="subject">{{thread['subject']}}</span>
+                                {%if thread['subject'] != None%}
+                                    <span class="subject">{{thread['subject']}}</span>
+                                {%endif%}
                                 {%if thread['trip']|hasSignature == True%}
-                                    {%if thread['options'] | length > 0%}
+                                    {%if thread['options'] != None%}
                                         <a class="name optionsName" href="mailto:{{thread['options']}}" target="_blank">{{thread['name']}}##<span class="{{thread['trip']}}">{{thread['trip']}}</span></a>
                                     {%else%}
                                         <span class="name">{{thread['name']}}##<span class="{{thread['trip']}}">{{thread['trip']}}</span></a>
                                     {%endif%}
                                 {%else%}
                                     {%if thread['trip'] != None%}
-                                        {%if thread['options'] | length > 0%}
+                                        {%if thread['options'] != None%}
                                             <a class="name optionsName" href="mailto:{{thread['options']}}" target="_blank">{{thread['name']}}##{{thread['trip']}}</a>
                                         {%else%}
                                             <span class="name">{{thread['name']}}##{{thread['trip']}}</span>
                                         {%endif%}
                                     {%else%}
-                                        {%if thread['options'] | length > 0%}
+                                        {%if thread['options'] != None%}
                                             <a class="name optionsName" href="mailto:{{thread['options']}}" target="_blank">{{thread['name']}}</a>
                                         {%else%}
                                             <span class="name">{{thread['name']}}</span>
@@ -235,22 +237,24 @@
                                             </form>
                                         </span>
                                         <input type="checkbox" name="{{post['number']}}-{{board}}">
-                                        <span class="subject">{{post['subject']}}</span>
+                                        {%if post['subject'] != None%}
+                                            <span class="subject">{{post['subject']}}</span>
+                                        {%endif%}
                                         {%if post['trip']|hasSignature == True%}
-                                            {%if post['options'] | length > 0%}
+                                            {%if post['options'] != None%}
                                                 <a class="name optionsName" href="mailto:{{post['options']}}" target="_blank">{{post['name']}}##<span class="{{post['trip']}}">{{post['trip']}}</span></a>
                                             {%else%}
                                                 <span class="name">{{post['name']}}##<span class="{{post['trip']}}">{{post['trip']}}</span></a>
                                             {%endif%}
                                         {%else%}
                                             {%if post['trip'] != None%}
-                                                {%if post['options'] | length > 0%}
+                                                {%if post['options'] != None%}
                                                     <a class="name optionsName" href="mailto:{{post['options']}}" target="_blank">{{post['name']}}##{{post['trip']}}</a>
                                                 {%else%}
                                                     <span class="name">{{post['name']}}##{{post['trip']}}</span>
                                                 {%endif%}
                                             {%else%}
-                                                {%if post['options'] | length > 0%}
+                                                {%if post['options'] != None%}
                                                     <a class="name optionsName" href="mailto:{{post['options']}}" target="_blank">{{post['name']}}</a>
                                                 {%else%}
                                                     <span class="name">{{post['name']}}</span>

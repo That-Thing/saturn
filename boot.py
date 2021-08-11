@@ -912,146 +912,105 @@ def uploadFile(f, board, filename, spoiler):
 
 @app.route('/newThread', methods=['POST'])
 def newThread():
-    filePass = checkFilePass()
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT * FROM boards")
-    boards = cursor.fetchall()
-    tripcode = None
-    for x in boards:
-        if x['uri'] == request.form['board']:
-            mimeTypes = globalSettings['mimeTypes'].split(',')
-            curTime = time.time()
-            if "name" in request.form and len(request.form['name']) > 0:
-                name = request.form['name']
-                name = stripHTML(name)
-                session['name'] = name
-                tripcode = checkTrip(name, int(session['group']))
-                if tripcode != False:
-                    name = name.split("##",1)[0]
-                else:
-                    tripcode = None
+    if request.method == 'POST':
+        filePass = checkFilePass()
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        if "board" not in request.form: #Checks if a board was given.
+            return render_template('error.html', errorMsg=errors['unfilledFields'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        cursor.execute("SELECT * FROM boards WHERE uri=%s", [request.form['board']])
+        board = cursor.fetchone()
+        if board == None: #Returns a 404 if board doesn't exist
+            return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
+        tripcode = None
+        mimeTypes = globalSettings['mimeTypes'].split(',')
+        curTime = time.time()
+        if "name" in request.form and len(request.form['name']) > 0: #Checks if a name is given
+            name = request.form['name']
+            name = stripHTML(name)
+            session['name'] = name
+            tripcode = checkTrip(name, int(session['group']))
+            if tripcode != False:
+                name = name.split("##",1)[0]
             else:
-                name = x['anonymous']
-            if 'subject' in request.form and len(request.form['subject']) > 0:
-                subject = request.form['subject']
-                subject = stripHTML(subject)
-            else:
-                subject = ""
-            if 'options' in request.form and len(request.form['options']) > 0:
-                options = request.form['options']
-                options = stripHTML(options)
-                options = options.lower()
-            else:
-                options = ""     
-            if "spoiler" in request.form:
-                if request.form['spoiler'] == "on":
-                    spoiler = 1
-                else:
-                    spoiler = 0
+                tripcode = None
+        else:
+            name = board['anonymous'] #sets name to default board anon name
+        if 'subject' in request.form and len(request.form['subject']) > 0: #Checks if a subject was given
+            subject = request.form['subject']
+            subject = stripHTML(subject)
+        else:
+            subject = None
+        if 'options' in request.form and len(request.form['options']) > 0: #Checks if options were given
+            options = request.form['options']
+            options = stripHTML(options)
+            options = options.lower()
+        else:
+            options = None     
+        if "spoiler" in request.form: #Checks if a spoiler was indicated
+            if request.form['spoiler'] == "on":
+                spoiler = 1
             else:
                 spoiler = 0
-            comment = request.form['comment']
-            comment = stripHTML(comment)
-            postLink = checkPostLink(comment)
-            if 'password' in request.form:
-                filePass = request.form['password']
-            if x['captcha'] == 1:
-                clearCaptcha() #clears captcha so it can't be used again to make a new thread.
-                if request.method == 'POST' and 'comment' in request.form and 'captcha' in request.form and request.files['file'].filename != '':
-                    if session['captcha'] == request.form['captcha']:
-                        files = request.files.getlist("file")
-                        if len(files) > globalSettings['maxFiles']: #check if too many files are uploaded
-                            return "Maximum file limit exceeded"
-                        else:
-                            filenames = []
-                            filePaths = []
-                            for f in files: #downloads the files and stores them on the disk
-                                if f.mimetype in mimeTypes:
-                                    filename = uploadFile(f, x['uri'], str(curTime), spoiler)
-                                    filePaths.append(filename)
-                                    filenames.append(secure_filename(f.filename))
-                                else:
-                                    return "Incorrect file type submitted"
-                            filenames = ','.join([str(x) for x in filenames])
-                            filePaths = ','.join([str(x) for x in filePaths])
-                        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, %s, %s, %s, %s, %s, %s, %s, %s, NULL)', (name, subject, options, comment, x['posts']+1, curTime, x['posts']+1, x['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode))
-                        if postLink != False:
-                            for x in postLink:
-                                cursor.execute("SELECT * FROM posts WHERE number = %s", [x])
-                                currentReplies = cursor.fetchone()
-                                if currentReplies:
-                                    currentReplies = currentReplies['replies']
-                                    if currentReplies != None:
-                                        currentReplies = currentReplies.split(",")
-                                    else:
-                                        currentReplies = []
-                                    currentReplies.append(f"{str(request.form['thread'])}/{str(number)}")
-                                    currentReplies = ",".join(currentReplies)
-                                    cursor.execute("UPDATE posts SET replies = %s WHERE number = %s", (currentReplies, x))
-                        cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (x['posts']+1, x['uri']))
-                        cursor.execute("SELECT * FROM server")
-                        serverInfo = cursor.fetchone()
-                        cursor.execute("UPDATE server SET posts=%s", [serverInfo['posts']+1])
-                        mysql.connection.commit()
-                        ownedPosts = request.cookies.get('ownedPosts')
-                        if ownedPosts == None:
-                            ownedPosts = "{}"
-                        ownedPosts = json.loads(ownedPosts)
-                        ownedPosts[f"{x['uri']}/{x['posts']+1}"] = filePass
-                        resp = redirect(f"{x['uri']}/thread/{x['posts']+1}")
-                        resp.set_cookie('ownedPosts', json.dumps(ownedPosts))
-                        return resp
-                    else:
-                        return "Incorrect captcha"
+        else:
+            spoiler = 0
+        if 'password' in request.form: #Checks if a password was given in the request
+            filePass = request.form['password']
+        if 'comment' not in request.form and len(request.files['file'].filename) == 0: #Checks if all required files are present
+            return render_template('error.html', errorMsg=errors['unfilledFields'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        comment = request.form['comment']
+        comment = stripHTML(comment)
+        postLink = checkPostLink(comment)
+        if board['captcha'] == 1: #Checks if the board has captcha enabled, and if so, checks if the entred captcha text is correct
+            clearCaptcha() #clears captcha so it can't be used again to make a new thread.
+            if 'captcha' not in request.form:
+                return render_template('error.html', errorMsg=errors['unfilledFields'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+            if session['captcha'] != request.form['captcha']: #Checks if the captcha is incorrect.
+                return render_template('error.html', errorMsg=errors['incorrectCaptcha'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        files = request.files.getlist("file") #Gets all the files from the request
+        if len(files) > globalSettings['maxFiles']: #check if too many files are uploaded
+            return render_template('error.html', errorMsg=errors['fileLimitExceeded'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        else:
+            filenames = []
+            filePaths = []
+            for f in files: #downloads the files and stores them on the disk
+                if f.mimetype in mimeTypes:
+                    filename = uploadFile(f, board['uri'], str(curTime), spoiler)
+                    filePaths.append(filename)
+                    filenames.append(secure_filename(f.filename))
                 else:
-                    return render_template('error.html', errorMsg=errors['unfilledFields'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
-            else:
-                if request.method == 'POST' and 'comment' in request.form and request.files['file'].filename != '':
-                    files = request.files.getlist("file")
-                    if len(files) > globalSettings['maxFiles']: #check if too many files are uploaded
-                        return "Maximum file limit exceeded"
+                    return render_template('error.html', errorMsg=errors['incorrectFiletype'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
+            filenames = ','.join([str(x) for x in filenames])
+            filePaths = ','.join([str(x) for x in filePaths])
+        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, %s, %s, %s, %s, %s, %s, %s, %s, NULL)', (name, subject, options, comment, board['posts']+1, curTime, board['posts']+1, board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode))
+        if postLink != False:
+            for x in postLink:
+                cursor.execute("SELECT * FROM posts WHERE number = %s", [x])
+                currentReplies = cursor.fetchone()
+                if currentReplies:
+                    currentReplies = currentReplies['replies']
+                    if currentReplies != None:
+                        currentReplies = currentReplies.split(",")
                     else:
-                        filenames = []
-                        filePaths = []
-                        for f in files: #downloads the files and stores them on the disk
-                            if f.mimetype in mimeTypes:
-                                filename = uploadFile(f, x['uri'], str(curTime), spoiler)
-                                filePaths.append(filename)
-                                filenames.append(secure_filename(f.filename))
-                            else:
-                                return "Incorrect file type submitted"
-                        filenames = ','.join([str(x) for x in filenames])
-                        filePaths = ','.join([str(x) for x in filePaths])
-                    cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, %s, %s, %s, %s, %s, %s, %s, %s, NULL)', (name, subject, options, comment, x['posts']+1, curTime, x['posts']+1,x['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode))
-                    if postLink != False:
-                        for x in postLink:
-                            cursor.execute("SELECT * FROM posts WHERE number = %s", [x])
-                            currentReplies = cursor.fetchone()
-                            if currentReplies:
-                                currentReplies = currentReplies['replies']
-                                if currentReplies != None:
-                                    currentReplies = currentReplies.split(",")
-                                else:
-                                    currentReplies = []
-                                currentReplies.append(f"{str(request.form['thread'])}/{str(number)}")
-                                currentReplies = ",".join(currentReplies)
-                                cursor.execute("UPDATE posts SET replies = %s WHERE number = %s", (currentReplies, x))
-                    cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (x['posts']+1, x['uri']))
-                    cursor.execute("SELECT * FROM server")
-                    serverInfo = cursor.fetchone()
-                    cursor.execute("UPDATE server SET posts=%s", [serverInfo['posts']+1])
-                    mysql.connection.commit()
-                    ownedPosts = request.cookies.get('ownedPosts')
-                    if ownedPosts == None:
-                        ownedPosts = "{}"
-                    ownedPosts = json.loads(ownedPosts)
-                    ownedPosts[f"{x['uri']}/{x['posts']+1}"] = filePass
-                    resp = redirect(f"{x['uri']}/thread/{x['posts']+1}")
-                    resp.set_cookie('ownedPosts', json.dumps(ownedPosts))
-                    return resp
-                else:
-                    return render_template('error.html', errorMsg="Please make sure the message and files are present.", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
-
+                        currentReplies = []
+                    currentReplies.append(f"{str(request.form['thread'])}/{str(number)}")
+                    currentReplies = ",".join(currentReplies)
+                    cursor.execute("UPDATE posts SET replies = %s WHERE number = %s", (currentReplies, x))
+        cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (board['posts']+1, board['uri']))
+        cursor.execute("SELECT * FROM server")
+        serverInfo = cursor.fetchone()
+        cursor.execute("UPDATE server SET posts=%s", [serverInfo['posts']+1])
+        mysql.connection.commit()
+        ownedPosts = request.cookies.get('ownedPosts')
+        if ownedPosts == None:
+            ownedPosts = "{}"
+        ownedPosts = json.loads(ownedPosts)
+        ownedPosts[f"{board['uri']}/{board['posts']+1}"] = filePass
+        resp = redirect(f"{board['uri']}/thread/{board['posts']+1}")
+        resp.set_cookie('ownedPosts', json.dumps(ownedPosts))
+        return resp         
+        return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
+    else:
+        return errors['RequestNotPost'] 
 
 @app.route('/<board>/thread/<thread>', methods=['GET'])
 @app.route('/<board>/thread/<thread>', methods=['GET'])
@@ -1307,10 +1266,7 @@ def postActions(board):
     else:
         return errors['RequestNotPost']
 
-
-
 #Moderation pages. 
-
 
 #Account moderation
 @app.route('/users', methods=['GET'])
@@ -1404,6 +1360,7 @@ def deleteUser(user):
     else:
         return errors['RequestNotPost']
 
+#User creation through the /users page
 @app.route("/user/create", methods=['POST'])
 def createUser():
     if request.method == 'POST':
