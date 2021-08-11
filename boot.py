@@ -830,23 +830,23 @@ def boardPage(board):
         ownedPosts = {}
     filePass = checkFilePass() #gets user's password for files
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT * FROM boards")
-    boards = cursor.fetchall()
-    for x in boards:
-        if x['uri'] == board:
-            posts = bumpOrder(board)
-            postLength = len(posts)
-            posts = posts[0:1*int(x['perPage'])]
-            path = os.path.join(globalSettings['bannerLocation'], board)
-            if len(os.listdir(path)) > 0:
-                banner = os.path.join(path, random.choice(os.listdir(path)))
-            else:
-                banner = "static/banners/defaultbanner.png"
-            if x['captcha'] == 1:
-                captcha = generateCaptcha(globalSettings['captchaDifficulty'])
-                return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, captcha=captcha, threads=posts, filePass=filePass, postLength=postLength, owned=ownedPosts, page=1, themes=themes)
-            else:
-                return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, threads=posts, filePass=filePass, postLength=postLength, owned=ownedPosts, page=1, themes=themes)
+    cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
+    board = cursor.fetchone()
+    if board == None:
+        return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
+    posts = bumpOrder(board['uri'])
+    postLength = len(posts)
+    posts = posts[0:1*int(board['perPage'])]
+    path = os.path.join(globalSettings['bannerLocation'], board['uri'])
+    if len(os.listdir(path)) > 0:
+        banner = os.path.join(path, random.choice(os.listdir(path)))
+    else:
+        banner = "static/banners/defaultbanner.png"
+    if board['captcha'] == 1:
+        captcha = generateCaptcha(globalSettings['captchaDifficulty'])
+        return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, captcha=captcha, threads=posts, filePass=filePass, postLength=postLength, owned=ownedPosts, page=1, themes=themes)
+    else:
+        return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, threads=posts, filePass=filePass, postLength=postLength, owned=ownedPosts, page=1, themes=themes)
     return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
 
 #individual pages
@@ -1025,20 +1025,20 @@ def thread(board, thread):
     parentPost = cursor.fetchall()
     cursor.execute("SELECT * FROM posts WHERE board=%s AND thread=%s and type=2", (board, thread))
     posts = cursor.fetchall()
-    cursor.execute("SELECT * FROM boards")
-    boards = cursor.fetchall()
-    for x in boards:
-        if x['uri'] == board:
-            path = os.path.join(globalSettings['bannerLocation'], board)
-            if len(os.listdir(path)) > 0:
-                banner = os.path.join(path, random.choice(os.listdir(path)))
-            else:
-                banner = "static/banners/defaultbanner.png"
-            if x['captcha'] == 1:
-                captcha = generateCaptcha(globalSettings['captchaDifficulty'])
-                return render_template('thread.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, captcha=captcha, posts=posts, owned=ownedPosts, op=parentPost[0], filePass=filePass, themes=themes)
-            else:
-                return render_template('thread.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board, boardData=x, banner=banner, posts=posts, op=parentPost[0], owned=ownedPosts, filePass=filePass, themes=themes)
+    cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
+    board = cursor.fetchone()
+    if board == None: #board doesn't exist
+        return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
+    path = os.path.join(globalSettings['bannerLocation'], board['uri'])
+    if len(os.listdir(path)) > 0:
+        banner = os.path.join(path, random.choice(os.listdir(path)))
+    else:
+        banner = "static/banners/defaultbanner.png"
+    if board['captcha'] == 1:
+        captcha = generateCaptcha(globalSettings['captchaDifficulty'])
+        return render_template('thread.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, captcha=captcha, posts=posts, owned=ownedPosts, op=parentPost[0], filePass=filePass, themes=themes)
+    else:
+        return render_template('thread.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, posts=posts, op=parentPost[0], owned=ownedPosts, filePass=filePass, themes=themes)
     return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
 
 
