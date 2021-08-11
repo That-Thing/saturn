@@ -11,5 +11,6 @@
     "fileLimitExceeded": "Maximum file limit exceeded",
     "incorrectFiletype": "Incorrect file type submitted",
     "incorrectCaptcha": "Incorrect captcha",
-    "alreadyBanned": "User is already banned"
+    "alreadyBanned": "User is already banned",
+    "notBanned": "User is not banned"
 }

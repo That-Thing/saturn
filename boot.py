@@ -387,8 +387,6 @@ def simplifyTime(minutes):
             if floor > 1:
                 name = unit+"s"
             result += f"{str(floor)} {name} "
-            print(result)
-            print(minutes)
             minutes = minutes - floor*time[unit]
     return result
 #Make local timestamps
@@ -843,7 +841,6 @@ def generateCaptcha(difficulty):
     session["captcha"] = captchaText
     session["captchaF"] = f'./static/captchas/{filename}.png'
     session["captchaExpire"] = datetime.now() + timedelta(minutes = globalSettings['captchaExpire']) #Set expire time for captcha. Add into global settings later. 
-    print(session["captchaExpire"])
     return f'./static/captchas/{filename}.png'
 
 def clearCaptcha():
@@ -1138,9 +1135,6 @@ def reply():
                 return render_template('error.html', errorMsg=errors['incorrectCaptcha'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         files = request.files.getlist("file")
         if request.files['file'].filename != '':
-            print("Files were given!")
-            print(files)
-            print(len(files))
             if len(files) > globalSettings['maxFiles']: #check if too many files are uploaded
                 return render_template('error.html', errorMsg=errors['fileLimitExceeded'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
             else:
@@ -1254,7 +1248,6 @@ def manageUser(user):
     groups = cursor.fetchall()
     cursor.execute("SELECT * FROM bans WHERE user = %s", [user['username']])
     ban = cursor.fetchone()
-    print(ban)
     if user == None: 
         return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
     if user['group'] <= session['group']: #Returns an insufficient permission error if the user's group has less permissions than the requested user
@@ -1371,18 +1364,33 @@ def banUser(user):
                 reason = None
             if 'length' in request.form and len(request.form['length']) > 0: #Checks if a reason was given
                 length = getMinutes(request.form['length'])
-                print(length)
             else:
-                reason = None
+                length = None
             cursor.execute("UPDATE accounts SET banned=1 WHERE username=%s", [user])
             cursor.execute("INSERT INTO bans VALUES(NULL, %s, %s, %s, NULL, %s)", (reason, length, user, time.time()))
             mysql.connection.commit()
-            print("Connection done")
             return redirect(url_for("manageUser", user=user))
         else:
             return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     else:
         return errors['RequestNotPost']  
-
+#Unban user
+@app.route("/user/<user>/unban", methods=['POST'])
+def unbanUser(user):
+    if request.method == 'POST':
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT * FROM accounts WHERE username=%s", [user])
+        userData = cursor.fetchone()
+        if userData == None: #Checks if the user exists. 
+            return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
+        if userData['banned'] == 0: #Checks if the user is already banned. 
+            return render_template('error.html', errorMsg=errors['notBanned'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        if int(session['group']) <= 1 and session['group'] < userData['group']:
+            cursor.execute("DELETE FROM bans WHERE user=%s", [user])
+            cursor.execute("UPDATE accounts SET banned=0 WHERE username=%s", [user])
+            mysql.connection.commit()
+            return redirect(url_for("manageUser", user=user))
+        else:
+            return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=configData["port"])
