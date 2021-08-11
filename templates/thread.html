@@ -264,7 +264,7 @@
                                 <span class="you">(you)</span>
                             {%endif%}
                             <span>{{post['date'] | ut}}</span>
-                            <span><a class="postNumber" href="#{{post['number']}}">No.</a><a href="#q{{post['number']}}" class="postNumber">{{post['number']}}</a></span>
+                            <span><a class="postNumber" href="#{{post['number']}}">No.</a><a href="#q{{post['number']}}" onclick="reply(this)" class="postNumber">{{post['number']}}</a></span>
                             <span>[<a class="reply">Reply</a>]</span>
                             {%if post['replies'] != None and post['replies'].split(',')%}
                                 <span>
