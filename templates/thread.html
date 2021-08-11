@@ -97,7 +97,7 @@
         </div>
         <div id="board-message">
             <hr>
-            <span>{{boardData['message']}}</span>
+            <span id="board-message-content">{{boardData['message']  | checkMarkdown(None, board, None) | safe}}</span>
             <hr>
         </div>
         <div id="thread-navigation">
