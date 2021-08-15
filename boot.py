@@ -17,6 +17,7 @@ from captcha.image import ImageCaptcha
 from PIL import Image
 import re
 import hashlib
+from flask_socketio import SocketIO, send
 with open('./config/config.json') as configFile: #global config file
     configData = json.load(configFile)
 with open('./config/database.json') as configFile: #database config
@@ -72,6 +73,10 @@ for f in os.listdir("./static/captchas"):
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 app.secret_key = 'test'
+socketio = SocketIO(app)
+socketio.init_app(app, cors_allowed_origins="*")
+
+
 
 #database
 app.config['MYSQL_HOST'] = databaseConfig["host"]
@@ -1075,7 +1080,6 @@ def thread(board, thread):
         return render_template('thread.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, posts=posts, op=parentPost[0], owned=ownedPosts, filePass=filePass, themes=themes)
     return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
 
-
 @app.route('/reply', methods=['POST'])
 def reply():
     if request.method == 'POST':
@@ -1149,7 +1153,7 @@ def reply():
                         return render_template('error.html', errorMsg=errors['incorrectFiletype'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
                 filenames = ','.join([str(x) for x in filenames])
                 filePaths = ','.join([str(x) for x in filePaths])
-                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s, %s, %s, NULL)', (name, subject, options, comment, number, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode))
+                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s, %s, %s, NULL)', (name, subject, options, comment, number, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode))                
         else: #No files are given
             cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s, %s, %s, %s, NULL)', (name, subject, options, comment, number, curTime, request.form['thread'], board['uri'], str(request.remote_addr), spoiler,filePass, tripcode))
         if postLink != False:
@@ -1177,9 +1181,13 @@ def reply():
         ownedPosts[f"{board['uri']}/{number}"] = filePass
         resp = redirect(f"{board['uri']}/thread/{request.form['thread']}#{number}")
         resp.set_cookie('ownedPosts', json.dumps(ownedPosts))
+        socketio.emit("replyEvent", broadcast=True) #Send reload signal through websocket
         return resp
     else:
-        return errors['RequestNotPost']  
+        return errors['RequestNotPost']
+
+
+
 
 
 @app.route('/<board>/postActions', methods=['POST'])

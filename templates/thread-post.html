@@ -1,0 +1,99 @@
+<div class="replyDiv" id="{{post['number']}}">
+    <div class="innerPost">
+        <div class="postInfo">
+            <span class="post-dropdown">
+                <i class="fas fa-caret-right dropdown-button-marker dropdown-button" onclick="dropdownFunction(this)"></i>
+                <form action="/{{board}}/postActions" method="POST">
+                    <div class="dropdown-content">
+                        <div class="dropdown-link" onclick="hidePostop(this)">Hide post</div>
+                        <hr>
+                        <input type="hidden" name="post" value="{{post['number']}}">
+                        {%if session['filePassword'] == post['password']%}
+                            <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete">
+                        {%elif session['group'] is defined and session['group'] <= 3%}
+                            <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete">
+                        {%else%}
+                            <input type="hidden" name="password">
+                            <div class="dropdown-link dropdown-submit" onclick="deletePrompt(this)">Delete</div>
+                            <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete" style="display: none;">
+                        {%endif%}
+                        <hr>  
+                        <div class="dropdown-link" type="submit">Report</div>
+                        <hr>  
+                        <div class="dropdown-link" onclick="">Filter</div>
+                    </div>
+                </form>
+            </span>
+            <input type="checkbox" name="{{post['number']}}-{{board}}">
+            {%if post['subject'] != None%}
+                <span class="subject">{{post['subject']}}</span>
+            {%endif%}
+            {%if post['trip']|hasSignature == True%}
+                {%if post['options'] != None%}
+                    <a class="name optionsName" href="mailto:{{post['options']}}" target="_blank">{{post['name']}}##<span class="{{post['trip']}}">{{post['trip']}}</span></a>
+                {%else%}
+                    <span class="name">{{post['name']}}##<span class="{{post['trip']}}">{{post['trip']}}</span></a></span>
+                {%endif%}
+            {%else%}
+                {%if post['trip'] != None%}
+                    {%if post['options'] != None%}
+                        <a class="name optionsName" href="mailto:{{post['options']}}" target="_blank">{{post['name']}}##{{post['trip']}}</a>
+                    {%else%}
+                        <span class="name">{{post['name']}}##{{post['trip']}}</span>
+                    {%endif%}
+                {%else%}
+                    {%if post['options'] != None%}
+                        <a class="name optionsName" href="mailto:{{post['options']}}" target="_blank">{{post['name']}}</a>
+                    {%else%}
+                        <span class="name">{{post['name']}}</span>
+                    {%endif%}
+                {%endif%}
+            {%endif%}
+            {%if board+"/"+post["number"]|string in owned%}
+                <span class="you">(you)</span>
+            {%endif%}
+            <span>{{post['date'] | ut}}</span>
+            <span><a class="postNumber" href="#{{post['number']}}">No.</a><a href="#q{{post['number']}}" onclick="reply(this)" class="postNumber">{{post['number']}}</a></span>
+            {%if post['replies'] != None and post['replies'].split(',')%}
+                <span>
+                    {%set replies = post['replies'].split(',')%}
+                    {%for reply in replies%}
+                        {%set reply = reply.split("/")%}
+                        <a href="/{{board}}/thread/{{reply[0]}}#{{reply[1]}}">>>{{reply[1]}}{%if board+"/"+reply[1]|string in owned%}(you){%endif%}</a>
+                    {%endfor%}
+                </span>
+            {%endif%}
+        </div>
+        {%if post['files'] != None%}
+            {%set files = post['files'].split(',')%}
+            {%set filenames = post['filenames'].split(',')%}
+            {%if files | length > 1%}
+                <div class="uploads multiple-files">
+            {%else%}
+                <div class="uploads">
+            {%endif%}
+            {%for file in files%}
+                <div class="fileDiv">
+                    <div class="file-info">
+                        <a class="filename" href="/{{file}}" target="_blank">{{filenames[files.index(file)]}}</a>
+                        <a href="/{{file}}" download="{{filenames[files.index(file)]}}"><i class="fas fa-download text-icon"></i></a>
+                        {%if file | checkimage == True%}
+                            <span class="fileSize text-icon">({{file | filesize}}, {{file | dimensions}})</span>
+                        {%else%}
+                            <span class="fileSize text-icon">({{file | filesize}})</span>
+                        {%endif%}
+                    </div>
+                    <a class="linkImg" target="_blank" href="/{{file}}">
+                        {%if post['spoiler'] == 1%}
+                            <img loading="lazy" class="thumbnail" src="/{{data['spoilerImage']}}">
+                        {%else%}
+                            <img loading="lazy" class="thumbnail" src="/{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
+                        {%endif%}
+                    </a>
+                </div>
+            {%endfor%}
+            </div>
+        {%endif%}
+        <blockquote class="comment">{{post['message'] | checkMarkdown(op['number'], board, post['number']) | safe}}</blockquote>
+        </div>
+    </div>
