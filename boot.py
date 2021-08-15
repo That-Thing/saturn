@@ -112,6 +112,11 @@ def reloadSettings():
     # )
     return globalSettings
 globalSettings = reloadSettings()
+def reloadLogSettings():
+    with open('./config/logs.json') as logFile: #log config file
+        logConfig = json.load(logFile)
+    return logConfig
+logConfig = reloadLogSettings()
 #gets user groups from the groups table. 
 def getUserGroups():
     with app.app_context():
@@ -539,6 +544,26 @@ def saveSettings():
                     if len(difference) > 0:
                         storeLog("globalSettingsUpdate", "Global Settings Updated", session['username'], request.remote_addr, time.time(), difference['values_changed'])
                 with open('./config/config.json', 'w') as f:
+                    json.dump(result, f, indent=4)
+                return redirect(url_for('siteSettings'))
+            else:
+                return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        except Exception as e:
+            print(e)
+            return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
+    else:
+        return render_template('error.html', errorMsg=errors['RequestNotPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+@app.route('/saveLogSettings', methods=['POST'])
+def saveLogSettings():
+    if request.method == 'POST':
+        try:
+            if int(session['group']) <= 1:
+                result = request.form.to_dict()
+                if logConfig['log-log-settings'] == 'on': #Checks if logs are enabled
+                    difference = DeepDiff(logConfig, result, ignore_order=True)
+                    if len(difference) > 0:
+                        storeLog("globalSettingsUpdate", "Logging Settings Updated", session['username'], request.remote_addr, time.time(), difference['values_changed'])
+                with open('./config/logs.json', 'w') as f:
                     json.dump(result, f, indent=4)
                 return redirect(url_for('siteSettings'))
             else:

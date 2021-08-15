@@ -134,94 +134,120 @@
         <div class="box box-settings">
             <h2 class="box-header">Logging options</h2>
             <div id="log-settings" class="settings-category">
-                <form action="/updatelogs" method="POST">
+                <form action="{{url_for('saveLogSettings')}}" method="POST">
                     <label>
                         Log logins:
-                        <input type="checkbox" name="log-logins" id="log-logins" {%if logData['log-logins'] == 'on'%}checked value="off"{%else%}value="on"{%endif%}>
+                        <input type="hidden" name="log-logins" value="off"/>
+                        <input type="checkbox" name="log-logins" id="log-logins" {%if logData['log-logins'] == 'on'%}checked{%endif%} value="on">
                     </label>
                     <label>
                         Log registrations:
-                        <input type="checkbox" name="log-register" id="log-register" {%if logData['log-register'] == 'on'%}checked value="off"{%else%}value="on"{%endif%}>
+                        <input type="hidden" name="log-register" value="off"/>
+                        <input type="checkbox" name="log-register" id="log-register" {%if logData['log-register'] == 'on'%}checked{%endif%} value="on">
                     </label>
                     <label>
                         Log logouts:
-                        <input type="checkbox" name="log-logout" id="log-logout" {%if logData['log-logout'] == 'on'%}checked value="off"{%else%}value="on"{%endif%}>
+                        <input type="hidden" name="log-logout" value="off"/>
+                        <input type="checkbox" name="log-logout" id="log-logout" {%if logData['log-logout'] == 'on'%}checked{%endif%} value="on">
                     </label>
                     <hr>
                     <label>
                         Log global settings change:
-                        <input type="checkbox" name="log-global-settings" id="log-global-settings" {%if logData['log-global-settings'] == 'on'%}checked value="off"{%else%}value="on"{%endif%}>
+                        <input type="hidden" name="log-global-settings" value="off"/>
+                        <input type="checkbox" name="log-global-settings" id="log-global-settings" {%if logData['log-global-settings'] == 'on'%}checked{%endif%} value="on">
+                    </label>
+                    <label>
+                        Log logging settings change:
+                        <input type="hidden" name="log-log-settings" value="off"/>
+                        <input type="checkbox" name="log-log-settings" id="log-log-settings" {%if logData['log-log-settings'] == 'on'%}checked{%endif%} value="on">
                     </label>
                     <hr>
                     <label>
                         Log rule additions/deletions:
-                        <input type="checkbox" name="log-rules" id="log-rules" {%if logData['log-rules'] == 'on'%}checked value="off"{%else%}value="on"{%endif%}>
+                        <input type="hidden" name="log-rules" value="off"/>
+                        <input type="checkbox" name="log-rules" id="log-rules" {%if logData['log-rules'] == 'on'%}checked{%endif%} value="on">
                     </label>
                     <hr>
                     <label>
                         Log user self password change:
-                        <input type="checkbox" name="log-self-password-change" id="log-self-password-change" {%if logData['log-self-password-change'] == 'on'%}checked value="off"{%else%}value="on"{%endif%}>
+                        <input type="hidden" name="log-self-password-change" value="off"/>
+                        <input type="checkbox" name="log-self-password-change" id="log-self-password-change" {%if logData['log-self-password-change'] == 'on'%}checked{%endif%} value="on">
                     </label>
                     <label>
                         Log user self email change:
-                        <input type="checkbox" name="log-self-email-change" id="log-self-email-change" {%if logData['log-self-password-change'] == 'on'%}checked value="off"{%else%}value="on"{%endif%}>
+                        <input type="hidden" name="log-self-email-change" value="off"/>
+                        <input type="checkbox" name="log-self-email-change" id="log-self-email-change" {%if logData['log-self-password-change'] == 'on'%}checked{%endif%} value="on">
                     </label>
                     <hr>
                     <label>
                         Log board creation:
-                        <input type="checkbox" name="log-board-creation" id="log-board-creation" {%if logData['log-board-creation'] == 'on'%}checked value="off"{%else%}value="on"{%endif%}>
+                        <input type="hidden" name="log-board-creation" value="off"/>
+                        <input type="checkbox" name="log-board-creation" id="log-board-creation" {%if logData['log-board-creation'] == 'on'%}checked{%endif%} value="on">
                     </label>
                     <label>
                         Log board deletion:
-                        <input type="checkbox" name="log-board-deletion" id="log-board-deletion"{%if logData['log-board-deletion'] == 'on'%}checked value="off"{%else%}value="on"{%endif%}>
+                        <input type="hidden" name="log-board-deletion" value="off"/>
+                        <input type="checkbox" name="log-board-deletion" id="log-board-deletion"{%if logData['log-board-deletion'] == 'on'%}checked{%endif%} value="on">
                     </label>
                     <label>
                         Log board update:
-                        <input type="checkbox" name="log-board-update" id="log-board-update" {%if logData['log-board-update'] == 'on'%}checked value="off"{%else%}value="on"{%endif%}>
+                        <input type="hidden" name="log-board-update" value="off"/>
+                        <input type="checkbox" name="log-board-update" id="log-board-update" {%if logData['log-board-update'] == 'on'%}checked{%endif%} value="on">
                     </label>
                     <label>
                         Log board ownership change:
-                        <input type="checkbox" name="log-board-ownerchange" id="log-board-ownerchange" {%if logData['log-board-ownerchange'] == 'on'%}checked value="off"{%else%}value="on"{%endif%}>
+                        <input type="hidden" name="log-board-ownerchange" value="off"/>
+                        <input type="checkbox" name="log-board-ownerchange" id="log-board-ownerchange" {%if logData['log-board-ownerchange'] == 'on'%}checked{%endif%} value="on">
                     </label>
                     <label>
                         Log banner uploads/deletions:
-                        <input type="checkbox" name="log-banners" id="log-banners" {%if logData['log-banners'] == 'on'%}checked value="off"{%else%}value="on"{%endif%}>
+                        <input type="hidden" name="log-banners" value="off"/>
+                        <input type="checkbox" name="log-banners" id="log-banners" {%if logData['log-banners'] == 'on'%}checked{%endif%} value="on">
                     </label>
                     <hr>
                     <label>
                         Log thread creation:
-                        <input type="checkbox" name="log-thread-creation" id="log-thread-creation" {%if logData['log-thread-creation'] == 'on'%}checked value="off"{%else%}value="on"{%endif%}>
+                        <input type="hidden" name="log-thread-creation" value="off"/>
+                        <input type="checkbox" name="log-thread-creation" id="log-thread-creation" {%if logData['log-thread-creation'] == 'on'%}checked{%endif%} value="on">
                     </label>
                     <label>
                         Log replies to thread:
-                        <input type="checkbox" name="log-reply" id="log-reply" {%if logData['log-reply'] == 'on'%}checked value="off"{%else%}value="on"{%endif%}>
+                        <input type="hidden" name="log-reply" value="off"/>
+                        <input type="checkbox" name="log-reply" id="log-reply" {%if logData['log-reply'] == 'on'%}checked{%endif%} value="on">
                     </label>
                     <label>
                         Log post deletion:
-                        <input type="checkbox" name="log-post-delete" id="log-post-delete" {%if logData['log-post-delete'] == 'on'%}checked value="off"{%else%}value="on"{%endif%}>
+                        <input type="hidden" name="log-post-delete" value="off"/>
+                        <input type="checkbox" name="log-post-delete" id="log-post-delete" {%if logData['log-post-delete'] == 'on'%}checked{%endif%} value="on">
                     </label>
                     <hr>
                     <label>
                         Log moderator updating user data:
-                        <input type="checkbox" name="log-mod-user-update" id="log-mod-user-update" value="{{logData['log-mod-user-update']}}" {%if logData['log-mod-user-update'] == 'on'%}checked value="off"{%else%}value="on"{%endif%}>
+                        <input type="hidden" name="log-mod-user-update" value="off"/>
+                        <input type="checkbox" name="log-mod-user-update" id="log-mod-user-update" value="{{logData['log-mod-user-update']}}" {%if logData['log-mod-user-update'] == 'on'%}checked{%endif%} value="on">
                     </label>
                     <label>
                         Log moderator deleting user:
-                        <input type="checkbox" name="log-mod-user-delete" id="log-mod-user-delete" value="{{logData['log-mod-user-delete']}}" {%if logData['log-mod-user-delete'] == 'on'%}checked value="off"{%else%}value="on"{%endif%}>
+                        <input type="hidden" name="log-mod-user-delete" value="off"/>
+                        <input type="checkbox" name="log-mod-user-delete" id="log-mod-user-delete" value="{{logData['log-mod-user-delete']}}" {%if logData['log-mod-user-delete'] == 'on'%}checked{%endif%} value="on">
                     </label>
                     <label>
                         Log moderator creating user:
-                        <input type="checkbox" name="log-mod-user-create" id="log-mod-user-create" value="{{logData['log-mod-user-create']}}" {%if logData['log-mod-user-create'] == 'on'%}checked value="off"{%else%}value="on"{%endif%}>
+                        <input type="hidden" name="log-mod-user-create" value="off"/>
+                        <input type="checkbox" name="log-mod-user-create" id="log-mod-user-create" value="{{logData['log-mod-user-create']}}" {%if logData['log-mod-user-create'] == 'on'%}checked{%endif%} value="on">
                     </label>
                     <hr>
                     <label>
                         Log user bans:
-                        <input type="checkbox" name="log-user-ban" id="log-user-ban" value="{{logData['log-user-ban']}}" {%if logData['log-user-ban'] == 'on'%}checked value="off"{%else%}value="on"{%endif%}>
+                        <input type="hidden" name="log-user-ban" value="off"/>
+                        <input type="checkbox" name="log-user-ban" id="log-user-ban" value="{{logData['log-user-ban']}}" {%if logData['log-user-ban'] == 'on'%}checked{%endif%} value="on">
                     </label>
                     <label>
                         Log user unban:
-                        <input type="checkbox" name="log-user-unban" id="log-user-unban" value="{{logData['log-user-unban']}}" {%if logData['log-user-unban'] == 'on'%}checked value="off"{%else%}value="on"{%endif%}>
+                        <input type="hidden" name="log-user-unban" value="off"/>
+                        <input type="checkbox" name="log-user-unban" id="log-user-unban" value="{{logData['log-user-unban']}}" {%if logData['log-user-unban'] == 'on'%}checked{%endif%} value="on">
                     </label>
+                    <p><input class="btn btn-primary" type="submit" value="save settings"></p>
                 </form>
             </div>
         </div>
