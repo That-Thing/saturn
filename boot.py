@@ -17,9 +17,12 @@ from captcha.image import ImageCaptcha
 from PIL import Image
 import re
 import hashlib
+from deepdiff import DeepDiff
 from flask_socketio import SocketIO, send
 with open('./config/config.json') as configFile: #global config file
     configData = json.load(configFile)
+with open('./config/logs.json') as logFile: #log config file
+    logConfig = json.load(logFile)
 with open('./config/database.json') as configFile: #database config
     databaseConfig = json.load(configFile)
 with open('./config/markdown.json') as markdownFile: #Loads markdown config
@@ -89,24 +92,24 @@ mysql = MySQL(app)
 #global settings
 def reloadSettings():
     with open('./config/config.json') as configFile: #global config file
-        reloadData = json.load(configFile)
-    globalSettings = dict(
-        port = reloadData["port"],
-        mediaLocation = reloadData["mediaLocation"],
-        siteName = reloadData["siteName"],
-        logoUrl = reloadData["siteLogo"],
-        faviconUrl = reloadData["siteFavicon"],
-        enableRegistration = reloadData["enableRegistration"],
-        requiredRole = reloadData["requiredRole"],
-        bannerLocation = reloadData["bannerLocation"],
-        mimeTypes = reloadData["mimeTypes"],
-        maxFiles = int(configData["maxFiles"]),
-        spoilerImage =  reloadData["spoilerImage"],
-        tripLength = reloadData["tripLength"],
-        pageThreads = reloadData["pageThreads"],
-        captchaDifficulty = int(reloadData['captchaDifficulty']),
-        captchaExpire = int(reloadData['captchaExpire'])
-    )
+        globalSettings = json.load(configFile)
+    # globalSettings = dict(
+    #     port = reloadData["port"],
+    #     mediaLocation = reloadData["mediaLocation"],
+    #     siteName = reloadData["siteName"],
+    #     logoUrl = reloadData["siteLogo"],
+    #     faviconUrl = reloadData["siteFavicon"],
+    #     enableRegistration = reloadData["enableRegistration"],
+    #     requiredRole = reloadData["requiredRole"],
+    #     bannerLocation = reloadData["bannerLocation"],
+    #     mimeTypes = reloadData["mimeTypes"],
+    #     maxFiles = int(configData["maxFiles"]),
+    #     spoilerImage =  reloadData["spoilerImage"],
+    #     tripLength = reloadData["tripLength"],
+    #     pageThreads = reloadData["pageThreads"],
+    #     captchaDifficulty = int(reloadData['captchaDifficulty']),
+    #     captchaExpire = int(reloadData['captchaExpire'])
+    # )
     return globalSettings
 globalSettings = reloadSettings()
 #gets user groups from the groups table. 
@@ -173,6 +176,82 @@ def checkFilePass():
         password =  "".join(random.choice(characters) for x in range(8))
         session['filePassword'] = password
         return password
+
+
+def storeLog(type, action, user, ip, date, data):
+    with app.app_context():
+        if type == "loginActions":
+            actionData = {}
+        elif type == "globalSettingsUpdate":
+            actionData = data
+        elif type == "selfChange":
+            actionData = {
+                "user": user,
+                "oldData": data['oldData'],
+                "newData": data['newData']
+            }
+        elif type == "boardCreation":
+            actionData = {
+                "board": data
+            }
+        elif type == "boardDeletion":
+            actionData = {
+                "board": data
+            }
+        elif type == "boardUpdate":
+            actionData = {
+                "uri": data[board],
+                "oldData": data['oldData'],
+                "newData": data['newData']
+            }
+        elif type == "ownerChange":
+            actionData = {
+                'uri':data[uri],
+                'oldOwner': data['oldOwner'],
+                'newOwner': data['newOwner']
+            }
+        elif type == "thread-creation":
+            actionData = {
+                "threadData": data
+            }
+        elif type == "reply":
+            actionData = {
+                "replyData": data
+            }
+        elif type == "postDelete":
+            actionData = {
+                "board": data['board'],
+                "thread": data['thread'],
+                "number": data['number'],
+                "type": data['type'],
+                "OP": data['ip']
+            }
+        elif type == "modUserUpdate":
+            actionData = {
+                "oldData": data['oldData'],
+                "newData": data['newData']
+            }
+        elif type == "modUserDelete":
+            actionData = {
+                "user": data
+            }
+        elif type == "modUserCreate":
+            actionData = {
+                "user": data
+            }
+        elif type == "userBan":
+            actionData = {
+                "user": data['user'],
+                "reason": data['reason']
+            }
+        elif type == "userUnban":
+            actionData = {
+                "user": data
+            }
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("INSERT INTO logs VALUES(NULL, %s, %s, %s, %s, %s)", (action, json.dumps(actionData), user, str(ip), date))
+        mysql.connection.commit()
+
 #allow files in the media folder to be served
 @app.route('/media/<path:path>')
 def showMedia(path):
@@ -406,6 +485,7 @@ def page_not_found(e):
 @app.before_request 
 def before_request_callback():
     checkGroup() #Checks if user has a group assigned, if not, gives them lowest possible permissions.
+    global globalSettings
     globalSettings = reloadSettings() #Reloads the global settings. 
 
 
@@ -441,7 +521,7 @@ def siteSettings():
     rules = cursor.fetchall()
     try:
         if int(session['group']) <= 1:
-            return render_template('siteSettings.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes, groups=groups, rules=rules)
+            return render_template('siteSettings.html', data=globalSettings, logData=logConfig, currentTheme=request.cookies.get('theme'), themes=themes, groups=groups, rules=rules)
         else:
             return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     except Exception as e:
@@ -454,6 +534,10 @@ def saveSettings():
         try:
             if int(session['group']) <= 1:
                 result = request.form.to_dict()
+                if logConfig['log-global-settings'] == 'on': #Checks if logs are enabled
+                    difference = DeepDiff(globalSettings, result, ignore_order=True)
+                    if len(difference) > 0:
+                        storeLog("globalSettingsUpdate", "Global Settings Updated", session['username'], request.remote_addr, time.time(), difference['values_changed'])
                 with open('./config/config.json', 'w') as f:
                     json.dump(result, f, indent=4)
                 return redirect(url_for('siteSettings'))

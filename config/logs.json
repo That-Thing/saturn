@@ -1,0 +1,22 @@
+{
+    "log-logins": "on",
+    "log-register": "on",
+    "log-logout": "on",
+    "log-global-settings": "on",
+    "log-rules": "on",
+    "log-self-password-change": "on",
+    "log-self-email-change": "on",
+    "log-board-creation": "on",
+    "log-board-deletion": "on",
+    "log-board-update": "on",
+    "log-board-ownerchange": "on",
+    "log-banners": "on",
+    "log-thread-creation": "on",
+    "log-reply": "on",
+    "log-post-delete": "on",
+    "log-mod-user-update": "on",
+    "log-mod-user-delete": "on",
+    "log-mod-user-create": "on",
+    "log-user-ban": "on",
+    "log-user-unban": "on"
+}
