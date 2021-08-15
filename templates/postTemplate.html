@@ -53,7 +53,7 @@
                 <span class="you">(you)</span>
             {%endif%}
             <span>{{post['date'] | ut}}</span>
-            <span><a class="postNumber" href="#{{post['number']}}">No.</a><a href="#q{{post['number']}}" onclick="reply(this)" class="postNumber">{{post['number']}}</a></span>
+            <span><a class="postNumber" href="/{{board}}/thread/{{thread['number']}}#{{post['number']}}">No.</a><a href="/{{board}}/thread/{{thread['number']}}#q{{post['number']}}" onclick="reply(this)" class="postNumber">{{post['number']}}</a></span>
             {%if post['replies'] != None and post['replies'].split(',')%}
                 <span>
                     {%set replies = post['replies'].split(',')%}
@@ -94,6 +94,6 @@
             {%endfor%}
             </div>
         {%endif%}
-        <blockquote class="comment">{{post['message'] | checkMarkdown(op['number'], board, post['number']) | safe}}</blockquote>
+        <blockquote class="comment">{{post['message'] | checkMarkdown(thread['number'], board, post['number']) | safe}}</blockquote>
         </div>
     </div>

@@ -1075,9 +1075,9 @@ def thread(board, thread):
         banner = "static/banners/defaultbanner.png"
     if board['captcha'] == 1:
         captcha = generateCaptcha(globalSettings['captchaDifficulty'])
-        return render_template('thread.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, captcha=captcha, posts=posts, owned=ownedPosts, op=parentPost[0], filePass=filePass, themes=themes)
+        return render_template('thread.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, captcha=captcha, posts=posts, owned=ownedPosts, thread=parentPost[0], filePass=filePass, themes=themes)
     else:
-        return render_template('thread.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, posts=posts, op=parentPost[0], owned=ownedPosts, filePass=filePass, themes=themes)
+        return render_template('thread.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, posts=posts, thread=parentPost[0], owned=ownedPosts, filePass=filePass, themes=themes)
     return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
 
 @app.route('/reply', methods=['POST'])

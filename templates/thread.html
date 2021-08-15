@@ -1,24 +1,24 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>/{{board}}/ - {{op['message']|truncate(10)}}</title>
+        <title>/{{board}}/ - {{thread['message']|truncate(10)}}</title>
         <meta charset="UTF-8">
         <link href="{{ url_for('static', filename='css/global.css') }}" type="text/css" rel="stylesheet">
         <link href="{{ url_for('static', filename='css/board.css') }}" type="text/css" rel="stylesheet">
         <link href="{{ url_for('static', filename='css/markdown.css') }}" type="text/css" rel="stylesheet">
         <link rel="shortcut icon" type="image/png" href="/{{data['faviconUrl']}}"/>
         <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
-        {%if op['message']|length > 10%}
-            <meta name="title" content="/{{board}}/ - {{op['message']|truncate(15)}}">
-            <meta property="og:title" content="/{{board}}/ - {{op['message']|truncate(15)}}">
+        {%if thread['message']|length > 10%}
+            <meta name="title" content="/{{board}}/ - {{thread['message']|truncate(15)}}">
+            <meta property="og:title" content="/{{board}}/ - {{thread['message']|truncate(15)}}">
         {%else%}
-            <meta name="title" content="/{{board}}/ - {{op['message']}}">
-            <meta property="og:title" content="/{{board}}/ - {{op['message']}}">
+            <meta name="title" content="/{{board}}/ - {{thread['message']}}">
+            <meta property="og:title" content="/{{board}}/ - {{thread['message']}}">
         {%endif%}
-        <meta name="description" content="{{op['message']|truncate(150)}}">
+        <meta name="description" content="{{thread['message']|truncate(150)}}">
         <meta property="og:type" content="website">
         <meta property="og:url" content="#">
-        <meta property="og:description" content="{{op['message']|truncate(150)}}">
+        <meta property="og:description" content="{{thread['message']|truncate(150)}}">
     </head>
     <body class="{{currentTheme}}">
         <nav>
@@ -43,7 +43,7 @@
             <span class="small">Reply mode</span>
             <form action="/reply" method="POST" id="authorForm" enctype="multipart/form-data">
                 <input type="hidden" name="board" value="{{board}}">
-                <input type="hidden" name="thread" value="{{op['number']}}">
+                <input type="hidden" name="thread" value="{{thread['number']}}">
                 <table>
                     <tbody>
                         <tr>
@@ -112,10 +112,10 @@
             </span>
         </div>
         <div id="postList">
-            <div class="op" id="{{op['number']}}">
+            <div class="op" id="{{thread['number']}}">
                 <hr>
-                {%set files = op['files'].split(',')%}
-                {%set filenames = op['filenames'].split(',')%}
+                {%set files = thread['files'].split(',')%}
+                {%set filenames = thread['filenames'].split(',')%}
                 {%if files | length > 1%}
                     <div class="uploads multiple-files">
                 {%else%}
@@ -133,7 +133,7 @@
                                 {%endif%}
                             </div>
                             <a class="linkImg" target="_blank" href="/{{file}}">
-                                {%if op['spoiler'] == 1%}
+                                {%if thread['spoiler'] == 1%}
                                     <img loading="lazy" class="thumbnail" src="/{{data['spoilerImage']}}">
                                 {%else%}
                                     <img loading="lazy" class="thumbnail" src="/{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
@@ -149,8 +149,8 @@
                             <div class="dropdown-content">
                                 <div class="dropdown-link" onclick="hidePostThread(this)">Hide post</div>
                                 <hr>
-                                <input type="hidden" name="post" value="{{op['number']}}">
-                                {%if session['filePassword'] == op['password']%}
+                                <input type="hidden" name="post" value="{{thread['number']}}">
+                                {%if session['filePassword'] == thread['password']%}
                                     <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete">
                                 {%elif session['group'] is defined and session['group'] <= 3%}
                                     <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete">
@@ -166,38 +166,38 @@
                             </div>
                         </form>
                     </span>
-                    {%if op['subject'] != None%}
-                    <span class="subject">{{op['subject']}}</span>
+                    {%if thread['subject'] != None%}
+                    <span class="subject">{{thread['subject']}}</span>
                     {%endif%}
-                    {%if op['trip']|hasSignature == True%}
-                        {%if op['options'] != None%}
-                            <a class="name optionsName" href="mailto:{{op['options']}}" target="_blank">{{op['name']}}##<span class="{{op['trip']}}">{{op['trip']}}</span></a>
+                    {%if thread['trip']|hasSignature == True%}
+                        {%if thread['options'] != None%}
+                            <a class="name optionsName" href="mailto:{{thread['options']}}" target="_blank">{{thread['name']}}##<span class="{{thread['trip']}}">{{thread['trip']}}</span></a>
                         {%else%}
-                            <span class="name">{{op['name']}}##<span class="{{op['trip']}}">{{op['trip']}}</span></a>
+                            <span class="name">{{thread['name']}}##<span class="{{thread['trip']}}">{{thread['trip']}}</span></a>
                         {%endif%}
                     {%else%}
-                        {%if op['trip'] != None%}
-                            {%if op['options'] != None%}
-                                <a class="name optionsName" href="mailto:{{op['options']}}" target="_blank">{{op['name']}}##{{op['trip']}}</a>
+                        {%if thread['trip'] != None%}
+                            {%if thread['options'] != None%}
+                                <a class="name optionsName" href="mailto:{{thread['options']}}" target="_blank">{{thread['name']}}##{{thread['trip']}}</a>
                             {%else%}
-                                <span class="name">{{op['name']}}##{{op['trip']}}</span>
+                                <span class="name">{{thread['name']}}##{{thread['trip']}}</span>
                             {%endif%}
                         {%else%}
-                            {%if op['options'] != None%}
-                                <a class="name optionsName" href="mailto:{{op['options']}}" target="_blank">{{op['name']}}</a>
+                            {%if thread['options'] != None%}
+                                <a class="name optionsName" href="mailto:{{thread['options']}}" target="_blank">{{thread['name']}}</a>
                             {%else%}
-                                <span class="name">{{op['name']}}</span>
+                                <span class="name">{{thread['name']}}</span>
                             {%endif%}
                         {%endif%}
                     {%endif%}
-                    {%if board+"/"+op["number"]|string in owned%}
+                    {%if board+"/"+thread["number"]|string in owned%}
                         <span class="you">(you)</span>
                     {%endif%}
-                    <span>{{op['date'] | ut}}</span>
-                    <span><a class="postNumber" href="#{{op['number']}}">No.</a><a href="#q{{op['number']}}" class="postNumber">{{op['number']}}</a></span>
-                    {%if op['replies'] != None and op['replies'].split(',')%}
+                    <span>{{thread['date'] | ut}}</span>
+                    <span><a class="postNumber" href="#{{thread['number']}}">No.</a><a href="#q{{thread['number']}}" class="postNumber">{{thread['number']}}</a></span>
+                    {%if thread['replies'] != None and thread['replies'].split(',')%}
                         <span>
-                            {%set replies = op['replies'].split(',')%}
+                            {%set replies = thread['replies'].split(',')%}
                             {%for reply in replies%}
                                 {%set reply = reply.split("/")%}
                                 <a href="/{{board}}/thread/{{reply[0]}}#{{reply[1]}}">>>{{reply[1]}}{%if board+"/"+reply[1]|string in owned%}(you){%endif%}</a>
@@ -205,10 +205,10 @@
                         </span>
                     {%endif%}
                 </div>
-                <blockquote class="comment">{{op['message'] | checkMarkdown(op['number'], board, op['number']) | safe}}</blockquote>
+                <blockquote class="comment">{{thread['message'] | checkMarkdown(thread['number'], board, thread['number']) | safe}}</blockquote>
             </div>
                 {%for post in posts%}
-                    {%include 'thread-post.html'%}
+                    {%include 'postTemplate.html'%}
                 {%endfor%}
         </div>
         <script type="text/javascript" src="{{ url_for('static', filename='js/posting.js') }}"></script>
