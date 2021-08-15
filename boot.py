@@ -620,7 +620,7 @@ def manageBoard(board):
     bannerData = cursor.fetchall()
     try:
         if int(session['group']) <= 1 or sqlData['owner'] == session['username']:
-            return render_template('manageBoard.html', data=globalSettings, currentTheme=request.cookies.get('theme'), sqlData=sqlData, bannerData=bannerData, msg=msg, themes=themes, rules=rules)
+            return render_template('manageBoard.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=sqlData, bannerData=bannerData, msg=msg, themes=themes, rules=rules)
         else:
             return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     except Exception as e:
@@ -690,6 +690,8 @@ def updateBoard(board):
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
         boardData = cursor.fetchone()
+        if boardData == None:
+            return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
         try:
             if boardData['owner'] == session['username'] or int(session['group']) <= 1:
                 name = request.form['name']
@@ -709,6 +711,27 @@ def updateBoard(board):
             print(e)
     else:
         return errors['RequestNotPost']
+
+@app.route('/<board>/setowner', methods=['POST'])
+def setOwner(board):   
+    if request.method == 'POST':
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
+        boardData = cursor.fetchone()
+        if boardData == None:
+            return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
+        try:
+            if int(session['group']) <= 1 or session['username'] ==  boardData['owner']:
+                cursor.execute("UPDATE boards SET owner=%s WHERE uri=%s", (request.form['owner'], board))
+                mysql.connection.commit()
+                return redirect(url_for("manageBoard", board=board))
+            else:
+                return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        except Exception as e:
+            print(e)
+            return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
+    else:
+        return render_template('error.html', errorMsg=errors['RequestNotPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 #banner management
 
 #upload banner and create sql entry
