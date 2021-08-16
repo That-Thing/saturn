@@ -195,6 +195,10 @@ def storeLog(type, action, user, ip, date, data):
                 "oldData": data['oldData'],
                 "newData": data['newData']
             }
+        elif type == "addRule":
+            actionData = data
+        elif type == "removeRule":
+            actionData = data
         elif type == "boardCreation":
             actionData = {
                 "board": data
@@ -594,6 +598,8 @@ def addRule():
         currentBoard = cursor.fetchone()
         if int(session['group']) <= 1 or currentBoard != None: #checks if the board exists or the user has admin+ perms
             if int(session['group']) <= 1 or currentBoard['owner'] == session['username']: #checks if the user has admin+ perms first
+                if logConfig['log-rules'] == 'on':
+                    storeLog("addRule", "Rule added", session['username'], request.remote_addr, time.time(), {"board": board, "rule": request.form['newRule']})
                 cursor.execute("INSERT INTO rules VALUES (NULL, %s, %s, %s)", (request.form['newRule'], request.form['type'], board))
                 mysql.connection.commit()
                 if request.form['type'] == "0":
@@ -619,6 +625,9 @@ def deleteRule():
         currentBoard = cursor.fetchone()
         if int(session['group']) <= 1 or currentBoard != None:
             if int(session['group']) <= 1 or currentBoard['owner'] == session['username']:
+                cursor.execute("SELECT * FROM rules WHERE id = %s", [int(request.form['id'])])
+                if logConfig['log-rules'] == 'on':
+                    storeLog("removeRule", "Rule deleted", session['username'], request.remote_addr, time.time(), {"board": board, "rule": cursor.fetchone()['content']})
                 if board == None:
                     cursor.execute("DELETE FROM rules WHERE id = %s AND board IS NULL", [int(request.form['id'])])
                 else:
