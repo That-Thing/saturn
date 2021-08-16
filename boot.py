@@ -183,22 +183,15 @@ def checkFilePass():
         return password
 
 
-def storeLog(type, action, user, ip, date, data):
+def storeLog(type, action, user, ip, date, data, board):
     with app.app_context():
-        if type == "loginActions":
-            actionData = {}
-        elif type == "globalSettingsUpdate":
-            actionData = data
-        elif type == "selfChange":
+        actionData = data
+        if type == "selfChange":
             actionData = {
                 "user": user,
                 "oldData": data['oldData'],
                 "newData": data['newData']
             }
-        elif type == "addRule":
-            actionData = data
-        elif type == "removeRule":
-            actionData = data
         elif type == "boardCreation":
             actionData = {
                 "board": data
@@ -258,7 +251,7 @@ def storeLog(type, action, user, ip, date, data):
                 "user": data
             }
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute("INSERT INTO logs VALUES(NULL, %s, %s, %s, %s, %s)", (action, json.dumps(actionData), user, str(ip), date))
+        cursor.execute("INSERT INTO logs VALUES(NULL, %s, %s, %s, %s, %s, %s, %s)", (type, action, json.dumps(actionData), user, str(ip), board,date))
         mysql.connection.commit()
 
 #allow files in the media folder to be served
@@ -546,7 +539,7 @@ def saveSettings():
                 if logConfig['log-global-settings'] == 'on': #Checks if logs are enabled
                     difference = DeepDiff(globalSettings, result, ignore_order=True)
                     if len(difference) > 0:
-                        storeLog("globalSettingsUpdate", "Global Settings Updated", session['username'], request.remote_addr, time.time(), difference['values_changed'])
+                        storeLog("globalSettingsUpdate", "Global Settings Updated", session['username'], request.remote_addr, time.time(), difference['values_changed'], None)
                 with open('./config/config.json', 'w') as f:
                     json.dump(result, f, indent=4)
                 return redirect(url_for('siteSettings'))
@@ -566,7 +559,7 @@ def saveLogSettings():
                 if logConfig['log-log-settings'] == 'on': #Checks if logs are enabled
                     difference = DeepDiff(logConfig, result, ignore_order=True)
                     if len(difference) > 0:
-                        storeLog("globalSettingsUpdate", "Logging Settings Updated", session['username'], request.remote_addr, time.time(), difference['values_changed'])
+                        storeLog("globalSettingsUpdate", "Logging Settings Updated", session['username'], request.remote_addr, time.time(), difference['values_changed'], None)
                 with open('./config/logs.json', 'w') as f:
                     json.dump(result, f, indent=4)
                 return redirect(url_for('siteSettings'))
@@ -599,7 +592,7 @@ def addRule():
         if int(session['group']) <= 1 or currentBoard != None: #checks if the board exists or the user has admin+ perms
             if int(session['group']) <= 1 or currentBoard['owner'] == session['username']: #checks if the user has admin+ perms first
                 if logConfig['log-rules'] == 'on':
-                    storeLog("addRule", "Rule added", session['username'], request.remote_addr, time.time(), {"board": board, "rule": request.form['newRule']})
+                    storeLog("addRule", "Rule added", session['username'], request.remote_addr, time.time(), {"board": board, "rule": request.form['newRule']}, None)
                 cursor.execute("INSERT INTO rules VALUES (NULL, %s, %s, %s)", (request.form['newRule'], request.form['type'], board))
                 mysql.connection.commit()
                 if request.form['type'] == "0":
@@ -627,7 +620,7 @@ def deleteRule():
             if int(session['group']) <= 1 or currentBoard['owner'] == session['username']:
                 cursor.execute("SELECT * FROM rules WHERE id = %s", [int(request.form['id'])])
                 if logConfig['log-rules'] == 'on':
-                    storeLog("removeRule", "Rule deleted", session['username'], request.remote_addr, time.time(), {"board": board, "rule": cursor.fetchone()['content']})
+                    storeLog("removeRule", "Rule deleted", session['username'], request.remote_addr, time.time(), {"board": board, "rule": cursor.fetchone()['content']}, None)
                 if board == None:
                     cursor.execute("DELETE FROM rules WHERE id = %s AND board IS NULL", [int(request.form['id'])])
                 else:
@@ -668,6 +661,8 @@ def updatePassword():
             confirmPassword = request.form['confirmPassword']
             if passwordHash == accountData['password']:
                 if newPassword == confirmPassword:
+                    if logConfig["log-self-password-change"] == 'on':
+                        storeLog("passwordUpdate", "User has changed their password", session['username'], request.remote_addr, time.time(), {}, None)
                     cursor.execute("UPDATE accounts SET password=%s WHERE username=%s", (returnHash(newPassword), session['username']))
                     mysql.connection.commit()
                     session.pop('loggedin', None)
@@ -691,6 +686,9 @@ def updateEmail():
             if session['loggedin'] == True:
                 email = request.form['email']
                 cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+                if logConfig["log-self-email-change"] == 'on':
+                    cursor.execute("SELECT * FROM accounts WHERE username=%s", [session['username']])
+                    storeLog("emailUpdate", "User has changed their email", session['username'], request.remote_addr, time.time(), {"oldEmail":cursor.fetchone()['email'], "newEmail":email}, None)
                 cursor.execute("UPDATE accounts SET email=%s WHERE username=%s", (email, session['username']))
                 session.pop('email', None)
                 mysql.connection.commit()
@@ -749,15 +747,18 @@ def manageBoard(board):
 def createBoard():
     if request.method == 'POST':
         try:
-            if globalSettings['requiredRole'] >= int(session['group']):
+            if int(globalSettings['requiredRole']) >= int(session['group']):
                 cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
                 cursor.execute("SELECT * FROM boards WHERE uri=%s", [request.form['uri']])
                 board = cursor.fetchone()
                 if board:
                     return redirect(url_for('boardManagement', msg="Board already exists"))
-                else:    
+                else:
                     cursor.execute("INSERT INTO boards VALUES (%s, %s, %s, %s, 'Anonymous', '', 0, 0, 0, 0, %s)",(request.form['uri'].lower(), request.form['name'], request.form['description'], session['username'], globalSettings['pageThreads'])) #create the board in the MySQL database
                     mysql.connection.commit()
+                    if logConfig['log-board-creation'] == 'on':
+                        cursor.execute("SELECT * FROM boards WHERE uri=%s", [request.form['uri']])
+                        storeLog("createBoard", "Board created", session['username'], request.remote_addr, time.time(), cursor.fetchone(), request.form['uri'].lower())
                     path = os.path.join(globalSettings['bannerLocation'], request.form['uri']) #make folder for banner. 
                     os.mkdir(path) 
                     path = os.path.join(globalSettings['mediaLocation'], request.form['uri']) #make folder for files.  
@@ -914,7 +915,7 @@ def login():
                 session['group'] = account['group']
                 session['email'] = account['email']
                 if logConfig['log-logins'] == 'on':
-                    storeLog("loginActions", "User logged in", session['username'], request.remote_addr, time.time(), None)
+                    storeLog("loginActions", "User logged in", session['username'], request.remote_addr, time.time(), {}, None)
                 return redirect(url_for('index'))
             else:
                 msg = 'Incorrect username or password'
@@ -925,7 +926,7 @@ def login():
 @app.route('/logout')
 def logout():
     if logConfig['log-logout'] == 'on':
-        storeLog("loginActions", "User logged out", session['username'], request.remote_addr, time.time(), None)
+        storeLog("loginActions", "User logged out", session['username'], request.remote_addr, time.time(), {}, None)
     session.pop('loggedin', None)
     session.pop('id', None)
     session.pop('username', None)
@@ -959,7 +960,7 @@ def register():
                 mysql.connection.commit()
                 msg = 'You have successfully registered!'
                 if logConfig['log-register'] == 'on':
-                    storeLog("loginActions", "User registered an account", username, request.remote_addr, time.time(), None)
+                    storeLog("loginActions", "User registered an account", username, request.remote_addr, time.time(), {}, None)
                 return render_template('login.html', msg="Registration complete, please log in", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         elif request.method == 'POST':
             msg = 'Please fill out the form!'

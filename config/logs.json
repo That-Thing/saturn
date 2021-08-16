@@ -1,7 +1,7 @@
 {
-    "log-logins": "on",
+    "log-logins": "off",
     "log-register": "on",
-    "log-logout": "on",
+    "log-logout": "off",
     "log-global-settings": "on",
     "log-log-settings": "on",
     "log-rules": "on",
@@ -18,6 +18,6 @@
     "log-mod-user-update": "on",
     "log-mod-user-delete": "on",
     "log-mod-user-create": "on",
-    "log-user-ban": "off",
+    "log-user-ban": "on",
     "log-user-unban": "on"
 }

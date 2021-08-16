@@ -23,11 +23,12 @@ CREATE TABLE IF NOT EXISTS `accounts` (
   `username` varchar(50) NOT NULL COMMENT 'Username',
   `password` text NOT NULL COMMENT 'Encrypted password',
   `email` varchar(100) DEFAULT NULL COMMENT 'Optional email',
-  `group` int(11) NOT NULL DEFAULT 0 COMMENT 'User permissions group',
+  `group` int(11) NOT NULL DEFAULT 999 COMMENT 'User permissions group',
   `date` int(11) NOT NULL COMMENT 'User creation date',
   `ip` varchar(50) DEFAULT NULL COMMENT 'Registration IP',
+  `banned` tinyint(1) NOT NULL DEFAULT 0 COMMENT '1 if banned, 0 if not. ',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=85 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=89 DEFAULT CHARSET=utf8;
 
 -- Data exporting was unselected.
 
@@ -37,6 +38,19 @@ CREATE TABLE IF NOT EXISTS `banners` (
   `filename` text NOT NULL,
   `filesize` int(11) NOT NULL DEFAULT 0 COMMENT 'File size in KB'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Data exporting was unselected.
+
+-- Dumping structure for table saturn.bans
+CREATE TABLE IF NOT EXISTS `bans` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'Ban ID',
+  `reason` tinytext DEFAULT NULL COMMENT 'Reason for ban',
+  `length` int(11) DEFAULT NULL COMMENT 'Length of ban in minutes',
+  `user` tinytext DEFAULT NULL COMMENT 'Username of banned person',
+  `ip` int(11) DEFAULT NULL COMMENT 'IP of banned person',
+  `date` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COMMENT='Banned users and IPs ';
 
 -- Data exporting was unselected.
 
@@ -65,6 +79,19 @@ CREATE TABLE IF NOT EXISTS `groups` (
 
 -- Data exporting was unselected.
 
+-- Dumping structure for table saturn.logs
+CREATE TABLE IF NOT EXISTS `logs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'Action ID',
+  `action` text NOT NULL COMMENT 'Action description',
+  `actionData` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT 'JSON of the logged action data' CHECK (json_valid(`actionData`)),
+  `user` text NOT NULL,
+  `ip` tinytext DEFAULT NULL COMMENT 'User IP. Can be null if connecting through TOR',
+  `date` int(11) NOT NULL COMMENT 'Unix timestamp',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COMMENT='Logs for user actions. ';
+
+-- Data exporting was unselected.
+
 -- Dumping structure for table saturn.posts
 CREATE TABLE IF NOT EXISTS `posts` (
   `name` tinytext DEFAULT NULL COMMENT 'Post name',
@@ -87,6 +114,19 @@ CREATE TABLE IF NOT EXISTS `posts` (
 
 -- Data exporting was unselected.
 
+-- Dumping structure for table saturn.reports
+CREATE TABLE IF NOT EXISTS `reports` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'Report ID',
+  `reporterIP` tinytext DEFAULT NULL COMMENT 'IP of reporter',
+  `board` tinytext NOT NULL COMMENT 'Board of reported post',
+  `number` int(11) NOT NULL COMMENT 'Number of reported post',
+  `reason` text DEFAULT NULL COMMENT 'Reason for report',
+  `date` int(11) DEFAULT NULL COMMENT 'Date of report',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Data exporting was unselected.
+
 -- Dumping structure for table saturn.rules
 CREATE TABLE IF NOT EXISTS `rules` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -94,7 +134,7 @@ CREATE TABLE IF NOT EXISTS `rules` (
   `type` int(11) NOT NULL COMMENT '0 for global 1 for board',
   `board` text DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4;
 
 -- Data exporting was unselected.
 
