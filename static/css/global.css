@@ -158,10 +158,12 @@ input, select, textarea {
     text-align: center;
 }
 /*Settings box*/
-.box-settings {
-    margin-top: 10%;
+.box-settings {  
     width: 50%;
     display: table;
+}
+.box-settings:first-of-type {
+    margin-top: 10%;
 }
 /*Category in settings*/
 .settings-category {
