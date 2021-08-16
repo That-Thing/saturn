@@ -526,7 +526,7 @@ def siteSettings():
     rules = cursor.fetchall()
     try:
         if int(session['group']) <= 1:
-            return render_template('siteSettings.html', data=globalSettings, logData=logConfig, currentTheme=request.cookies.get('theme'), themes=themes, groups=groups, rules=rules)
+            return render_template('siteSettings.html', data=globalSettings, logData=reloadLogSettings(), currentTheme=request.cookies.get('theme'), themes=themes, groups=groups, rules=rules)
         else:
             return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     except Exception as e:
