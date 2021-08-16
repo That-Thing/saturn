@@ -904,6 +904,8 @@ def login():
                 session['username'] = account['username']
                 session['group'] = account['group']
                 session['email'] = account['email']
+                if logConfig['log-logins'] == 'on':
+                    storeLog("loginActions", "User logged in", session['username'], request.remote_addr, time.time(), None)
                 return redirect(url_for('index'))
             else:
                 msg = 'Incorrect username or password'
@@ -913,37 +915,42 @@ def login():
 
 @app.route('/logout')
 def logout():
-   session.pop('loggedin', None)
-   session.pop('id', None)
-   session.pop('username', None)
-   session.pop('group', None)
-   return redirect(url_for('index'))
+    if logConfig['log-logout'] == 'on':
+        storeLog("loginActions", "User logged out", session['username'], request.remote_addr, time.time(), None)
+    session.pop('loggedin', None)
+    session.pop('id', None)
+    session.pop('username', None)
+    session.pop('group', None)
+    return redirect(url_for('index'))
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if globalSettings['enableRegistration'] == 'on':
         msg = ''
-        if request.method == 'POST' and 'username' in request.form and 'password' in request.form and 'email' in request.form:
+        if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
             username = request.form['username']
-            password = request.form['password'] + salt
-            email = request.form['email']
+            if 'email' in request.form:
+                email = request.form['email']
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
             cursor.execute('SELECT * FROM accounts WHERE username = %s', (username,))
             account = cursor.fetchone()
             if account:
                 msg = 'Account already exists'
-            elif not re.match(r'[^@]+@[^@]+\.[^@]+', email):
-                msg = 'Invalid email address!'
+            elif len(email) > 0:
+                if not re.match(r'[^@]+@[^@]+\.[^@]+', email):
+                    msg = 'Invalid email address!'
             elif not re.match(r'^[a-zA-Z0-9_.-]*$', username):
                 msg = 'Username must contain only characters and numbers'
-            elif not username or not password or not email:
+            elif not username or not password:
                 msg = 'Please fill out the form'
             else:
                 # Account doesnt exists and the form data is valid, now insert new account into accounts table
                 password = returnHash(password)
-                cursor.execute('INSERT INTO accounts VALUES (NULL, %s, %s, %s, 4, %s, %s, NULL)', (username, password, email, time.time(), str(request.remote_addr)))
+                cursor.execute('INSERT INTO accounts VALUES (NULL, %s, %s, %s, 4, %s, %s, 0)', (username, password, email, time.time(), str(request.remote_addr)))
                 mysql.connection.commit()
                 msg = 'You have successfully registered!'
+                if logConfig['log-register'] == 'on':
+                    storeLog("loginActions", "User registered an account", username, request.remote_addr, time.time(), None)
                 return render_template('login.html', msg="Registration complete, please log in", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         elif request.method == 'POST':
             msg = 'Please fill out the form!'
