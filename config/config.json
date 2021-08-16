@@ -1,17 +1,17 @@
 {
-    "port": "80",
+    "port": 80,
     "mediaLocation": "./media",
     "siteName": "Saturn",
     "logoUrl": "static/images/logoS.png",
     "faviconUrl": "static/images/favicon.png",
     "spoilerImage": "static/images/spoiler.png",
     "bannerLocation": "static/banners",
-    "requiredRole": "4",
+    "requiredRole": 0,
     "enableRegistration": "on",
     "mimeTypes": "image/jpeg,image/png,image/gif",
-    "maxFiles": "3",
-    "tripLength": "10",
-    "pageThreads": "20",
-    "captchaDifficulty": "5",
-    "captchaExpire": "5"
+    "maxFiles": 3,
+    "tripLength": 10,
+    "pageThreads": 20,
+    "captchaDifficulty": 4,
+    "captchaExpire": 5
 }

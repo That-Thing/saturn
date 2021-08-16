@@ -28,7 +28,7 @@
                     <hr>
                     <label>
                         Server Port:
-                        <input type="text" name="port" id="serverPortInput" value="{{data['port']}}" required autocomplete="off"> <span class="small">Server must be restarted</span>
+                        <input type="number" step="1" name="port" id="serverPortInput" value="{{data['port']}}" required autocomplete="off"> <span class="small">Server must be restarted</span>
                     </label>
                     <label>
                         Media Location:
@@ -83,24 +83,24 @@
                     </label>
                     <label>
                         Maximum files:
-                        <input type="text" name="maxFiles" id="mimeFileInput" value="{{data['maxFiles']}}" required autocomplete="off">
+                        <input type="number" step="1" name="maxFiles" id="mimeFileInput" value="{{data['maxFiles']}}" required autocomplete="off">
                     </label>
                     <label>
                         Tripcode Length:
-                        <input type="text" name="tripLength" id="tripLength" value="{{data['tripLength']}}" required autocomplete="off"> <span class="small">Longer tripcodes take more time to bruteforce</span>
+                        <input type="number" step="1" name="tripLength" id="tripLength" value="{{data['tripLength']}}" required autocomplete="off"> <span class="small">Longer tripcodes take more time to bruteforce</span>
                     </label>
                     <label>
                         Max number of threads per page:
-                        <input type="text" name="pageThreads" id="pageThreads" value="{{data['pageThreads']}}" required autocomplete="off"> <span class="small">This sets how many threads to display on a board before creating a new page</span>
+                        <input type="number" step="1" name="pageThreads" id="pageThreads" value="{{data['pageThreads']}}" required autocomplete="off"> <span class="small">This sets how many threads to display on a board before creating a new page</span>
                     </label>
                     <h4>captcha</h4>
                     <label>
                         Captcha difficulty:
-                        <input type="text" name="captchaDifficulty" id="captchaDifficulty" value="{{data['captchaDifficulty']}}" required autocomplete="off"> <span class="small">Sets the length of the captcha (must be a number)</span>
+                        <input type="number" step="1" name="captchaDifficulty" id="captchaDifficulty" value="{{data['captchaDifficulty']}}" required autocomplete="off"> <span class="small">Sets the length of the captcha (must be a number)</span>
                     </label>
                     <label>
-                        Captcha expire time:
-                        <input type="text" name="captchaExpire" id="captchaExpire" value="{{data['captchaExpire']}}" required autocomplete="off"> <span class="small">How long the captcha is active before a new one is generated</span>
+                        Captcha expire time (minutes):
+                        <input type="number" step="1" name="captchaExpire" id="captchaExpire" value="{{data['captchaExpire']}}" required autocomplete="off"> <span class="small">How long the captcha is active before a new one is generated</span>
                     </label>
                     <p><input class="btn btn-primary" type="submit" value="save settings"></p>
                 </form>

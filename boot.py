@@ -192,20 +192,6 @@ def storeLog(type, action, user, ip, date, data, board):
                 "oldData": data['oldData'],
                 "newData": data['newData']
             }
-        elif type == "boardCreation":
-            actionData = {
-                "board": data
-            }
-        elif type == "boardDeletion":
-            actionData = {
-                "board": data
-            }
-        elif type == "boardUpdate":
-            actionData = {
-                "uri": data[board],
-                "oldData": data['oldData'],
-                "newData": data['newData']
-            }
         elif type == "ownerChange":
             actionData = {
                 'uri':data[uri],
@@ -301,7 +287,7 @@ def checkTrip(name, role): #check if tripcode password is included and hash it i
             return password
         else:
             password = returnHash(password)
-            return password[:int(globalSettings["tripLength"])]
+            return password[:globalSettings["tripLength"]]
     else: 
         return False
 def checkGroup():
@@ -536,10 +522,13 @@ def saveSettings():
         try:
             if int(session['group']) <= 1:
                 result = request.form.to_dict()
+                for x in result:
+                    if result[x].isnumeric() == True:
+                        result[x] = int(result[x])
                 if logConfig['log-global-settings'] == 'on': #Checks if logs are enabled
                     difference = DeepDiff(globalSettings, result, ignore_order=True)
                     if len(difference) > 0:
-                        storeLog("globalSettingsUpdate", "Global Settings Updated", session['username'], request.remote_addr, time.time(), difference['values_changed'], None)
+                       storeLog("globalSettingsUpdate", "Global Settings Updated", session['username'], request.remote_addr, time.time(), difference['values_changed'], None)
                 with open('./config/config.json', 'w') as f:
                     json.dump(result, f, indent=4)
                 return redirect(url_for('siteSettings'))
@@ -747,7 +736,7 @@ def manageBoard(board):
 def createBoard():
     if request.method == 'POST':
         try:
-            if int(globalSettings['requiredRole']) >= int(session['group']):
+            if globalSettings['requiredRole'] >= int(session['group']):
                 cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
                 cursor.execute("SELECT * FROM boards WHERE uri=%s", [request.form['uri']])
                 board = cursor.fetchone()
@@ -824,11 +813,17 @@ def updateBoard(board):
                     perPage = globalSettings['pageThreads']
                 cursor.execute("UPDATE boards SET name=%s, description=%s, anonymous=%s, message=%s, captcha=%s, perPage=%s WHERE uri=%s", (name, desc, anonymous, message, captcha, perPage, board))
                 mysql.connection.commit()
+                if logConfig['log-board-update'] == 'on':
+                    cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
+                    difference = DeepDiff(boardData, cursor.fetchone())
+                    if len(difference) > 0:
+                        storeLog("boardUpdate", "Board Settings Updated", session['username'], request.remote_addr, time.time(), difference['values_changed'], board)
                 return redirect(url_for('manageBoard', board=board))
             else:
                 return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         except Exception as e:
             print(e)
+            return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     else:
         return errors['RequestNotPost']
 
