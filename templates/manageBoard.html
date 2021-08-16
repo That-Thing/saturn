@@ -27,7 +27,7 @@
             <form class="center" action="{{url_for('deleteBoard', board=board['uri'])}}" method="POST">
                 <label>
                     Confirm board deletion
-                    <input type="checkbox" id="deleteBoard" name="deleteBoard">
+                    <input type="checkbox" id="deleteBoard" name="deleteBoard" value="on">
                     <p><input class="btn btn-primary" type="submit" value="Delete /{{board['uri']}}/"></p>
                 </label>
                 <p class="small center">Deleting the board will also delete all of the posts made on the board</p>

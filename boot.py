@@ -773,34 +773,35 @@ def createBoard():
 @app.route('/<board>/delete', methods=['POST'])
 def deleteBoard(board):
     if request.method == 'POST':
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
-        boardData = cursor.fetchone()
-        cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
-        sqlData = cursor.fetchone()
         try:
-            if boardData['owner'] == session['username'] or int(session['group']) <= 1:
-                try:
-                    if request.form["deleteBoard"] == "on":
-                        cursor.execute("DELETE FROM boards WHERE  uri=%s AND owner=%s LIMIT 1", (board, session['username']))
-                        cursor.execute("DELETE FROM posts WHERE board=%s", [board])
-                        mysql.connection.commit()
-                        path = os.path.join(globalSettings['bannerLocation'], board) #path for banner folder for specific board. 
-                        os.rmdir(path)#remove banner folder
-                        path = os.path.join(globalSettings['mediaLocation'], board) #path for banner folder for specific board. 
-                        for x in os.listdir(path):
-                            os.remove(os.path.join(path, x))
-                        os.rmdir(path)#remove media sub-folder
-                        return redirect(url_for('boardManagement'))
-                    else:
-                        return redirect(url_for('manageboard', board=board, msg="Please confirm board deletion"))
-                except Exception as e:
-                    print(e)
-                    return render_template('manageBoard.html', data=globalSettings, currentTheme=request.cookies.get('theme'), sqlData=sqlData, themes=themes, msg="Please confirm board deletion") #probably could have done better
-            else:
-                return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
+            boardData = cursor.fetchone()
+            if boardData == None:
+                return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
+            
+                if boardData['owner'] == session['username'] or int(session['group']) <= 1:
+                    if 'deleteBoard' not in request.form:
+                        return render_template('error.html', errorMsg=errors['confirmBoardDeletion'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                    if request.form["deleteBoard"] != "on":
+                        return render_template('error.html', errorMsg=errors['confirmBoardDeletion'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                    if logConfig['log-board-deletion'] == 'on':
+                        storeLog("deleteBoard", "Board deleted", session['username'], request.remote_addr, time.time(), boardData, board)
+                    cursor.execute("DELETE FROM boards WHERE  uri=%s AND owner=%s LIMIT 1", (board, session['username']))
+                    cursor.execute("DELETE FROM posts WHERE board=%s", [board])
+                    mysql.connection.commit()
+                    path = os.path.join(globalSettings['bannerLocation'], board) #path for banner folder for specific board. 
+                    os.rmdir(path)#remove banner folder
+                    path = os.path.join(globalSettings['mediaLocation'], board) #path for banner folder for specific board. 
+                    for x in os.listdir(path):
+                        os.remove(os.path.join(path, x))
+                    os.rmdir(path)#remove media sub-folder
+                    return redirect(url_for('boardManagement'))
+                else:
+                    return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         except Exception as e:
-             print(e)
+            return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+            print(e)
     else:
         return render_template('error.html', errorMsg=errors['RequestNotPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 @app.route('/<board>/update', methods=['POST'])

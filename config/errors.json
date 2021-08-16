@@ -12,5 +12,6 @@
     "incorrectFiletype": "Incorrect file type submitted",
     "incorrectCaptcha": "Incorrect captcha",
     "alreadyBanned": "User is already banned",
-    "notBanned": "User is not banned"
+    "notBanned": "User is not banned",
+    "confirmBoardDeletion": "Please confirm board deletion"
 }
