@@ -254,22 +254,23 @@ def bumpOrder(board):
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     #long and drawn out sql query to get bump order.
 
-    #add checks for sage in options
     cursor.execute(''' 
-        SELECT parent.*, child.number, (SELECT MAX(c1.number) FROM posts c1 WHERE c1.thread = parent.number AND c1.options != "sage") AS threadNum FROM posts parent,
+        SELECT parent.*, child.number AS Testc FROM posts parent,
         posts child
-        WHERE child.thread = parent.number AND parent.board=%s
-        AND child.number = (SELECT MAX(c1.number) FROM posts c1
-        WHERE c1.thread = parent.number)
+        WHERE child.thread = parent.number
+        AND parent.board=%s
+        AND child.number = (
+            SELECT MAX(c1.number) FROM posts c1 WHERE (c1.options <> 'sage' OR c1.options IS NULL) AND c1.thread = parent.number #This seems to cause the script to only return posts with options
+        )
         UNION 
-        SELECT parent.*, parent.number, parent.number AS threadNum
+        SELECT parent.*, parent.number
         FROM posts parent
         WHERE parent.board=%s AND
             NOT EXISTS (SELECT * FROM posts c2
             WHERE c2.thread = parent.number)
             AND NOT EXISTS (SELECT * FROM posts c3
             WHERE parent.thread = c3.number)
-        ORDER BY threadNum desc
+        ORDER BY Testc desc
         ;
     ''', (board, board))
     posts = cursor.fetchall()
@@ -808,7 +809,7 @@ def updateBoard(board):
                 anonymous = request.form['anonymous']
                 message = request.form['message']
                 captcha = request.form['captcha']
-                perPage = request.form['perPage']
+                perPage = int(request.form['perPage'])
                 if perPage > globalSettings['pageThreads']:
                     perPage = globalSettings['pageThreads']
                 cursor.execute("UPDATE boards SET name=%s, description=%s, anonymous=%s, message=%s, captcha=%s, perPage=%s WHERE uri=%s", (name, desc, anonymous, message, captcha, perPage, board))
@@ -1023,7 +1024,7 @@ def boardPage(board):
         return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
     posts = bumpOrder(board['uri'])
     postLength = len(posts)
-    posts = posts[0:1*int(board['perPage'])]
+    posts = posts[0:1*board['perPage']]
     path = os.path.join(globalSettings['bannerLocation'], board['uri'])
     if len(os.listdir(path)) > 0:
         banner = os.path.join(path, random.choice(os.listdir(path)))
@@ -1049,7 +1050,7 @@ def boardNumPage(board, page):
     board = cursor.fetchone()
     posts = bumpOrder(board['uri'])
     postLength = len(posts)
-    posts = posts[(page-1)*int(board['perPage']):page*int(board['perPage'])]
+    posts = posts[(page-1)*board['perPage']:page*board['perPage']]
     if posts:
         path = os.path.join(globalSettings['bannerLocation'], board['uri'])
         if len(os.listdir(path)) > 0:
