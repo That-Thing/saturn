@@ -182,6 +182,12 @@ input, select, textarea {
     border: 1px var(--input) solid;
 }
 
+#s-thumbnail-X, #s-thumbnail-Y {
+    width: 10%;
+}
+
+
+
 
 .manage-link {
     float: left;

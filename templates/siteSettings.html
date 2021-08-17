@@ -93,6 +93,11 @@
                         Max number of threads per page:
                         <input type="number" step="1" name="pageThreads" id="pageThreads" value="{{data['pageThreads']}}" required autocomplete="off"> <span class="small">This sets how many threads to display on a board before creating a new page</span>
                     </label>
+                    <label>
+                        Thumbnail size:
+                        <input type="number" step="1" name="thumbnailX" id="s-thumbnail-X" value="{{data['thumbnailX']}}" required autocomplete="off">x<input type="number" step="1" name="thumbnailY" id="s-thumbnail-Y" value="{{data['thumbnailY']}}" required autocomplete="off">
+                        <span class="small">Sizes in px</span>
+                    </label>
                     <h4>captcha</h4>
                     <label>
                         Captcha difficulty:

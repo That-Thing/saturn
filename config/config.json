@@ -12,6 +12,8 @@
     "maxFiles": 3,
     "tripLength": 10,
     "pageThreads": 20,
+    "thumbnailX": 150,
+    "thumbnailY": 150,
     "captchaDifficulty": 4,
     "captchaExpire": 5
 }

@@ -255,7 +255,7 @@ def bumpOrder(board):
     #long and drawn out sql query to get bump order.
 
     cursor.execute(''' 
-        SELECT parent.*, child.number AS Testc FROM posts parent,
+        SELECT parent.*, child.number AS bumporder FROM posts parent,
         posts child
         WHERE child.thread = parent.number
         AND parent.board=%s
@@ -270,7 +270,7 @@ def bumpOrder(board):
             WHERE c2.thread = parent.number)
             AND NOT EXISTS (SELECT * FROM posts c3
             WHERE parent.thread = c3.number)
-        ORDER BY Testc desc
+        ORDER BY bumporder desc
         ;
     ''', (board, board))
     posts = cursor.fetchall()
@@ -1081,7 +1081,7 @@ def boardRules(board):
 def thumbnail(image, board, filename, ext):
     try:
         image = Image.open(image)
-        size = 150, 150
+        size = globalSettings['thumbnailX'], globalSettings['thumbnailY']
         image.thumbnail(size)
         image.save(os.path.join(globalSettings['mediaLocation'], board, filename + "s"+ext))
     except IOError:
