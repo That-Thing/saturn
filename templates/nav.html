@@ -15,15 +15,3 @@
         {% endfor %}
     </select>
 </span>
-{% if request.endpoint == 'board' or request.endpoint == 'thread' %}
-    <span id="nav-secondary">
-        <span>
-            [
-            <a href="#banner"><i class="fas fa-arrow-up"></i></a>
-            /
-            <a href="#footer"><i class="fas fa-arrow-down"></i></a>
-            ]
-        </span>
-        <div class="nav-button" onclick="showHiddenMenu()"><i class="fas fa-eye-slash text-icon"></i><label>Hidden Posts</label></div>
-    </span>
-{%endif%}

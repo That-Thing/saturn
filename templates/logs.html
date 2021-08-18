@@ -28,9 +28,18 @@
                     {%if log['board'] != None%}
                         <span class="log-board">Board: <a href="?board={{log['board']}}">{{log['board']}}</a></span><br>
                     {%endif%}
-                    <span class="log-action-data">{{log['actionData']}}</span><br>
+                    {%set logData = log['actionData'] | loadJSON%}
+                    <div class="log-jsondata">
+                        {%if logData != None%}{%for x in logData%}
+                            {{x}}: {%if x == 'url'%}
+                                <a href="{{logData[x]}}" target="_blank">{{logData[x]}}</a>
+                            {%else%}
+                                {{logData[x]}}
+                            {%endif%}
+                            <br>
+                        {%endfor%}{%endif%}
+                    </div>
                     <span class="log-date">Date: {{log['date'] | ut}} GMT</span>
-                    
                 </div>
             {% endfor %}
         </div>

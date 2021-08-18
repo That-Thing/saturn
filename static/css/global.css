@@ -536,6 +536,11 @@ p {
 .log {
     border-top: 1px solid var(--border-2);
     background-color: var(--background-3);
+    padding-left: 5px;
+}
+.log-jsondata {
+    font-size: 90%;
+    padding-left: 10px;
 }
 .log:nth-child(even) {
     background-color: var(--background-2);

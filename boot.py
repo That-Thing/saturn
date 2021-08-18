@@ -429,6 +429,10 @@ def simplifyTime(minutes):
             result += f"{str(floor)} {name} "
             minutes = minutes - floor*time[unit]
     return result
+
+@app.template_filter("loadJSON")
+def loadJSON(string):
+    return json.loads(string)
 #Make local timestamps
 #add relative times
 

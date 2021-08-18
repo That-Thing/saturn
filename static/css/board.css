@@ -78,7 +78,7 @@ li {
 #board-message span {
     white-space: pre-line;
 }
-#boardNavigation {
+#boardNavigation, #thread-navigation{
     font-size: 80%;
     margin: 1em;
 }
