@@ -22,16 +22,16 @@
     </head>
     <body class="{{currentTheme}}">
         <nav>
-            <span id="navMain">
-                <a href="{{ url_for('index') }}"><i class="fas fa-home text-icon"></i>Home</a>
-                <a href="{{ url_for('boards') }}"><i class="fas fa-stream text-icon"></i>Boards</a>
-                <a href="{{ url_for('help') }}"><i class="fas fa-question text-icon"></i>Help</a>
-                <a href="/settings"><i class="fas fa-cog text-icon"></i>Settings</a>
-                <select onchange="changeTheme(this.value, {{themes}})" id="theme-select">
-                    {% for theme in themes %}
-                        <option id="{{themes[theme]['class']}}" value="{{themes[theme]['id']}}">{{themes[theme]['name']}}</option>
-                    {% endfor %}
-                </select>
+            {% include 'nav.html' %}
+            <span id="nav-secondary">
+                <span>
+                    [
+                    <a href="#banner"><i class="fas fa-arrow-up"></i></a>
+                    /
+                    <a href="#footer"><i class="fas fa-arrow-down"></i></a>
+                    ]
+                </span>
+                <div class="nav-button" onclick="showHiddenMenu()"><i class="fas fa-eye-slash text-icon"></i><label>Hidden Posts</label></div>
             </span>
         </nav>
         <div id="board-info">

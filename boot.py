@@ -192,12 +192,6 @@ def storeLog(type, action, user, ip, date, data, board):
                 "oldData": data['oldData'],
                 "newData": data['newData']
             }
-        elif type == "ownerChange":
-            actionData = {
-                'uri':data[uri],
-                'oldOwner': data['oldOwner'],
-                'newOwner': data['newOwner']
-            }
         elif type == "thread-creation":
             actionData = {
                 "threadData": data
@@ -625,7 +619,7 @@ def deleteRule():
     else:
         return render_template('error.html', errorMsg=errors['RequestNotPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 
-@app.route('/accountsettings', methods=['GET'])
+@app.route('/account', methods=['GET'])
 def accountSettings():
     try:
         if session['loggedin'] == True:
@@ -638,7 +632,7 @@ def accountSettings():
     except Exception as e:
         print(e)
         return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)   
-@app.route('/updatePassword', methods=['POST'])
+@app.route('/account/passwordchange', methods=['POST'])
 def updatePassword():
     if request.method == 'POST':
         if session['loggedin'] == True:
@@ -669,7 +663,7 @@ def updatePassword():
             
 
 
-@app.route('/updateemail', methods=['POST'])
+@app.route('/account/emailchange', methods=['POST'])
 def updateEmail():
     if request.method == 'POST':
         try:
@@ -695,7 +689,7 @@ def updateEmail():
 
 
 #board management page
-@app.route('/boardmanagement', methods=['GET'])
+@app.route('/boards/manage', methods=['GET'])
 def boardManagement():
     try:
         if int(session['group']) <= 1:
@@ -840,6 +834,8 @@ def setOwner(board):
             if int(session['group']) <= 1 or session['username'] ==  boardData['owner']:
                 cursor.execute("UPDATE boards SET owner=%s WHERE uri=%s", (request.form['owner'], board))
                 mysql.connection.commit()
+                if logConfig['log-board-ownerchange'] == 'on':
+                    storeLog("ownerChange", "Board owner changed", session['username'], request.remote_addr, time.time(), {'oldOwner':boardData['owner'], 'newOwner':request.form['owner']}, board)
                 return redirect(url_for("manageBoard", board=board))
             else:
                 return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
@@ -868,6 +864,8 @@ def uploadBanner(board):
                 size = os.path.getsize(os.path.join(path, filename))
                 cursor.execute("INSERT INTO banners VALUES (%s, %s, %s)",(board, filename, size))
                 mysql.connection.commit()
+                if logConfig['log-banners'] == 'on':
+                    storeLog("bannerUpload", "Banner upload", session['username'], request.remote_addr, time.time(), {'filename': filename}, board)
                 return redirect(url_for('manageBoard', board=board)) #Find a better solution for this. 
         except Exception as e:
             print(e)
@@ -889,6 +887,8 @@ def deleteBanner(board):
                 bannerData = cursor.fetchall()
                 path = os.path.join(globalSettings['bannerLocation'], board)
                 os.remove(os.path.join(path, name))
+                if logConfig['log-banners'] == 'on':
+                    storeLog("bannerDelete", "Banner deleted", session['username'], request.remote_addr, time.time(), {'filename': name}, board)
                 return redirect(url_for('manageBoard', board=board))
         except Exception as e:
             return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
