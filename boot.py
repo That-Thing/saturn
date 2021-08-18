@@ -1167,7 +1167,8 @@ def newThread():
                     return render_template('error.html', errorMsg=errors['incorrectFiletype'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
             filenames = ','.join([str(x) for x in filenames])
             filePaths = ','.join([str(x) for x in filePaths])
-        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, %s, %s, %s, %s, %s, %s, %s, %s, NULL)', (name, subject, options, comment, board['posts']+1, curTime, board['posts']+1, board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode))
+        number = board['posts']+1
+        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, %s, %s, %s, %s, %s, %s, %s, %s, NULL)', (name, subject, options, comment, number, curTime, number, board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode))
         if postLink != False:
             for x in postLink:
                 cursor.execute("SELECT * FROM posts WHERE number = %s", [x])
@@ -1181,7 +1182,7 @@ def newThread():
                     currentReplies.append(f"{str(request.form['thread'])}/{str(number)}")
                     currentReplies = ",".join(currentReplies)
                     cursor.execute("UPDATE posts SET replies = %s WHERE number = %s", (currentReplies, x))
-        cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (board['posts']+1, board['uri']))
+        cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (number, board['uri']))
         cursor.execute("SELECT * FROM server")
         serverInfo = cursor.fetchone()
         cursor.execute("UPDATE server SET posts=%s", [serverInfo['posts']+1])
@@ -1190,9 +1191,11 @@ def newThread():
         if ownedPosts == None:
             ownedPosts = "{}"
         ownedPosts = json.loads(ownedPosts)
-        ownedPosts[f"{board['uri']}/{board['posts']+1}"] = filePass
-        resp = redirect(f"{board['uri']}/thread/{board['posts']+1}")
+        ownedPosts[f"{board['uri']}/{number}"] = filePass
+        resp = redirect(f"{board['uri']}/thread/{number}")
         resp.set_cookie('ownedPosts', json.dumps(ownedPosts))
+        if logConfig['log-thread-creation'] == 'on':
+            storeLog("threadCreation", "Thread created", session['username'], request.remote_addr, curTime, {"number": number, "files": str(filenames)}, board['uri'])
         return resp
     else:
         return errors['RequestNotPost'] 
@@ -1284,6 +1287,7 @@ def reply():
             if session['captcha'] != request.form['captcha']: #Checks if the captcha is incorrect.
                 return render_template('error.html', errorMsg=errors['incorrectCaptcha'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         files = request.files.getlist("file")
+        filenames = []
         if request.files['file'].filename != '':
             if len(files) > globalSettings['maxFiles']: #check if too many files are uploaded
                 return render_template('error.html', errorMsg=errors['fileLimitExceeded'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
@@ -1328,6 +1332,8 @@ def reply():
         resp = redirect(f"{board['uri']}/thread/{request.form['thread']}#{number}")
         resp.set_cookie('ownedPosts', json.dumps(ownedPosts))
         socketio.emit("replyEvent", broadcast=True) #Send reload signal through websocket
+        if logConfig['log-thread-creation'] == 'on':
+            storeLog("reply", "Reply made", session['username'], request.remote_addr, curTime, {"number": number, "files": str(filenames)}, board['uri'])
         return resp
     else:
         return errors['RequestNotPost']
