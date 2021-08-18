@@ -49,6 +49,7 @@
     --background-3: rgba(240,224,214,0.98); /*Background color for lists, floating boxes, box headers*/
     --nav-color: rgba(240,224,214,0.98); /*background color of nav bar*/
     --border-color: #d9bfb7; /*color for things such as button borders */
+    --border-2: var(--border-color); /*Alternative border*/
     --border-radius: 0px; /*Border radius for things like boxes, posts, etc.*/
     --font-family: arial,helvetica,sans-serif; /*Default font*/
     --link-color: #0000EE; /*Links*/
@@ -169,6 +170,7 @@ body.theme-yotsuba {
     --background-3: rgba(214,218,240,0.98); /*Background color for lists, floating boxes, box headers*/
     --nav-color: rgba(214,218,240,0.98); /*background color of nav bar*/
     --border-color: #b7c5d9; /*color for things such as button borders */
+    --border-2: var(--border-color); /*Alternative border*/
     --border-radius: 0px; /*Border radius for things like boxes, posts, etc.*/
     --font-family: arial,helvetica,sans-serif; /*Default font*/
     --link-color: #34345c; /*Links*/
@@ -294,6 +296,7 @@ body.theme-yotsuba-b {
     --background-3: rgb(40, 42, 46); /*Background color for lists, floating boxes, box headers*/
     --nav-color: rgb(40, 42, 46); /*background color of nav bar*/
     --border-color: #282a2e; /*color for things such as button borders */
+    --border-2: #111; /*Alternative border*/
     --border-radius: 0px; /*Border radius for things like boxes, posts, etc.*/
     --font-family: arial,helvetica,sans-serif; /*Default font*/
     --link-color: #81a2be; /*Links*/
@@ -430,6 +433,7 @@ body.theme-tomorrow {
     --background-3: rgba(221,221,221); /*Background color for lists, floating boxes, box headers*/
     --nav-color: rgba(221,221,221); /*background color of nav bar*/
     --border-color: #ccc; /*color for things such as button borders */
+    --border-2: var(--border-color); /*Alternative border*/
     --border-radius: 0px; /*Border radius for things like boxes, posts, etc.*/
     --font-family: arial,helvetica,sans-serif; /*Default font*/
     --link-color: #f60; /*Links*/
