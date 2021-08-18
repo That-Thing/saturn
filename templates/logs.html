@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{data['siteName']}} - Logs</title>
+        <meta charset="UTF-8">
+        <link href="{{ url_for('static', filename='css/global.css') }}" type="text/css" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/markdown.css') }}" type="text/css" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/help.css') }}" type="text/css" rel="stylesheet">
+        <link rel="shortcut icon" type="image/png" href="/{{data['faviconUrl']}}"/>
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+    </head>
+    <body class="{{currentTheme}}">
+        <nav>
+            {% include 'nav.html' %}
+        </nav>
+        <div class="box box-80 box-settings">
+            <h1 class="box-header">Logs</h1>
+            {% for log in logs %}
+                <div class="log">
+                    <span class="log-id">{{log['id']}}. </span>
+                    <span class="log-action">{{log['action']}}</span>
+                    <span class="log-type small"><a href="?action={{log['type']}}">{{log['type']}}</a></span>
+                    <br>
+                    <span>User: <a href="?user={{log['user']}}">{{log['user']}}</a></span><br>
+                    {%if session['group'] <= 1%}
+                        <span class="log-ip">IP: <a href="?ip={{log['ip']}}">{{log['ip']}}</a></span> <br>
+                    {%endif%}
+                    <span class="log-action-data">{{log['actionData']}}</span><br>
+                    <span class="log-user">{{log['']}}</span>
+                    {%if log['board'] != None%}
+                        <span class="log-board">{{log['none']}}</span>
+                    {%endif%}
+                    <span class="log-date">Date: {{log['date'] | ut}} GMT</span>
+                    
+                </div>
+            {% endfor %}
+        </div>
+    </body>
+    <script src="{{ url_for('static', filename='js/themes.js') }}"></script>
+</html>

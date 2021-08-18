@@ -849,10 +849,10 @@ def uploadBanner(board):
 def deleteBanner(board):
     name = request.args.get('name', type=str)
     if request.method == 'POST':
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
-        sqlData = cursor.fetchone()
         try:
+            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
+            sqlData = cursor.fetchone()
             if sqlData['owner'] == session['username'] or int(session['group']) <= 1:
                 cursor.execute("DELETE FROM banners WHERE filename=%s LIMIT 1", [name]) 
                 mysql.connection.commit()
@@ -895,13 +895,17 @@ def login():
 
 @app.route('/logout')
 def logout():
-    if logConfig['log-logout'] == 'on':
-        storeLog("loginActions", "User logged out", session['username'], request.remote_addr, time.time(), {}, None)
-    session.pop('loggedin', None)
-    session.pop('id', None)
-    session.pop('username', None)
-    session.pop('group', None)
-    return redirect(url_for('index'))
+    try:
+        if logConfig['log-logout'] == 'on':
+            storeLog("loginActions", "User logged out", session['username'], request.remote_addr, time.time(), {}, None)
+        session.pop('loggedin', None)
+        session.pop('id', None)
+        session.pop('username', None)
+        session.pop('group', None)
+        return redirect(url_for('index'))
+    except Exception as e:
+        print(e)
+        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -985,46 +989,20 @@ def getThreads(uri):
 @app.route('/<board>/', methods=['GET'])
 @app.route('/<board>', methods=['GET'])
 def boardPage(board):
-    if request.cookies.get('ownedPosts') != None:
-        ownedPosts = json.loads(request.cookies.get('ownedPosts')) #gets posts the current user has made for (you)s
-    else:
-        ownedPosts = {}
-    filePass = checkFilePass() #gets user's password for files
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
-    board = cursor.fetchone()
-    if board == None:
-        return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
-    posts = bumpOrder(board['uri'])
-    postLength = len(posts)
-    posts = posts[0:1*board['perPage']]
-    path = os.path.join(globalSettings['bannerLocation'], board['uri'])
-    if len(os.listdir(path)) > 0:
-        banner = os.path.join(path, random.choice(os.listdir(path)))
-    else:
-        banner = "static/banners/defaultbanner.png"
-    if board['captcha'] == 1:
-        captcha = generateCaptcha(globalSettings['captchaDifficulty'])
-        return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, captcha=captcha, threads=posts, filePass=filePass, postLength=postLength, owned=ownedPosts, page=1, themes=themes)
-    else:
-        return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, threads=posts, filePass=filePass, postLength=postLength, owned=ownedPosts, page=1, themes=themes)
-    return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
-
-#individual pages
-@app.route('/<board>/<int:page>', methods=['GET'])
-def boardNumPage(board, page):
-    if request.cookies.get('ownedPosts') != None:
-        ownedPosts = json.loads(request.cookies.get('ownedPosts')) #gets posts the current user has made for (you)s
-    else:
-        ownedPosts = {}
-    filePass = checkFilePass()
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute('SELECT * FROM boards WHERE uri=%s', [board])
-    board = cursor.fetchone()
-    posts = bumpOrder(board['uri'])
-    postLength = len(posts)
-    posts = posts[(page-1)*board['perPage']:page*board['perPage']]
-    if posts:
+    try:
+        if request.cookies.get('ownedPosts') != None:
+            ownedPosts = json.loads(request.cookies.get('ownedPosts')) #gets posts the current user has made for (you)s
+        else:
+            ownedPosts = {}
+        filePass = checkFilePass() #gets user's password for files
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
+        board = cursor.fetchone()
+        if board == None:
+            return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
+        posts = bumpOrder(board['uri'])
+        postLength = len(posts)
+        posts = posts[0:1*board['perPage']]
         path = os.path.join(globalSettings['bannerLocation'], board['uri'])
         if len(os.listdir(path)) > 0:
             banner = os.path.join(path, random.choice(os.listdir(path)))
@@ -1032,24 +1010,62 @@ def boardNumPage(board, page):
             banner = "static/banners/defaultbanner.png"
         if board['captcha'] == 1:
             captcha = generateCaptcha(globalSettings['captchaDifficulty'])
-            return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, captcha=captcha, threads=posts, filePass=filePass, postLength=postLength, owned=ownedPosts, page=page, themes=themes)
+            return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, captcha=captcha, threads=posts, filePass=filePass, postLength=postLength, owned=ownedPosts, page=1, themes=themes)
         else:
-            return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, threads=posts, filePass=filePass, postLength=postLength, owned=ownedPosts, page=page, themes=themes)
-    else:
+            return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, threads=posts, filePass=filePass, postLength=postLength, owned=ownedPosts, page=1, themes=themes)
         return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
-    return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
+    except Exception as e:
+        print(e)
+        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+
+#individual pages
+@app.route('/<board>/<int:page>', methods=['GET'])
+def boardNumPage(board, page):
+    try:
+        if request.cookies.get('ownedPosts') != None:
+            ownedPosts = json.loads(request.cookies.get('ownedPosts')) #gets posts the current user has made for (you)s
+        else:
+            ownedPosts = {}
+        filePass = checkFilePass()
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute('SELECT * FROM boards WHERE uri=%s', [board])
+        board = cursor.fetchone()
+        posts = bumpOrder(board['uri'])
+        postLength = len(posts)
+        posts = posts[(page-1)*board['perPage']:page*board['perPage']]
+        if posts:
+            path = os.path.join(globalSettings['bannerLocation'], board['uri'])
+            if len(os.listdir(path)) > 0:
+                banner = os.path.join(path, random.choice(os.listdir(path)))
+            else:
+                banner = "static/banners/defaultbanner.png"
+            if board['captcha'] == 1:
+                captcha = generateCaptcha(globalSettings['captchaDifficulty'])
+                return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, captcha=captcha, threads=posts, filePass=filePass, postLength=postLength, owned=ownedPosts, page=page, themes=themes)
+            else:
+                return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, threads=posts, filePass=filePass, postLength=postLength, owned=ownedPosts, page=page, themes=themes)
+        else:
+            return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
+        return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
+    except Exception as e:
+        print(e)
+        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 
 @app.route('/<board>/rules', methods=['GET'])
 def boardRules(board):
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT * FROM boards WHERE uri = %s", [board])
-    board = cursor.fetchone()
-    if board != None:
-        cursor.execute("SELECT * FROM rules WHERE board = %s", [board['uri']])
-        rules = cursor.fetchall()
-        return render_template('rules.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes, rules=rules, board=f"/{board['uri']}/")
-    else:
-        return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
+    try:
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT * FROM boards WHERE uri = %s", [board])
+        board = cursor.fetchone()
+        if board != None:
+            cursor.execute("SELECT * FROM rules WHERE board = %s", [board['uri']])
+            rules = cursor.fetchall()
+            return render_template('rules.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes, rules=rules, board=f"/{board['uri']}/")
+        else:
+            return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
+    except Exception as e:
+        print(e)
+        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 #thumbnail generation
 def thumbnail(image, board, filename, ext):
     try:
@@ -1176,31 +1192,35 @@ def newThread():
 @app.route('/<board>/thread/<thread>', methods=['GET'])
 @app.route('/<board>/thread/<thread>', methods=['GET'])
 def thread(board, thread):
-    if request.cookies.get('ownedPosts') != None:
-        ownedPosts = json.loads(request.cookies.get('ownedPosts')) #gets posts the current user has made for (you)s
-    else:
-        ownedPosts = {}
-    filePass = checkFilePass()
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT * FROM posts WHERE board=%s AND number=%s AND type=1", (board, thread))
-    parentPost = cursor.fetchall()
-    cursor.execute("SELECT * FROM posts WHERE board=%s AND thread=%s and type=2", (board, thread))
-    posts = cursor.fetchall()
-    cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
-    board = cursor.fetchone()
-    if board == None: #board doesn't exist
+    try:
+        if request.cookies.get('ownedPosts') != None:
+            ownedPosts = json.loads(request.cookies.get('ownedPosts')) #gets posts the current user has made for (you)s
+        else:
+            ownedPosts = {}
+        filePass = checkFilePass()
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT * FROM posts WHERE board=%s AND number=%s AND type=1", (board, thread))
+        parentPost = cursor.fetchall()
+        cursor.execute("SELECT * FROM posts WHERE board=%s AND thread=%s and type=2", (board, thread))
+        posts = cursor.fetchall()
+        cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
+        board = cursor.fetchone()
+        if board == None: #board doesn't exist
+            return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
+        path = os.path.join(globalSettings['bannerLocation'], board['uri'])
+        if len(os.listdir(path)) > 0:
+            banner = os.path.join(path, random.choice(os.listdir(path)))
+        else:
+            banner = "static/banners/defaultbanner.png"
+        if board['captcha'] == 1:
+            captcha = generateCaptcha(globalSettings['captchaDifficulty'])
+            return render_template('thread.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, captcha=captcha, posts=posts, owned=ownedPosts, thread=parentPost[0], filePass=filePass, themes=themes)
+        else:
+            return render_template('thread.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, posts=posts, thread=parentPost[0], owned=ownedPosts, filePass=filePass, themes=themes)
         return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
-    path = os.path.join(globalSettings['bannerLocation'], board['uri'])
-    if len(os.listdir(path)) > 0:
-        banner = os.path.join(path, random.choice(os.listdir(path)))
-    else:
-        banner = "static/banners/defaultbanner.png"
-    if board['captcha'] == 1:
-        captcha = generateCaptcha(globalSettings['captchaDifficulty'])
-        return render_template('thread.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, captcha=captcha, posts=posts, owned=ownedPosts, thread=parentPost[0], filePass=filePass, themes=themes)
-    else:
-        return render_template('thread.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, posts=posts, thread=parentPost[0], owned=ownedPosts, filePass=filePass, themes=themes)
-    return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
+    except Exception as e:
+        print(e)
+        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 
 @app.route('/reply', methods=['POST'])
 def reply():
@@ -1357,44 +1377,52 @@ def postActions(board):
 #Account moderation
 @app.route('/users', methods=['GET'])
 def users():
-    if session['group'] <= 1:
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute("SELECT * FROM accounts")
-        users = cursor.fetchall()
-        cursor.execute("SELECT * FROM groups")
-        groups = cursor.fetchall()
-        cursor.execute("SELECT * FROM boards")
-        boards = cursor.fetchall()
-        cursor.execute("SELECT * FROM groups WHERE id > %s", [session['group']])
-        availableGroups = cursor.fetchall()
-        return render_template('users.html', users=users, groups=groups, aGroups=availableGroups,boards=boards,data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-    else:
-        return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+    try:
+        if session['group'] <= 1:
+            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute("SELECT * FROM accounts")
+            users = cursor.fetchall()
+            cursor.execute("SELECT * FROM groups")
+            groups = cursor.fetchall()
+            cursor.execute("SELECT * FROM boards")
+            boards = cursor.fetchall()
+            cursor.execute("SELECT * FROM groups WHERE id > %s", [session['group']])
+            availableGroups = cursor.fetchall()
+            return render_template('users.html', users=users, groups=groups, aGroups=availableGroups,boards=boards,data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        else:
+            return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+    except Exception as e:
+        print(e)
+        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 
 #Manage individual user
 @app.route('/user/<user>/manage', methods=['GET'])
 def manageUser(user):
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT * FROM accounts WHERE username = %s", [user])
-    user = cursor.fetchone()
-    cursor.execute("SELECT * FROM groups WHERE id > %s", [session['group']])
-    groups = cursor.fetchall()
-    cursor.execute("SELECT * FROM bans WHERE user = %s", [user['username']])
-    ban = cursor.fetchone()
-    if user == None: 
-        return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
-    if user['group'] <= session['group']: #Returns an insufficient permission error if the user's group has less permissions than the requested user
-        return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-    if session['group'] <= 1:
-        return render_template('manageUser.html', user=user, groups=groups, ban=ban, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-    else:
-        return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+    try:
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT * FROM accounts WHERE username = %s", [user])
+        user = cursor.fetchone()
+        cursor.execute("SELECT * FROM groups WHERE id > %s", [session['group']])
+        groups = cursor.fetchall()
+        cursor.execute("SELECT * FROM bans WHERE user = %s", [user['username']])
+        ban = cursor.fetchone()
+        if user == None: 
+            return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
+        if user['group'] <= session['group']: #Returns an insufficient permission error if the user's group has less permissions than the requested user
+            return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        if session['group'] <= 1:
+            return render_template('manageUser.html', user=user, groups=groups, ban=ban, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        else:
+            return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+    except Exception as e:
+        print(e)
+        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 #Update user information
 @app.route("/user/<user>/update", methods=['POST'])
 def updateUser(user):
     if request.method == 'POST':
-        if session['group'] <= 1:
-            try:
+        try:
+            if session['group'] <= 1:
                 cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
                 cursor.execute("SELECT * FROM accounts WHERE username = %s", [user])
                 userData = cursor.fetchone()
@@ -1414,46 +1442,50 @@ def updateUser(user):
                     if len(difference) > 0:
                         storeLog("modUserUpdate", "A moderator updated a user", session['username'], request.remote_addr, time.time(), {'user':user, "changes":difference['values_changed']}, None)
                 return redirect(url_for("manageUser", user=user))
-            except Exception as e:
-               print(e)
-               return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-        else:
-            return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+            else:
+                return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        except Exception as e:
+            print(e)
+            return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     else:
         return errors['RequestNotPost']
 #Delete user
 @app.route("/user/<user>/delete", methods=['POST'])
 def deleteUser(user):
     if request.method == 'POST':
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute("SELECT * FROM accounts WHERE username=%s", [user])
-        userData = cursor.fetchone()
-        if session['group'] < userData['group'] or user == session['username']: #Checks if the user has perms over the user being deleted or if the user is deleting themselves. 
-            if 'confirm-delete' in request.form and request.form['confirm-delete'] == 'confirm':
-                try:
-                    if userData == None: #User doesn't exist
-                        return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
-                    if userData['group'] < session['group']: #Permissions are too low
-                        return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-                    cursor.execute("SELECT * FROM boards WHERE owner=%s", [user]) #Checks if the deleted user owned any boards, and if so, transfers ownership of the boards to the current user. 
-                    boards = cursor.fetchall()
-                    if boards != None:
-                        for board in boards:
-                            cursor.execute("UPDATE boards SET owner=%s WHERE owner=%s", (session['username'], user))
-                    mysql.connection.commit()
-                    cursor.execute("DELETE FROM accounts WHERE username=%s AND id=%s", (user, userData['id'])) #Delete account
-                    cursor.execute("DELETE FROM bans WHERE username=%s", [user]) #Remove bans so that if anther user with the same username is registered it won't mess up the DB
-                    mysql.connection.commit()
-                    if logConfig['log-mod-user-update']:
-                        storeLog("modUserDelete", "A moderator deleted a user", session['username'], request.remote_addr, time.time(), {'user':user}, None)
-                    return redirect(url_for("users"))
-                except Exception as e:
-                    print(e)
-                    return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        try:
+            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute("SELECT * FROM accounts WHERE username=%s", [user])
+            userData = cursor.fetchone()
+            if session['group'] < userData['group'] or user == session['username']: #Checks if the user has perms over the user being deleted or if the user is deleting themselves. 
+                if 'confirm-delete' in request.form and request.form['confirm-delete'] == 'confirm':
+                    try:
+                        if userData == None: #User doesn't exist
+                            return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
+                        if userData['group'] < session['group']: #Permissions are too low
+                            return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                        cursor.execute("SELECT * FROM boards WHERE owner=%s", [user]) #Checks if the deleted user owned any boards, and if so, transfers ownership of the boards to the current user. 
+                        boards = cursor.fetchall()
+                        if boards != None:
+                            for board in boards:
+                                cursor.execute("UPDATE boards SET owner=%s WHERE owner=%s", (session['username'], user))
+                        mysql.connection.commit()
+                        cursor.execute("DELETE FROM accounts WHERE username=%s AND id=%s", (user, userData['id'])) #Delete account
+                        cursor.execute("DELETE FROM bans WHERE username=%s", [user]) #Remove bans so that if anther user with the same username is registered it won't mess up the DB
+                        mysql.connection.commit()
+                        if logConfig['log-mod-user-update']:
+                            storeLog("modUserDelete", "A moderator deleted a user", session['username'], request.remote_addr, time.time(), {'user':user}, None)
+                        return redirect(url_for("users"))
+                    except Exception as e:
+                        print(e)
+                        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                else:
+                    return render_template('error.html', errorMsg="You must confirm user deletion", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
             else:
-                return render_template('error.html', errorMsg="You must confirm user deletion", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-        else:
-            return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        except Exception as e:
+            print(e)
+            return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     else:
         return errors['RequestNotPost']
 
@@ -1555,5 +1587,41 @@ def unbanUser(user):
         except Exception as e:
             print(e)
             return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+
+@app.route("/logs", methods=['GET'])
+def logs():
+    if not request.args.get('board', type=str): #Board filter arguments
+        board = "board OR board=NULL"
+    else:
+        board = f'"{request.args.get("board", type=str)}"'
+    if not request.args.get('user', type=str): #user filter arguments
+        user = "user OR user=NULL"
+    else:
+        user = f'"{request.args.get("user", type=str)}"'
+    if not request.args.get('ip', type=str): #IP filter arguments
+        ip = "ip OR ip=NULL"
+    else:
+        ip = f'"{request.args.get("ip", type=str)}"'
+    if not request.args.get("action", type=str): #type of action
+        action = "type"
+    else:
+        action = f'"{request.args.get("action", type=str)}"'
+    if not request.args.get('id', type=str): # ID filter arguments
+        id = "id"
+    else:
+        id = f'"{request.args.get("id", type=str)}"'
+    print(board)
+    print(user)
+    print(ip)
+    print(action)
+    print(id)
+    query = f"SELECT * FROM logs WHERE id={id} AND type={action} AND user={user} AND ip={ip} AND board={board} ORDER BY id desc"
+    print(query)
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute(query)
+    logs = cursor.fetchall()
+    #print(logs)
+    return render_template('logs.html', logs=logs, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=configData["port"])

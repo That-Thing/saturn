@@ -185,10 +185,9 @@ input, select, textarea {
 #s-thumbnail-X, #s-thumbnail-Y {
     width: 10%;
 }
-
-
-
-
+.box-80 {
+    width: 80%;
+}
 .manage-link {
     float: left;
     margin-right: 20px;
@@ -532,4 +531,8 @@ p {
 
 .banned-user {
     color: var(--banned-user);
+}
+/*Log page*/
+.log {
+    border-top: 1px solid var(--border-color);
 }

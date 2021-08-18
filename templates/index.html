@@ -51,6 +51,8 @@
                 <h2 class="box-header">Moderation</h2>
                 <a href="/reports"><i class="fas fa-flag text-icon"></i>Reports</a>
                 <a href="/latest"><i class="fas fa-list text-icon"></i>Latest Posts</a>
+                <a href="/logs"><i class="fas fa-history text-icon"></i>Logs</a>
+                <a href="/media"><i class="far fa-images text-icon"></i>Media Management</a>
                 {% if session['group'] | int<=1%}
                     <a href="{{url_for('users')}}"><i class="fas fa-users-cog text-icon"></i>Users</a>
                 {% endif %}
