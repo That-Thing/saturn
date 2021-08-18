@@ -21,15 +21,14 @@
                     <span class="log-action">{{log['action']}}</span>
                     <span class="log-type small"><a href="?action={{log['type']}}">{{log['type']}}</a></span>
                     <br>
-                    <span>User: <a href="?user={{log['user']}}">{{log['user']}}</a></span><br>
+                    <span class="log-user">User: <a href="?user={{log['user']}}">{{log['user']}}</a></span><br>
                     {%if session['group'] <= 1%}
                         <span class="log-ip">IP: <a href="?ip={{log['ip']}}">{{log['ip']}}</a></span> <br>
                     {%endif%}
-                    <span class="log-action-data">{{log['actionData']}}</span><br>
-                    <span class="log-user">{{log['']}}</span>
                     {%if log['board'] != None%}
-                        <span class="log-board">{{log['none']}}</span>
+                        <span class="log-board">Board: <a href="?board={{log['board']}}">{{log['board']}}</a></span><br>
                     {%endif%}
+                    <span class="log-action-data">{{log['actionData']}}</span><br>
                     <span class="log-date">Date: {{log['date'] | ut}} GMT</span>
                     
                 </div>
