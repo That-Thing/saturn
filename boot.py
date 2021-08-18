@@ -1461,33 +1461,37 @@ def deleteUser(user):
 @app.route("/user/create", methods=['POST'])
 def createUser():
     if request.method == 'POST':
-        if int(session['group']) <= 1: 
-            if 'username' and 'password' and 'confirm-password' and 'group' not in request.form:
-                return render_template('error.html', errorMsg=errors['unfilledFields'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-            if request.form['password'] != request.form['confirm-password']:
-                return render_template('error.html', errorMsg=errors['passwordsDoNotMatch'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-            if int(request.form['group']) <= int(session['group']):
-                return "Insufficient permissions"
-            if bool(re.match(r'^[a-zA-Z0-9_.-]*$', request.form['username'])) == False:
-                return render_template('error.html', errorMsg=errors['usernameRegexFail'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            cursor.execute("SELECT * FROM accounts WHERE username=%s", [request.form['username']])
-            if cursor.fetchone() != None:
-                return render_template('error.html', errorMsg=errors['accountExists'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-            if 'email' in request.form and len(request.form['email']) > 0:
-                if bool(re.match(r'[^@]+@[^@]+\.[^@]+', request.form['email'])) == False:
-                    return render_template('error.html', errorMsg=errors['emailRegexFail'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-                email = request.form['email']
+        try:
+            if int(session['group']) <= 1: 
+                if 'username' and 'password' and 'confirm-password' and 'group' not in request.form:
+                    return render_template('error.html', errorMsg=errors['unfilledFields'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                if request.form['password'] != request.form['confirm-password']:
+                    return render_template('error.html', errorMsg=errors['passwordsDoNotMatch'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                if int(request.form['group']) <= int(session['group']):
+                    return "Insufficient permissions"
+                if bool(re.match(r'^[a-zA-Z0-9_.-]*$', request.form['username'])) == False:
+                    return render_template('error.html', errorMsg=errors['usernameRegexFail'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+                cursor.execute("SELECT * FROM accounts WHERE username=%s", [request.form['username']])
+                if cursor.fetchone() != None:
+                    return render_template('error.html', errorMsg=errors['accountExists'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                if 'email' in request.form and len(request.form['email']) > 0:
+                    if bool(re.match(r'[^@]+@[^@]+\.[^@]+', request.form['email'])) == False:
+                        return render_template('error.html', errorMsg=errors['emailRegexFail'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                    email = request.form['email']
+                else:
+                    email = None
+                creationTime = time.time()
+                cursor.execute("INSERT INTO accounts VALUES (NULL, %s, %s, %s, %s, %s, %s, 0)", (request.form['username'], returnHash(request.form['password']), email, request.form['group'], creationTime, str(request.remote_addr)))
+                if logConfig['log-mod-user-update']:
+                    storeLog("modUserCreate", "A moderator created a user", session['username'], request.remote_addr, creationTime, {'user':request.form['username'], "group":request.form['group'], "email":email}, None)
+                mysql.connection.commit()                
+                return redirect(url_for("manageUser", user=request.form['username']))
             else:
-                email = None
-            creationTime = time.time()
-            cursor.execute("INSERT INTO accounts VALUES (NULL, %s, %s, %s, %s, %s, %s, 0)", (request.form['username'], returnHash(request.form['password']), email, request.form['group'], creationTime, str(request.remote_addr)))
-            if logConfig['log-mod-user-update']:
-                storeLog("modUserCreate", "A moderator created a user", session['username'], request.remote_addr, creationTime, {'user':request.form['username'], "group":request.form['group'], "email":email}, None)
-            mysql.connection.commit()                
-            return redirect(url_for("manageUser", user=request.form['username']))
-        else:
-            return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        except Exception as e:
+            print(e)
+            return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     else:
         return errors['RequestNotPost']
 
@@ -1495,53 +1499,61 @@ def createUser():
 @app.route("/user/<user>/ban", methods=['POST'])
 def banUser(user):
     if request.method == 'POST':
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute("SELECT * FROM accounts WHERE username=%s", [user])
-        userData = cursor.fetchone()
-        if userData == None: #Checks if the user exists. 
-            return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
-        if userData['banned'] == 1: #Checks if the user is already banned. 
-            return render_template('error.html', errorMsg=errors['alreadyBanned'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-        if int(session['group']) <= 1 and session['group'] < userData['group']:
-            if 'reason' in request.form and len(request.form['reason']) > 0: #Checks if a reason was given
-                reason = request.form['reason']
+        try:
+            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute("SELECT * FROM accounts WHERE username=%s", [user])
+            userData = cursor.fetchone()
+            if userData == None: #Checks if the user exists. 
+                return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
+            if userData['banned'] == 1: #Checks if the user is already banned. 
+                return render_template('error.html', errorMsg=errors['alreadyBanned'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+            if int(session['group']) <= 1 and session['group'] < userData['group']:
+                if 'reason' in request.form and len(request.form['reason']) > 0: #Checks if a reason was given
+                    reason = request.form['reason']
+                else:
+                    reason = None
+                if 'length' in request.form and len(request.form['length']) > 0: #Checks if a reason was given
+                    length = getMinutes(request.form['length'])
+                else:
+                    length = None
+                cursor.execute("UPDATE accounts SET banned=1 WHERE username=%s", [user])
+                currentTime = time.time()
+                cursor.execute("INSERT INTO bans VALUES(NULL, %s, %s, %s, NULL, %s)", (reason, length, user, currentTime))
+                if logConfig['log-user-ban']:
+                    cursor.execute("SELECT * FROM bans WHERE user=%s", [user])
+                    storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {"id":cursor.fetchone()['id'],'user':user, "reason": reason, "length":length}, None)
+                mysql.connection.commit()
+                return redirect(url_for("manageUser", user=user))
             else:
-                reason = None
-            if 'length' in request.form and len(request.form['length']) > 0: #Checks if a reason was given
-                length = getMinutes(request.form['length'])
-            else:
-                length = None
-            cursor.execute("UPDATE accounts SET banned=1 WHERE username=%s", [user])
-            currentTime = time.time()
-            cursor.execute("INSERT INTO bans VALUES(NULL, %s, %s, %s, NULL, %s)", (reason, length, user, currentTime))
-            if logConfig['log-user-ban']:
-                cursor.execute("SELECT * FROM bans WHERE user=%s"[user])
-                storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {"id":cursor.fetchone()['id'],'user':user, "reason": reason, "length":length}, None)
-            mysql.connection.commit()
-            return redirect(url_for("manageUser", user=user))
-        else:
-            return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        except Exception as e:
+            print(e)
+            return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     else:
         return errors['RequestNotPost']  
 #Unban user
 @app.route("/user/<user>/unban", methods=['POST'])
 def unbanUser(user):
     if request.method == 'POST':
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute("SELECT * FROM accounts WHERE username=%s", [user])
-        userData = cursor.fetchone()
-        if userData == None: #Checks if the user exists. 
-            return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
-        if userData['banned'] == 0: #Checks if the user is not banned. 
-            return render_template('error.html', errorMsg=errors['notBanned'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-        if int(session['group']) <= 1 and session['group'] < userData['group']:
-            cursor.execute("DELETE FROM bans WHERE user=%s", [user])
-            cursor.execute("UPDATE accounts SET banned=0 WHERE username=%s", [user])
-            if logConfig['log-user-unban']:
-                storeLog("userUnban", "A user has been unbanned", session['username'], request.remote_addr, time.time(), {'user':user}, None)
-            mysql.connection.commit()
-            return redirect(url_for("manageUser", user=user))
-        else:
-            return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        try:
+            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute("SELECT * FROM accounts WHERE username=%s", [user])
+            userData = cursor.fetchone()
+            if userData == None: #Checks if the user exists. 
+                return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
+            if userData['banned'] == 0: #Checks if the user is not banned. 
+                return render_template('error.html', errorMsg=errors['notBanned'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+            if int(session['group']) <= 1 and session['group'] < userData['group']:
+                cursor.execute("DELETE FROM bans WHERE user=%s", [user])
+                cursor.execute("UPDATE accounts SET banned=0 WHERE username=%s", [user])
+                if logConfig['log-user-unban']:
+                    storeLog("userUnban", "A user has been unbanned", session['username'], request.remote_addr, time.time(), {'user':user}, None)
+                mysql.connection.commit()
+                return redirect(url_for("manageUser", user=user))
+            else:
+                return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        except Exception as e:
+            print(e)
+            return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=configData["port"])
