@@ -278,7 +278,10 @@ def checkTrip(name, role): #check if tripcode password is included and hash it i
     if "##" in name:
         password = name.split("##",1)[1]
         if password == "rs":
-            password = groups[role]['name']
+            try:
+                password = groups[role]['name']
+            except:
+                password = ''
             return password
         else:
             password = returnHash(password)
@@ -1195,7 +1198,7 @@ def newThread():
         resp = redirect(f"{board['uri']}/thread/{number}")
         resp.set_cookie('ownedPosts', json.dumps(ownedPosts))
         if logConfig['log-thread-creation'] == 'on':
-            storeLog("threadCreation", "Thread created", session['username'], request.remote_addr, curTime, {"number": number, "files": str(filenames)}, board['uri'])
+            storeLog("threadCreation", "Thread created", session['username'] if 'username' in session else None, request.remote_addr, curTime, {"number": number, "files": str(filenames)}, board['uri'])
         return resp
     else:
         return errors['RequestNotPost'] 
@@ -1333,7 +1336,7 @@ def reply():
         resp.set_cookie('ownedPosts', json.dumps(ownedPosts))
         socketio.emit("replyEvent", broadcast=True) #Send reload signal through websocket
         if logConfig['log-thread-creation'] == 'on':
-            storeLog("reply", "Reply made", session['username'], request.remote_addr, curTime, {"number": number, "files": str(filenames)}, board['uri'])
+            storeLog("reply", "Reply made", session['username'] if 'username' in session else None, request.remote_addr, curTime, {"number": number, "files": str(filenames)}, board['uri'])
         return resp
     else:
         return errors['RequestNotPost']
