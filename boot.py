@@ -192,14 +192,6 @@ def storeLog(type, action, user, ip, date, data, board):
                 "oldData": data['oldData'],
                 "newData": data['newData']
             }
-        elif type == "thread-creation":
-            actionData = {
-                "threadData": data
-            }
-        elif type == "reply":
-            actionData = {
-                "replyData": data
-            }
         elif type == "postDelete":
             actionData = {
                 "board": data['board'],
@@ -207,28 +199,6 @@ def storeLog(type, action, user, ip, date, data, board):
                 "number": data['number'],
                 "type": data['type'],
                 "OP": data['ip']
-            }
-        elif type == "modUserUpdate":
-            actionData = {
-                "oldData": data['oldData'],
-                "newData": data['newData']
-            }
-        elif type == "modUserDelete":
-            actionData = {
-                "user": data
-            }
-        elif type == "modUserCreate":
-            actionData = {
-                "user": data
-            }
-        elif type == "userBan":
-            actionData = {
-                "user": data['user'],
-                "reason": data['reason']
-            }
-        elif type == "userUnban":
-            actionData = {
-                "user": data
             }
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute("INSERT INTO logs VALUES(NULL, %s, %s, %s, %s, %s, %s, %s)", (type, action, json.dumps(actionData), user, str(ip), board,date))
@@ -1427,7 +1397,8 @@ def updateUser(user):
             try:
                 cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
                 cursor.execute("SELECT * FROM accounts WHERE username = %s", [user])
-                if cursor.fetchone() == None:
+                userData = cursor.fetchone()
+                if userData == None:
                     return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
                 if 'newPassword' and 'confirmPassword' in request.form and len(request.form['newPassword']) > 0 and len(request.form['confirmPassword']) > 0:
                     if request.form['newPassword'] == request.form['confirmPassword']:
@@ -1437,6 +1408,11 @@ def updateUser(user):
                 else:
                     cursor.execute("UPDATE accounts SET email=%s, `group`=%s WHERE username=%s", (request.form['email'], int(request.form['group']), user))
                 mysql.connection.commit()
+                if logConfig['log-mod-user-update']:
+                    cursor.execute("SELECT * FROM accounts WHERE username = %s", [user])
+                    difference = DeepDiff(userData, cursor.fetchone())
+                    if len(difference) > 0:
+                        storeLog("modUserUpdate", "A moderator updated a user", session['username'], request.remote_addr, time.time(), {'user':user, "changes":difference['values_changed']}, None)
                 return redirect(url_for("manageUser", user=user))
             except Exception as e:
                print(e)
@@ -1466,7 +1442,10 @@ def deleteUser(user):
                             cursor.execute("UPDATE boards SET owner=%s WHERE owner=%s", (session['username'], user))
                     mysql.connection.commit()
                     cursor.execute("DELETE FROM accounts WHERE username=%s AND id=%s", (user, userData['id'])) #Delete account
+                    cursor.execute("DELETE FROM bans WHERE username=%s", [user]) #Remove bans so that if anther user with the same username is registered it won't mess up the DB
                     mysql.connection.commit()
+                    if logConfig['log-mod-user-update']:
+                        storeLog("modUserDelete", "A moderator deleted a user", session['username'], request.remote_addr, time.time(), {'user':user}, None)
                     return redirect(url_for("users"))
                 except Exception as e:
                     print(e)
@@ -1501,8 +1480,11 @@ def createUser():
                 email = request.form['email']
             else:
                 email = None
-            cursor.execute("INSERT INTO accounts VALUES (NULL, %s, %s, %s, %s, %s, %s, 0)", (request.form['username'], returnHash(request.form['password']), email, request.form['group'], time.time(), str(request.remote_addr)))
-            mysql.connection.commit()
+            creationTime = time.time()
+            cursor.execute("INSERT INTO accounts VALUES (NULL, %s, %s, %s, %s, %s, %s, 0)", (request.form['username'], returnHash(request.form['password']), email, request.form['group'], creationTime, str(request.remote_addr)))
+            if logConfig['log-mod-user-update']:
+                storeLog("modUserCreate", "A moderator created a user", session['username'], request.remote_addr, creationTime, {'user':request.form['username'], "group":request.form['group'], "email":email}, None)
+            mysql.connection.commit()                
             return redirect(url_for("manageUser", user=request.form['username']))
         else:
             return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
@@ -1530,7 +1512,11 @@ def banUser(user):
             else:
                 length = None
             cursor.execute("UPDATE accounts SET banned=1 WHERE username=%s", [user])
-            cursor.execute("INSERT INTO bans VALUES(NULL, %s, %s, %s, NULL, %s)", (reason, length, user, time.time()))
+            currentTime = time.time()
+            cursor.execute("INSERT INTO bans VALUES(NULL, %s, %s, %s, NULL, %s)", (reason, length, user, currentTime))
+            if logConfig['log-user-ban']:
+                cursor.execute("SELECT * FROM bans WHERE user=%s"[user])
+                storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {"id":cursor.fetchone()['id'],'user':user, "reason": reason, "length":length}, None)
             mysql.connection.commit()
             return redirect(url_for("manageUser", user=user))
         else:
@@ -1546,11 +1532,13 @@ def unbanUser(user):
         userData = cursor.fetchone()
         if userData == None: #Checks if the user exists. 
             return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
-        if userData['banned'] == 0: #Checks if the user is already banned. 
+        if userData['banned'] == 0: #Checks if the user is not banned. 
             return render_template('error.html', errorMsg=errors['notBanned'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         if int(session['group']) <= 1 and session['group'] < userData['group']:
             cursor.execute("DELETE FROM bans WHERE user=%s", [user])
             cursor.execute("UPDATE accounts SET banned=0 WHERE username=%s", [user])
+            if logConfig['log-user-unban']:
+                storeLog("userUnban", "A user has been unbanned", session['username'], request.remote_addr, time.time(), {'user':user}, None)
             mysql.connection.commit()
             return redirect(url_for("manageUser", user=user))
         else:

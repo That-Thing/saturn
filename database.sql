@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS `accounts` (
   `ip` varchar(50) DEFAULT NULL COMMENT 'Registration IP',
   `banned` tinyint(1) NOT NULL DEFAULT 0 COMMENT '1 if banned, 0 if not. ',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=89 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=92 DEFAULT CHARSET=utf8;
 
 -- Data exporting was unselected.
 
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS `bans` (
   `ip` int(11) DEFAULT NULL COMMENT 'IP of banned person',
   `date` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COMMENT='Banned users and IPs ';
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COMMENT='Banned users and IPs ';
 
 -- Data exporting was unselected.
 
@@ -82,13 +82,15 @@ CREATE TABLE IF NOT EXISTS `groups` (
 -- Dumping structure for table saturn.logs
 CREATE TABLE IF NOT EXISTS `logs` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'Action ID',
+  `type` tinytext NOT NULL,
   `action` text NOT NULL COMMENT 'Action description',
   `actionData` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT 'JSON of the logged action data' CHECK (json_valid(`actionData`)),
-  `user` text NOT NULL,
+  `user` text DEFAULT NULL,
   `ip` tinytext DEFAULT NULL COMMENT 'User IP. Can be null if connecting through TOR',
+  `board` tinytext DEFAULT NULL COMMENT 'Used if action was related to a board',
   `date` int(11) NOT NULL COMMENT 'Unix timestamp',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COMMENT='Logs for user actions. ';
+) ENGINE=InnoDB AUTO_INCREMENT=102 DEFAULT CHARSET=utf8mb4 COMMENT='Logs for user actions. ';
 
 -- Data exporting was unselected.
 
@@ -97,7 +99,7 @@ CREATE TABLE IF NOT EXISTS `posts` (
   `name` tinytext DEFAULT NULL COMMENT 'Post name',
   `subject` tinytext DEFAULT NULL COMMENT 'Post subject',
   `options` tinytext DEFAULT NULL COMMENT 'Post options',
-  `message` text NOT NULL COMMENT 'Post message content',
+  `message` text DEFAULT NULL COMMENT 'Post message content',
   `number` int(11) NOT NULL COMMENT 'Post number',
   `date` int(11) NOT NULL COMMENT 'Unix Timestamp',
   `type` int(1) NOT NULL COMMENT '1 for thread, 2 for reply',
@@ -134,7 +136,7 @@ CREATE TABLE IF NOT EXISTS `rules` (
   `type` int(11) NOT NULL COMMENT '0 for global 1 for board',
   `board` text DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4;
 
 -- Data exporting was unselected.
 
