@@ -141,18 +141,11 @@ body.theme-yotsuba {
 .theme-yotsuba #board-list-header {
     background-color: var(--header-color);
 }
-.theme-yotsuba #boardsDiv .board-entry:nth-child(odd) {
-    background-color: white;
-}
-.theme-yotsuba .rule-list>li:nth-child(odd){
+.theme-yotsuba #boardsDiv .board-entry:nth-child(odd), .theme-yotsuba .rule-list>li:nth-child(odd), .theme-yotsuba #box-user-list .manage-user:nth-child(even), .theme-yotsuba .log:nth-child(even) {
     background-color: white;
 }
 .theme-yotsuba .dropdown-submit {
     border: none;
-}
-
-.theme-yotsuba #box-user-list .manage-user:nth-child(even) {
-    background-color: white;
 }
 
 
@@ -267,19 +260,13 @@ body.theme-yotsuba-b {
 .theme-yotsuba-b #board-list-header {
     background-color: var(--header-color);
 }
-.theme-yotsuba-b #boardsDiv .board-entry:nth-child(odd) {
-    background-color: white;
-}
-.theme-yotsuba-b .rule-list>li:nth-child(odd){
+.theme-yotsuba-b #boardsDiv .board-entry:nth-child(odd), .theme-yotsuba-b #box-user-list .manage-user:nth-child(even), .theme-yotsuba-b .rule-list>li:nth-child(odd), .theme-yotsuba-b .log:nth-child(even) {
     background-color: white;
 }
 .theme-yotsuba-b .dropdown-submit {
     border: none;
 }
 
-.theme-yotsuba-b #box-user-list .manage-user:nth-child(even) {
-    background-color: white;
-}
 
 
 
@@ -387,13 +374,10 @@ body.theme-tomorrow {
 .theme-tomorrow #boardsDiv {
     background-color: var(--page-background);
 }
-.theme-tomorrow #boardsDiv .board-entry:nth-child(odd) {
-    background-color: rgba(255,255,255,.1);
-}
 .theme-tomorrow .rule-list {
     background-color: var(--page-background);
 }
-.theme-tomorrow .rule-list>li:nth-child(odd){
+.theme-tomorrow .rule-list>li:nth-child(odd), .theme-tomorrow #box-user-list .manage-user:nth-child(even), .theme-tomorrow #boardsDiv .board-entry:nth-child(odd), .theme-tomorrow .log:nth-child(even){
     background-color: rgba(255,255,255,.1);
 }
 .theme-tomorrow .board-entry {
@@ -414,9 +398,6 @@ body.theme-tomorrow {
 }
 .theme-tomorrow .manage-user {
     border-top: 1px solid #111;
-}
-.theme-tomorrow #box-user-list .manage-user:nth-child(even) {
-    background-color: rgba(255,255,255,.1);
 }
 
 
@@ -515,12 +496,7 @@ body.theme-photon {
     color: var(--text-color);
     border: 1px solid var(--border-color);
 }
-
-
-.theme-photon #boardsDiv .board-entry:nth-child(odd) {
-    background-color: var(--page-background);
-}
-.theme-photon .rule-list>li:nth-child(odd){
+.theme-photon .rule-list>li:nth-child(odd), .theme-photon #box-user-list .manage-user:nth-child(even), .theme-photon #boardsDiv .board-entry:nth-child(odd), .theme-photon .log:nth-child(even){
     background-color: var(--page-background);
 }
 .theme-photon .dropdown-content hr {
@@ -528,9 +504,6 @@ body.theme-photon {
 }
 .theme-photon .dropdown-submit {
     border: none;
-}
-.theme-photon #box-user-list .manage-user:nth-child(even) {
-    background-color: var(--page-background);
 }
 /*
 ######
@@ -568,13 +541,7 @@ body.theme-photon {
 .theme-nord .box-header {
     background-color: var(--header-color);
 }
-.theme-nord #boardsDiv .board-entry:nth-child(odd) {
-    background-color: var(--header-color);
-}
-.theme-nord .rule-list>li:nth-child(odd){
-    background-color: var(--header-color);
-}
-.theme-nord #box-user-list .manage-user:nth-child(even) {
+.theme-nord .rule-list>li:nth-child(odd), .theme-nord #box-user-list .manage-user:nth-child(even), .theme-nord #boardsDiv .board-entry:nth-child(odd), .theme-nord .log:nth-child(even){
     background-color: var(--header-color);
 }
 .theme-gruvbox {
@@ -607,15 +574,9 @@ body.theme-photon {
 .theme-gruvbox .box-header {
     background-color: var(--header-color);
 }
-.theme-gruvbox #boardsDiv .board-entry:nth-child(odd) {
-    background-color: var(--marked-post);
-}
-.theme-gruvbox .rule-list>li:nth-child(odd){
-    background-color: var(--marked-post);
-}
 .theme-gruvbox nav {
     border-bottom: 1px solid var(--hr);
 }
-.theme-gruvbox #box-user-list .manage-user:nth-child(even) {
+.theme-gruvbox #box-user-list .manage-user:nth-child(even), .theme-gruvbox .rule-list>li:nth-child(odd), .theme-gruvbox #boardsDiv .board-entry:nth-child(odd), .theme-gruvbox .log:nth-child(even){
     background-color: var(--marked-post);
 }
