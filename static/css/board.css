@@ -87,6 +87,14 @@ li {
 }
 #boardPages {
     clear: left;
+    display: flex;
+    justify-content: space-between;
+}
+#page-span {
+    flex-grow:1; 
+}
+#delete-span {
+    flex-grow:0;
 }
 #comment {
     width: 295px;

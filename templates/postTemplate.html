@@ -3,7 +3,7 @@
         <div class="postInfo">
             <span class="post-dropdown">
                 <i class="fas fa-caret-right dropdown-button-marker dropdown-button" onclick="dropdownFunction(this)"></i>
-                <form action="/{{board}}/postActions" method="POST">
+                <form action="/{{post['board']}}/postActions" method="POST">
                     <div class="dropdown-content">
                         <div class="dropdown-link" onclick="hidePostop(this)">Hide post</div>
                         <hr>
@@ -24,7 +24,7 @@
                     </div>
                 </form>
             </span>
-            <input type="checkbox" name="{{post['number']}}-{{board}}">
+            <input type="checkbox" name="{{post['number']}}-{{post['board']}}">
             {%if post['subject'] != None%}
                 <span class="subject">{{post['subject']}}</span>
             {%endif%}
@@ -49,17 +49,17 @@
                     {%endif%}
                 {%endif%}
             {%endif%}
-            {%if board+"/"+post["number"]|string in owned%}
+            {%if post['board']+"/"+post["number"]|string in owned%}
                 <span class="you">(you)</span>
             {%endif%}
             <span>{{post['date'] | ut}}</span>
-            <span><a class="postNumber" href="/{{board}}/thread/{{thread['number']}}#{{post['number']}}">No.</a><a href="/{{board}}/thread/{{thread['number']}}#q{{post['number']}}" onclick="reply(this)" class="postNumber">{{post['number']}}</a></span>
+            <span><a class="postNumber" href="/{{post['board']}}/thread/{{post['thread']}}#{{post['number']}}">No.</a><a href="/{{post['board']}}/thread/{{post['thread']}}#q{{post['number']}}" onclick="reply(this)" class="postNumber">{{post['number']}}</a></span>
             {%if post['replies'] != None and post['replies'].split(',')%}
                 <span>
                     {%set replies = post['replies'].split(',')%}
                     {%for reply in replies%}
                         {%set reply = reply.split("/")%}
-                        <a href="/{{board}}/thread/{{reply[0]}}#{{reply[1]}}">>>{{reply[1]}}{%if board+"/"+reply[1]|string in owned%}(you){%endif%}</a>
+                        <a href="/{{post['board']}}/thread/{{reply[0]}}#{{reply[1]}}">>>{{reply[1]}}{%if post['board']+"/"+reply[1]|string in owned%}(you){%endif%}</a>
                     {%endfor%}
                 </span>
             {%endif%}
@@ -94,6 +94,6 @@
             {%endfor%}
             </div>
         {%endif%}
-        <blockquote class="comment">{{post['message'] | checkMarkdown(thread['number'], board, post['number']) | safe}}</blockquote>
+        <blockquote class="comment">{{post['message'] | checkMarkdown(post['thread'], post['board'], post['number']) | safe}}</blockquote>
         </div>
     </div>

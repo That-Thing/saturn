@@ -1614,18 +1614,24 @@ def logs():
         id = "id"
     else:
         id = f'"{request.args.get("id", type=str)}"'
-    print(board)
-    print(user)
-    print(ip)
-    print(action)
-    print(id)
-    query = f"SELECT * FROM logs WHERE id={id} AND type={action} AND user={user} AND ip={ip} AND board={board} ORDER BY id desc"
-    print(query)
+    query = f"SELECT * FROM logs WHERE id={id} AND type={action} AND user={user} AND ip={ip} AND board={board} ORDER BY id desc" #It just has to be done like this
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute(query)
     logs = cursor.fetchall()
-    #print(logs)
     return render_template('logs.html', logs=logs, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+
+@app.route('/latest', methods=['GET'])
+def latest():
+    if not request.args.get('board', type=str): #Board filter arguments
+        board = "board OR board=NULL"
+    else:
+        board = f'"{request.args.get("board", type=str)}"'
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    query = f"SELECT * FROM posts WHERE board={board} ORDER BY number desc"
+    cursor.execute(query)
+    posts = cursor.fetchall()
+    return render_template('latest.html', posts=posts, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=configData["port"])

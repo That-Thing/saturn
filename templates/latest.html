@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{data['siteName']}} - Latest Posts</title>
+        <meta charset="UTF-8">
+        <link href="{{ url_for('static', filename='css/global.css') }}" type="text/css" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/markdown.css') }}" type="text/css" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/board.css') }}" type="text/css" rel="stylesheet">
+        <link rel="shortcut icon" type="image/png" href="/{{data['faviconUrl']}}"/>
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+    </head>
+    <body class="{{currentTheme}}">
+        <nav>
+            {% include 'nav.html' %}
+        </nav>
+        <div class="box box-settings">
+            <h2 class="box-header">Latest Posts</h2>
+            <div id="postList">
+                {%for post in posts%}
+                    {%include 'postTemplate.html'%}
+                {%endfor%}
+            </div>
+        </div>
+    </body>
+    <script src="{{ url_for('static', filename='js/themes.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/posting.js') }}"></script>
+</html>

@@ -206,7 +206,7 @@
                 {% endfor %}
                 <div id="boardPages">
                     <hr>
-                    <span>
+                    <span id="page-span">
                         [
                         {%if page != 1%}<a href="{{page-1}}"><i class="fas fa-chevron-left"></i></a>{%endif%}
                         {% for x in range((postLength / boardData['perPage'])|round(0,'ceil')|int) %}
@@ -214,6 +214,15 @@
                         {% endfor %}
                         {%if page != (postLength / boardData['perPage'])|round(0,'ceil')|int%}<a href="{{page+1}}"><i class="fas fa-chevron-right"></i></a>{%endif%}
                         ]
+                    </span>
+                    <span id="delete-span">
+                        <form action="/deletepass" method="POST">
+                            <label>
+                                Delete post(s)
+                                <input type="password" name="file-password-input" placeholder="password">
+                                <input class="btn btn-primary" type="submit" value="Delete">
+                            </label>
+                        </form>
                     </span>
                 </div>
                 {% if boardData['owner'] == session['username']%}
