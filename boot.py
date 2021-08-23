@@ -438,6 +438,8 @@ def page_not_found(e):
 def before_request_callback():
     checkGroup() #Checks if user has a group assigned, if not, gives them lowest possible permissions.
     global globalSettings
+    if 'username' not in session:
+        session['username'] = None
     globalSettings = reloadSettings() #Reloads the global settings. 
 
 
@@ -1398,7 +1400,7 @@ def passworddelete(board):
                         thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
                         os.remove(file)
                         os.remove(thumbPath)
-                cursor.execute("DELETE FROM posts WHERE thread=%s AND board=%s AND type=2", (int(request.form['post']), board))
+                cursor.execute("DELETE FROM posts WHERE thread=%s AND board=%s AND type=2", (post['number'], board))
         if logConfig['log-post-delete'] == 'on':
             numbers = []
             for post in posts:
