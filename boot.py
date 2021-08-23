@@ -994,7 +994,6 @@ def getThreads(uri):
 
 #board page
 @app.route('/<board>/', methods=['GET'])
-@app.route('/<board>', methods=['GET'])
 def boardPage(board):
     try:
         if request.cookies.get('ownedPosts') != None:
@@ -1370,7 +1369,7 @@ def postActions(board):
                     cursor.execute("DELETE FROM posts WHERE thread=%s AND board=%s", (int(request.form['post']), board))
                 cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (int(request.form['post']), board))
                 mysql.connection.commit()
-                return(redirect(f"/{board}/"))
+                return redirect(url_for("boardPage", board=board))
             else:
                 return render_template('error.html', errorMsg=errors['incorrectPassword'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         else:
@@ -1379,6 +1378,17 @@ def postActions(board):
     else:
         return errors['RequestNotPost']
 
+@app.route('/<board>/passworddelete', methods=['POST'])
+def passworddelete(board):
+    if request.method == 'POST':
+        if "password" not in request.form:
+            return render_template('error.html', errorMsg=errors['unfilledFields'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("DELETE FROM posts WHERE password=%s and board=%s", (request.form['password'], board))
+        mysql.connection.commit()
+        return redirect(url_for("boardPage", board=board))
+    else:
+        return errors['RequestNotPost']
 #Moderation pages. 
 
 #Account moderation

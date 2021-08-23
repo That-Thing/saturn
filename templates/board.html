@@ -216,10 +216,10 @@
                         ]
                     </span>
                     <span id="delete-span">
-                        <form action="/deletepass" method="POST">
+                        <form action="{{url_for('passworddelete', board=board)}}" method="POST">
                             <label>
                                 Delete post(s)
-                                <input type="password" name="file-password-input" placeholder="password">
+                                <input type="password" name="password" placeholder="password">
                                 <input class="btn btn-primary" type="submit" value="Delete">
                             </label>
                         </form>
