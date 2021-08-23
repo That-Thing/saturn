@@ -30,10 +30,18 @@
                     {%set logData = log['actionData'] | loadJSON%}
                     <div class="log-jsondata">
                         {%if logData != None%}{%for x in logData%}
-                            {{x}}: {%if x == 'url'%}
-                                <a href="{{logData[x]}}" target="_blank">{{logData[x]}}</a>
+                            {%if x == 'changes'%}
+                                {%set changeData = logData[x] | loadJSON%}
+                                {%for change in changeData%}
+                                    {{change}}: 
+                                        {{changeData[change]}}
+                                {%endfor%}
                             {%else%}
-                                {{logData[x]}}
+                                {{x}}: {%if x == 'url'%}
+                                    <a href="{{logData[x]}}" target="_blank">{{logData[x]}}</a>
+                                {%else%}
+                                    {{logData[x]}}
+                                {%endif%}
                             {%endif%}
                             <br>
                         {%endfor%}{%endif%}

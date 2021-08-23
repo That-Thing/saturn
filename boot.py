@@ -500,7 +500,8 @@ def saveSettings():
                 if logConfig['log-global-settings'] == 'on': #Checks if logs are enabled
                     difference = DeepDiff(globalSettings, result, ignore_order=True)
                     if len(difference) > 0:
-                       storeLog("globalSettingsUpdate", "Global Settings Updated", session['username'], request.remote_addr, time.time(), difference['values_changed'], None)
+                        difference = difference.to_json()
+                        storeLog("globalSettingsUpdate", "Global Settings Updated", session['username'], request.remote_addr, time.time(), {'changes': difference}, None)
                 with open('./config/config.json', 'w') as f:
                     json.dump(result, f, indent=4)
                 return redirect(url_for('siteSettings'))
@@ -520,7 +521,8 @@ def saveLogSettings():
                 if logConfig['log-log-settings'] == 'on': #Checks if logs are enabled
                     difference = DeepDiff(logConfig, result, ignore_order=True)
                     if len(difference) > 0:
-                        storeLog("globalSettingsUpdate", "Logging Settings Updated", session['username'], request.remote_addr, time.time(), difference['values_changed'], None)
+                        difference = difference.to_json()
+                        storeLog("globalSettingsUpdate", "Logging Settings Updated", session['username'], request.remote_addr, time.time(), {'changes': difference}, None)
                 with open('./config/logs.json', 'w') as f:
                     json.dump(result, f, indent=4)
                 return redirect(url_for('siteSettings'))
@@ -789,7 +791,8 @@ def updateBoard(board):
                     cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
                     difference = DeepDiff(boardData, cursor.fetchone())
                     if len(difference) > 0:
-                        storeLog("boardUpdate", "Board Settings Updated", session['username'], request.remote_addr, time.time(), difference['values_changed'], board)
+                        difference = difference.to_json()
+                        storeLog("boardUpdate", "Board Settings Updated", session['username'], request.remote_addr, time.time(), {'changes': difference}, board)
                 return redirect(url_for('manageBoard', board=board))
             else:
                 return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
@@ -1447,8 +1450,8 @@ def updateUser(user):
                     cursor.execute("SELECT * FROM accounts WHERE username = %s", [user])
                     difference = DeepDiff(userData, cursor.fetchone())
                     if len(difference) > 0:
-                        print(difference)
-                        storeLog("modUserUpdate", "A moderator updated a user", session['username'], request.remote_addr, time.time(), {'user':user, "changes":str(difference)}, None)
+                        difference = difference.to_json()
+                        storeLog("modUserUpdate", "A moderator updated a user", session['username'], request.remote_addr, time.time(), {'user':user, 'changes':str(difference)}, None)
                 return redirect(url_for("manageUser", user=user))
             else:
                 return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
