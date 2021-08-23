@@ -104,33 +104,35 @@
                     <div class="thread" id="t-{{thread['number']}}">
                         <div class="op" id="{{thread['number']}}">
                             <hr>
-                            {%set files = thread['files'].split(',')%}
-                            {%set filenames = thread['filenames'].split(',')%}
-                            {%if files | length > 1%}
-                                <div class="uploads multiple-files">
-                            {%else%}
-                                <div class="uploads ">
-                            {%endif%}
-                            {%for file in files%}
-                                    <div class="fileDiv">
-                                        <div class="file-info">
-                                            <a class="filename" href="/{{file}}" target="_blank">{{filenames[files.index(file)]}}</a>
-                                            <a href="/{{file}}" download="{{filenames[files.index(file)]}}"><i class="fas fa-download text-icon"></i></a>
-                                            {%if file | checkimage == True%}
-                                                <span class="fileSize text-icon">({{file | filesize}}, {{file | dimensions}})</span>
-                                            {%else%}
-                                                <span class="fileSize text-icon">({{file | filesize}})</span>
-                                            {%endif%}
+                            {%if thread['files'] != None%}
+                                {%set files = thread['files'].split(',')%}
+                                {%set filenames = thread['filenames'].split(',')%}
+                                {%if files | length > 1%}
+                                    <div class="uploads multiple-files">
+                                {%else%}
+                                    <div class="uploads ">
+                                {%endif%}
+                                {%for file in files%}
+                                        <div class="fileDiv">
+                                            <div class="file-info">
+                                                <a class="filename" href="/{{file}}" target="_blank">{{filenames[files.index(file)]}}</a>
+                                                <a href="/{{file}}" download="{{filenames[files.index(file)]}}"><i class="fas fa-download text-icon"></i></a>
+                                                {%if file | checkimage == True%}
+                                                    <span class="fileSize text-icon">({{file | filesize}}, {{file | dimensions}})</span>
+                                                {%else%}
+                                                    <span class="fileSize text-icon">({{file | filesize}})</span>
+                                                {%endif%}
+                                            </div>
+                                            <a class="linkImg" target="_blank" href="/{{file}}">
+                                                {%if thread['spoiler'] == 1%}
+                                                    <img loading="lazy" class="thumbnail" src="/{{data['spoilerImage']}}">
+                                                {%else%}
+                                                    <img loading="lazy" class="thumbnail" src="/{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
+                                                {%endif%}
+                                            </a>
                                         </div>
-                                        <a class="linkImg" target="_blank" href="/{{file}}">
-                                            {%if thread['spoiler'] == 1%}
-                                                <img loading="lazy" class="thumbnail" src="/{{data['spoilerImage']}}">
-                                            {%else%}
-                                                <img loading="lazy" class="thumbnail" src="/{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
-                                            {%endif%}
-                                        </a>
-                                    </div>
-                            {%endfor%}
+                                {%endfor%}
+                            {%endif%}
                             </div>
                             <div class="postInfo">
                                 <span class="post-dropdown">

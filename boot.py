@@ -192,14 +192,6 @@ def storeLog(type, action, user, ip, date, data, board):
                 "oldData": data['oldData'],
                 "newData": data['newData']
             }
-        elif type == "postDelete":
-            actionData = {
-                "board": data['board'],
-                "thread": data['thread'],
-                "number": data['number'],
-                "type": data['type'],
-                "OP": data['ip']
-            }
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute("INSERT INTO logs VALUES(NULL, %s, %s, %s, %s, %s, %s, %s)", (type, action, json.dumps(actionData), user, str(ip), board,date))
         mysql.connection.commit()
@@ -995,7 +987,7 @@ def getThreads(uri):
 #board page
 @app.route('/<board>/', methods=['GET'])
 def boardPage(board):
-    try:
+    #try:
         if request.cookies.get('ownedPosts') != None:
             ownedPosts = json.loads(request.cookies.get('ownedPosts')) #gets posts the current user has made for (you)s
         else:
@@ -1020,9 +1012,9 @@ def boardPage(board):
         else:
             return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, threads=posts, filePass=filePass, postLength=postLength, owned=ownedPosts, page=1, themes=themes)
         return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
-    except Exception as e:
-        print(e)
-        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+    #except Exception as e:
+    #    print(e)
+    #    return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 
 #individual pages
 @app.route('/<board>/<int:page>', methods=['GET'])
@@ -1356,7 +1348,7 @@ def postActions(board):
                         os.remove(file)
                         os.remove(thumbPath)
                 if post['type'] == 1: #Check if post is a thread and delete all child posts. 
-                    cursor.execute("SELECT * FROM posts WHERE thread=%s AND board=%s", (int(request.form['post']), board))
+                    cursor.execute("SELECT * FROM posts WHERE thread=%s AND board=%s AND type=2", (int(request.form['post']), board))
                     posts = cursor.fetchall()
                     for x in posts:
                         files = []
@@ -1366,7 +1358,7 @@ def postActions(board):
                             thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
                             os.remove(file)
                             os.remove(thumbPath)
-                    cursor.execute("DELETE FROM posts WHERE thread=%s AND board=%s", (int(request.form['post']), board))
+                    cursor.execute("DELETE FROM posts WHERE thread=%s AND board=%s  AND type=2", (int(request.form['post']), board))
                 cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (int(request.form['post']), board))
                 mysql.connection.commit()
                 return redirect(url_for("boardPage", board=board))
@@ -1384,6 +1376,34 @@ def passworddelete(board):
         if "password" not in request.form:
             return render_template('error.html', errorMsg=errors['unfilledFields'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT * FROM posts WHERE password=%s and board=%s", (request.form['password'], board))
+        posts = cursor.fetchall()
+        if posts == None:
+            return redirect(url_for("boardPage", board=board))
+        for post in posts:
+            if post['files'] != None: #delete files from disk
+                files = post['files'].split(',')
+                for file in files:
+                    thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
+                    os.remove(file)
+                    os.remove(thumbPath)
+            if post['type'] == 1: #Check if post is a thread and delete all child posts. 
+                cursor.execute("SELECT * FROM posts WHERE thread=%s AND board=%s AND type=2", (post['number'], board))
+                children = cursor.fetchall()
+                for x in children:
+                    files = []
+                    if x['files'] != None:
+                        files = files + x['files'].split(',')
+                    for file in files:
+                        thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
+                        os.remove(file)
+                        os.remove(thumbPath)
+                cursor.execute("DELETE FROM posts WHERE thread=%s AND board=%s AND type=2", (int(request.form['post']), board))
+        if logConfig['log-post-delete'] == 'on':
+            numbers = []
+            for post in posts:
+                numbers.append(post['number'])
+            storeLog("postDelete", "A user deleted their posts", session['username'], request.remote_addr, time.time(), {'posts': str(numbers)}, board)
         cursor.execute("DELETE FROM posts WHERE password=%s and board=%s", (request.form['password'], board))
         mysql.connection.commit()
         return redirect(url_for("boardPage", board=board))
@@ -1456,7 +1476,7 @@ def updateUser(user):
                 else:
                     cursor.execute("UPDATE accounts SET email=%s, `group`=%s WHERE username=%s", (email, int(request.form['group']), user))
                 mysql.connection.commit()
-                if logConfig['log-mod-user-update']:
+                if logConfig['log-mod-user-update'] == 'on':
                     cursor.execute("SELECT * FROM accounts WHERE username = %s", [user])
                     difference = DeepDiff(userData, cursor.fetchone())
                     if len(difference) > 0:
@@ -1494,7 +1514,7 @@ def deleteUser(user):
                         cursor.execute("DELETE FROM accounts WHERE username=%s AND id=%s", (user, userData['id'])) #Delete account
                         cursor.execute("DELETE FROM bans WHERE username=%s", [user]) #Remove bans so that if anther user with the same username is registered it won't mess up the DB
                         mysql.connection.commit()
-                        if logConfig['log-mod-user-update']:
+                        if logConfig['log-mod-user-update'] == 'on':
                             storeLog("modUserDelete", "A moderator deleted a user", session['username'], request.remote_addr, time.time(), {'user':user}, None)
                         return redirect(url_for("users"))
                     except Exception as e:
@@ -1536,7 +1556,7 @@ def createUser():
                     email = None
                 creationTime = time.time()
                 cursor.execute("INSERT INTO accounts VALUES (NULL, %s, %s, %s, %s, %s, %s, 0)", (request.form['username'], returnHash(request.form['password']), email, request.form['group'], creationTime, str(request.remote_addr)))
-                if logConfig['log-mod-user-update']:
+                if logConfig['log-mod-user-update'] == 'on':
                     storeLog("modUserCreate", "A moderator created a user", session['username'], request.remote_addr, creationTime, {'user':request.form['username'], "group":request.form['group'], "email":email}, None)
                 mysql.connection.commit()                
                 return redirect(url_for("manageUser", user=request.form['username']))
@@ -1572,7 +1592,7 @@ def banUser(user):
                 cursor.execute("UPDATE accounts SET banned=1 WHERE username=%s", [user])
                 currentTime = time.time()
                 cursor.execute("INSERT INTO bans VALUES(NULL, %s, %s, %s, NULL, %s)", (reason, length, user, currentTime))
-                if logConfig['log-user-ban']:
+                if logConfig['log-user-ban'] == 'on':
                     cursor.execute("SELECT * FROM bans WHERE user=%s", [user])
                     storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {"id":cursor.fetchone()['id'],'user':user, "reason": reason, "length":length}, None)
                 mysql.connection.commit()
