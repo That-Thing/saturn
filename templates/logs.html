@@ -15,8 +15,8 @@
         <div class="box box-80 box-settings">
             <h2 class="box-header">Logs</h2>
             {% for log in logs %}
-                <div class="log">
-                    <span class="log-id">{{log['id']}}. </span>
+                <div class="log" id="{{log['id']}}">
+                    <span class="log-id"><a href="#{{log['id']}}">{{log['id']}}</a>. </span>
                     <span class="log-action">{{log['action']}}</span>
                     <span class="log-type small"><a href="?action={{log['type']}}">{{log['type']}}</a></span>
                     <br>

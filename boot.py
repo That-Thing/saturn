@@ -1432,19 +1432,23 @@ def updateUser(user):
                 userData = cursor.fetchone()
                 if userData == None:
                     return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
+                email = request.form['email']
+                if len(email) == 0:
+                    email = None
                 if 'newPassword' and 'confirmPassword' in request.form and len(request.form['newPassword']) > 0 and len(request.form['confirmPassword']) > 0:
                     if request.form['newPassword'] == request.form['confirmPassword']:
-                        cursor.execute("UPDATE accounts SET password=%s, `email`=%s, `group`=%s WHERE username=%s", (returnHash(request.form['newPassword']), request.form['email'], int(request.form['group']), user))
+                        cursor.execute("UPDATE accounts SET password=%s, `email`=%s, `group`=%s WHERE username=%s", (returnHash(request.form['newPassword']), email, int(request.form['group']), user))
                     else:
                         return render_template('error.html', errorMsg=errors['passwordsDoNotMatch'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
                 else:
-                    cursor.execute("UPDATE accounts SET email=%s, `group`=%s WHERE username=%s", (request.form['email'], int(request.form['group']), user))
+                    cursor.execute("UPDATE accounts SET email=%s, `group`=%s WHERE username=%s", (email, int(request.form['group']), user))
                 mysql.connection.commit()
                 if logConfig['log-mod-user-update']:
                     cursor.execute("SELECT * FROM accounts WHERE username = %s", [user])
                     difference = DeepDiff(userData, cursor.fetchone())
                     if len(difference) > 0:
-                        storeLog("modUserUpdate", "A moderator updated a user", session['username'], request.remote_addr, time.time(), {'user':user, "changes":difference['values_changed']}, None)
+                        print(difference)
+                        storeLog("modUserUpdate", "A moderator updated a user", session['username'], request.remote_addr, time.time(), {'user':user, "changes":str(difference)}, None)
                 return redirect(url_for("manageUser", user=user))
             else:
                 return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
