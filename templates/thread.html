@@ -194,7 +194,7 @@
                         <span class="you">(you)</span>
                     {%endif%}
                     <span>{{thread['date'] | ut}}</span>
-                    <span><a class="postNumber" href="#{{thread['number']}}">No.</a><a href="#q{{thread['number']}}" class="postNumber">{{thread['number']}}</a></span>
+                    <span><a class="postNumber" href="#{{thread['number']}}">No.</a><a href="#q{{thread['number']}}" onclick="reply(this)" class="postNumber">{{thread['number']}}</a></span>
                     {%if thread['replies'] != None and thread['replies'].split(',')%}
                         <span>
                             {%set replies = thread['replies'].split(',')%}

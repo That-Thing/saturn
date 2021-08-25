@@ -69,7 +69,6 @@ for f in os.listdir("./static/captchas"):
 #add expansion of thumbnail on click for posts
 #catalog
 #add floating reply thing.
-#add replying by clicking on the post number
 
 
 #flask app configuration
@@ -1361,6 +1360,11 @@ def postActions(board):
                             os.remove(file)
                             os.remove(thumbPath)
                     cursor.execute("DELETE FROM posts WHERE thread=%s AND board=%s  AND type=2", (int(request.form['post']), board))
+                if logConfig['log-post-delete'] == 'on':
+                    if session['group'] <= 3:
+                        storeLog("modPostDelete", "A moderator deleted posts", session['username'], request.remote_addr, time.time(), {'posts': int(request.form['post'])}, board)
+                    else:
+                        storeLog("postDelete", "A user deleted posts", session['username'], request.remote_addr, time.time(), {'posts': int(request.form['post'])}, board)
                 cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (int(request.form['post']), board))
                 mysql.connection.commit()
                 return redirect(url_for("boardPage", board=board))
