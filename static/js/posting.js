@@ -49,38 +49,11 @@ function hidePostThread(post) {
 
 //might need to just rewrite this completely unless I figure out how to access sql data using JS. 
 function showHiddenMenu() {
-  var hiddenMenu = document.createElement("div");
-  hiddenMenu.className = "floating-menu";
-  hiddenMenu.id = "hidden-menu";
-  let hidden = JSON.parse(localStorage.getItem('hidden'));
-  if(hidden == null) {
-    hidden = [];
-  }
-  var divs = "";
-  try {
-    hidden.forEach(element => {
-      if (element != null && element != undefined) {
-        divs = divs + '<div class="hidden-entry" id="hidden-'+ element +'"><span>'+ element +'</span> <i class="fas fa-times text-icon-l remove-hidden" onclick="removeHidden(this)"></i></div><br>';
-      }
-    });
-  } catch {
-    //do nothing
-  }
-  menuTemplate = `
-    <div class="drag-header floating-menu-header">
-        <label>Hidden Posts</label>
-        <i class="fas fa-times text-icon text-icon-l close-menu" onclick='closeHidden()'></i>
-    </div>
-    <div class="floating-menu-inner">
-  ` + divs +  `
-    </div>
-  `;
-  hiddenMenu.innerHTML = menuTemplate;
-  document.body.appendChild(hiddenMenu);
+  document.getElementById('hidden-menu').style.display = "block";
   dragElement(document.getElementById("hidden-menu"));
 }
 function closeHidden() {
-  document.getElementById("hidden-menu").remove();
+  document.getElementById('hidden-menu').style.display = "none";
 }
 
 function dragElement(elmnt) {

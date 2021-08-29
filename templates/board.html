@@ -254,6 +254,7 @@
                 <a href="{{url_for('boardRules', board=board)}}" target="_blank">Board Rules</a>
             </span>
         </footer>
+        {% include 'hiddenPostsMenu.html' %}
         <script src="{{ url_for('static', filename='js/themes.js') }}"></script>
         <script src="{{ url_for('static', filename='js/posting.js') }}"></script>
         <!-- <script src="{{ url_for('static', filename='js/markdown.js') }}"></script> -->
