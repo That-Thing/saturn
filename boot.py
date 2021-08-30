@@ -303,10 +303,13 @@ def fileSize(file):
     return convertSize(size)
 @app.template_filter('checkimage') #check if file is a valid image
 def checkImage(file):
-    im = Image.open(file)
-    if str(im.verify()) == "None":
-        return True
-    else:
+    try:
+        im = Image.open(file)
+        if str(im.verify()) == "None":
+            return True
+        else:
+            return False
+    except:
         return False
 @app.template_filter('dimensions') #get image dimensions
 def getDimensions(file):
@@ -735,26 +738,27 @@ def deleteBoard(board):
             boardData = cursor.fetchone()
             if boardData == None:
                 return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
-            
-                if boardData['owner'] == session['username'] or int(session['group']) <= 1:
-                    if 'deleteBoard' not in request.form:
-                        return render_template('error.html', errorMsg=errors['confirmBoardDeletion'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-                    if request.form["deleteBoard"] != "on":
-                        return render_template('error.html', errorMsg=errors['confirmBoardDeletion'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-                    if logConfig['log-board-deletion'] == 'on':
-                        storeLog("deleteBoard", "Board deleted", session['username'], request.remote_addr, time.time(), boardData, board)
-                    cursor.execute("DELETE FROM boards WHERE  uri=%s AND owner=%s LIMIT 1", (board, session['username']))
-                    cursor.execute("DELETE FROM posts WHERE board=%s", [board])
-                    mysql.connection.commit()
-                    path = os.path.join(globalSettings['bannerLocation'], board) #path for banner folder for specific board. 
-                    os.rmdir(path)#remove banner folder
-                    path = os.path.join(globalSettings['mediaLocation'], board) #path for banner folder for specific board. 
-                    for x in os.listdir(path):
-                        os.remove(os.path.join(path, x))
-                    os.rmdir(path)#remove media sub-folder
-                    return redirect(url_for('boardManagement'))
-                else:
-                    return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+            if boardData['owner'] == session['username'] or int(session['group']) <= 1:
+                if 'deleteBoard' not in request.form:
+                    return render_template('error.html', errorMsg=errors['confirmBoardDeletion'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                if request.form["deleteBoard"] != "on":
+                    return render_template('error.html', errorMsg=errors['confirmBoardDeletion'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                if logConfig['log-board-deletion'] == 'on':
+                    storeLog("deleteBoard", "Board deleted", session['username'], request.remote_addr, time.time(), boardData, board)
+                cursor.execute("DELETE FROM boards WHERE  uri=%s AND owner=%s LIMIT 1", (board, session['username']))
+                cursor.execute("DELETE FROM posts WHERE board=%s", [board])
+                mysql.connection.commit()
+                path = os.path.join(globalSettings['bannerLocation'], board) #path for banner folder for specific board. 
+                for x in os.listdir(path):
+                    os.remove(os.path.join(path, x))
+                os.rmdir(path)#remove banner folder
+                path = os.path.join(globalSettings['mediaLocation'], board) #path for media folder for specific board. 
+                for x in os.listdir(path):
+                    os.remove(os.path.join(path, x))
+                os.rmdir(path)#remove media sub-folder
+                return redirect(url_for('boardManagement'))
+            else:
+                return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         except Exception as e:
             return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
             print(e)
@@ -993,6 +997,10 @@ def boardPage(board):
             ownedPosts = json.loads(request.cookies.get('ownedPosts')) #gets posts the current user has made for (you)s
         else:
             ownedPosts = {}
+        if request.cookies.get('hidden') != None:
+            hidden = json.loads(request.cookies.get('hidden'))
+        else:
+            hidden = {}
         filePass = checkFilePass() #gets user's password for files
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
@@ -1009,9 +1017,9 @@ def boardPage(board):
             banner = "static/banners/defaultbanner.png"
         if board['captcha'] == 1:
             captcha = generateCaptcha(globalSettings['captchaDifficulty'])
-            return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, captcha=captcha, threads=posts, filePass=filePass, postLength=postLength, owned=ownedPosts, page=1, themes=themes)
+            return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, captcha=captcha, threads=posts, filePass=filePass, postLength=postLength, owned=ownedPosts, hidden=hidden, page=1, themes=themes)
         else:
-            return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, threads=posts, filePass=filePass, postLength=postLength, owned=ownedPosts, page=1, themes=themes)
+            return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, threads=posts, filePass=filePass, postLength=postLength, owned=ownedPosts, hidden=hidden,page=1, themes=themes)
         return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
     #except Exception as e:
     #    print(e)

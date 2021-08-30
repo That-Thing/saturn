@@ -24,7 +24,7 @@ window.onclick = function(event) {
   }
 }
 //hide reply to thread
-function hidePostReply(post) {
+function hidePostReply(post, board) {
   post = post.parentNode.parentNode.parentNode.parentNode.parentNode;//this is such a stupid way of doing this.
   post.classList.add("hide");
   let hidden = JSON.parse(localStorage.getItem('hidden'));
@@ -35,14 +35,14 @@ function hidePostReply(post) {
   localStorage.setItem('hidden', JSON.stringify(hidden))
 }
 //hide entire thread
-function hidePostThread(post) {
+function hidePostThread(post, board) {
   post = post.parentNode.parentNode.parentNode.parentNode.parentNode;
   post.classList.add("hide");
   let hidden = JSON.parse(localStorage.getItem('hidden'));
   if(hidden == null) {
     hidden = [];
   }
-  hidden.push(post.id);
+  hidden.push({board:post.id});
   localStorage.setItem('hidden', JSON.stringify(hidden))
 }
 

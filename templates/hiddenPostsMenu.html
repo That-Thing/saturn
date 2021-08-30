@@ -3,6 +3,15 @@
         <label>Hidden Posts</label>
         <i class="fas fa-times text-icon text-icon-l close-menu" onclick='closeHidden()'></i>
         <div class="floating-menu-inner">
+            {%for post in hidden%}
+                {%if post == board%}
+                    <div class="hidden-entry" id="hidden-{{hidden[post]}}-entry">
+                        <span>{{hidden[post]}}</span>
+                        <i class="fas fa-times text-icon-l remove-hidden" onclick="removeHidden(this)"></i>
+                    </div>
+                    <br>
+                {%endif%}
+            {%endfor%}
         </div>
     </div>
 </div>
