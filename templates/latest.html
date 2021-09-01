@@ -13,14 +13,145 @@
         <nav>
             {% include 'nav.html' %}
         </nav>
-        <div class="box box-settings">
-            <h2 class="box-header">Latest Posts</h2>
-            <div id="postList">
-                {%for post in posts%}
-                    {%include 'postTemplate.html'%}
-                {%endfor%}
+        <form action="/latest/delete" method="POST">
+            <div class="box box-settings">
+                <h2 class="box-header">Post actions</h2>
+                <div id="latest-posts-actions" class="settings-category">
+                    <label>
+                        Delete posts
+                        <input type="checkbox" name="delete-posts" value="delete-posts">
+                    </label>
+                    <label>
+                        Delete media
+                        <input type="checkbox" name="delete-media" value="delete-media">
+                    </label>
+                    <label>
+                        Hash ban media
+                        <input type="checkbox" name="delete-media" value="delete-media">
+                    </label>
+                    <label>
+                        Ban posters
+                        <input type="checkbox" name="ban-posters" value="delete-media">
+                    </label>
+                    <label>
+                        Reason:
+                        <input type="text" name="ban-reason" placeholder="ban reason">
+                    </label>
+                    <label>
+                        Duration:
+                        <input type="text" name="ban-duration" placeholder="1y2m3d4h5">
+                    </label>
+                    <input class="btn btn-primary" type="submit" value="Submit">
+                </div>
             </div>
-        </div>
+            <div class="box box-settings">
+                <h2 class="box-header">Latest Posts</h2>
+                <div id="postList">
+                    {%for post in posts%}
+                        <div class="replyDiv" id="{{post['number']}}">
+                            <div class="innerPost">
+                                <div class="postInfo">
+                                    <input type="checkbox" name="{{post['number']}}-{{post['board']}}">
+                                    {%if post['subject'] != None%}
+                                        <span class="subject">{{post['subject']}}</span>
+                                    {%endif%}
+                                    {%if post['trip']|hasSignature == True%}
+                                        {%if post['options'] != None%}
+                                            <a class="name optionsName" href="mailto:{{post['options']}}" target="_blank">{{post['name']}}##<span class="{{post['trip']}}">{{post['trip']}}</span></a>
+                                        {%else%}
+                                            <span class="name">{{post['name']}}##<span class="{{post['trip']}}">{{post['trip']}}</span></a></span>
+                                        {%endif%}
+                                    {%else%}
+                                        {%if post['trip'] != None%}
+                                            {%if post['options'] != None%}
+                                                <a class="name optionsName" href="mailto:{{post['options']}}" target="_blank">{{post['name']}}##{{post['trip']}}</a>
+                                            {%else%}
+                                                <span class="name">{{post['name']}}##{{post['trip']}}</span>
+                                            {%endif%}
+                                        {%else%}
+                                            {%if post['options'] != None%}
+                                                <a class="name optionsName" href="mailto:{{post['options']}}" target="_blank">{{post['name']}}</a>
+                                            {%else%}
+                                                <span class="name">{{post['name']}}</span>
+                                            {%endif%}
+                                        {%endif%}
+                                    {%endif%}
+                                    <span>{{post['date'] | ut}}</span>
+                                    <span><a class="postNumber" href="/{{post['board']}}/thread/{{post['thread']}}#{{post['number']}}">No.</a><a href="/{{post['board']}}/thread/{{post['thread']}}#q{{post['number']}}" onclick="reply(this)" class="postNumber">{{post['number']}}</a></span>
+                                    {%if post['replies'] != None and post['replies'].split(',')%}
+                                        <span>
+                                            {%set replies = post['replies'].split(',')%}
+                                            {%for reply in replies%}
+                                                {%set reply = reply.split("/")%}
+                                                <a href="/{{post['board']}}/thread/{{reply[0]}}#{{reply[1]}}">>>{{reply[1]}}</a>
+                                            {%endfor%}
+                                        </span>
+                                    {%endif%}
+                                </div>
+                                {%if post['files'] != None%}
+                                    {%set files = post['files'].split(',')%}
+                                    {%set filenames = post['filenames'].split(',')%}
+                                    {%if files | length > 1%}
+                                        <div class="uploads multiple-files">
+                                    {%else%}
+                                        <div class="uploads">
+                                    {%endif%}
+                                    {%for file in files%}
+                                        <div class="fileDiv">
+                                            <div class="file-info">
+                                                <a class="filename" href="/{{file}}" target="_blank">{{filenames[files.index(file)]}}</a>
+                                                <a href="/{{file}}" download="{{filenames[files.index(file)]}}"><i class="fas fa-download text-icon"></i></a>
+                                                {%if file | checkimage == True%}
+                                                    <span class="fileSize text-icon">({{file | filesize}}, {{file | dimensions}})</span>
+                                                {%else%}
+                                                    <span class="fileSize text-icon">({{file | filesize}})</span>
+                                                {%endif%}
+                                            </div>
+                                            <a class="linkImg" target="_blank" href="/{{file}}">
+                                                {%if post['spoiler'] == 1%}
+                                                    <img loading="lazy" class="thumbnail" src="/{{data['spoilerImage']}}">
+                                                {%else%}
+                                                    <img loading="lazy" class="thumbnail" src="/{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
+                                                {%endif%}
+                                            </a>
+                                        </div>
+                                    {%endfor%}
+                                    </div>
+                                {%endif%}
+                                <blockquote class="comment">{{post['message'] | checkMarkdown(post['thread'], post['board'], post['number']) | safe}}</blockquote>
+                                </div>
+                            </div>
+                        <div id="latest-individual-post-buttons" class="settings-category">
+                            <h4>Delete post</h4>
+                            <form action="/latest/delete" method="POST">
+                                <input class="btn btn-primary" type="submit" value="Delete Post">
+                            </form>
+                            <h4>Delete Media</h4>
+                            <form action="/latest/deleteMedia" method="POST">
+                                <input class="btn btn-primary" type="submit" value="Delete Media">
+                            </form>
+                            <h4>Ban poster</h4>
+                            <form action="/latest/ban" method="POST">
+                                <label>
+                                    Reason:
+                                    <input type="text" name="ban-reason" placeholder="ban reason">
+                                </label>
+                                <label>
+                                    Duration:
+                                    <input type="text" name="ban-duration" placeholder="1y2m3d4h5">
+                                </label>
+                                <label>
+                                    Delete post
+                                    <input type="checkbox" name="delete-post" value="delete-post">
+                                </label>
+                                <input class="btn btn-primary" type="submit" value="Ban">
+                            </form>
+                        </div>
+                        <hr>
+                    {%endfor%}
+                </div>
+            </div>
+        </form>
     </body>
     <script src="{{ url_for('static', filename='js/themes.js') }}"></script>
     <script src="{{ url_for('static', filename='js/posting.js') }}"></script>
