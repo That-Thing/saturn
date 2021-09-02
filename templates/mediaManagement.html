@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{data['siteName']}} - Media Management</title>
+        <meta charset="UTF-8">
+        <link href="{{ url_for('static', filename='css/global.css') }}" type="text/css" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/markdown.css') }}" type="text/css" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/board.css') }}" type="text/css" rel="stylesheet">
+        <link rel="shortcut icon" type="image/png" href="/{{data['faviconUrl']}}"/>
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+    </head>
+    <body class="{{currentTheme}}">
+        <nav>
+            {% include 'nav.html' %}
+        </nav>
+        <form action="/media/globalactions" method="POST">
+            <div class="box box-settings">
+                <h2 class="box-header">Media actions</h2>
+                <div id="media-actions" class="settings-category">
+                    <label>
+                        Delete files
+                        <input type="checkbox" name="media-delete" value="media-delete">
+                    </label>
+                    <label>
+                        Unlink file
+                        <input type="checkbox" name="media-unlink" value="media-unlink">
+                    </label>
+                    <label>
+                        Spoil media
+                        <input type="checkbox" name="media-spoil" value="media-spoil">
+                    </label>
+                    <label>
+                        Hash ban media
+                        <input type="checkbox" name="media-hash-ban" value="media-hash-ban">
+                    </label>
+                    <label>
+                        Reason:
+                        <input type="text" name="hash-ban-reason" placeholder="hash-ban reason">
+                    </label>
+                    <label>
+                        Ban posters
+                        <input type="checkbox" name="ban-posters" value="ban-posters">
+                    </label>
+                    <label>
+                        Reason:
+                        <input type="text" name="ban-reason" placeholder="ban reason">
+                    </label>
+                    <label>
+                        Duration:
+                        <input type="text" name="ban-duration" placeholder="1y2m3d4h5">
+                    </label>
+                    <input class="btn btn-primary" type="submit" value="Submit">
+                </div>
+            </div>
+            <div class="box box-settings">
+                <h2 class="box-header">Media</h2>
+                <div id="postList">
+                    {%for post in posts%}
+                        {%set files = post['files'].split(',')%}
+                        {%set filenames = post['filenames'].split(',')%}
+                        {%for file in files%}
+                            <div class="media-post">
+                                <span class="media-info">
+                                    <input type="checkbox" name="post" value="{{'file'}}">
+                                    <a class="filename" href="/{{file}}" target="_blank">{{filenames[files.index(file)]}}</a>
+                                    {%if file | checkimage == True%}
+                                        <span class="fileSize text-icon">({{file | filesize}}, {{file | dimensions}})</span>
+                                    {%else%}
+                                        <span class="fileSize text-icon">({{file | filesize}})</span>
+                                    {%endif%}
+                                    <br>
+                                    <span>MD5 Hash: {{file | getFileHash}}</span>
+                                </span>
+                                <img loading="lazy" class="thumbnail" src="/{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
+                                <div class="media-options settings-category">
+                                    <form action="/media/individualactions" method="POST">
+                                        <input type="hidden" name="media" value="{{file}}"> 
+                                        <label>
+                                            Delete media
+                                            <input type="checkbox" name="media-delete">
+                                        </label>
+                                        <label>
+                                            Unlink file
+                                            <input type="checkbox" name="media-unlink" value="media-unlink">
+                                        </label>
+                                        <label>
+                                            Spoil media
+                                            <input type="checkbox" name="media-spoil">
+                                        </label>
+                                        <label>
+                                            Ban poster
+                                            <input type="checkbox" name="media-ban-poster">
+                                        </label>
+                                        <label>
+                                            Reason:
+                                            <input type="text" name="ban-reason" placeholder="ban reason">
+                                        </label>
+                                        <label>
+                                            Duration:
+                                            <input type="text" name="ban-duration" placeholder="1y2m3d4h5">
+                                        </label>
+                                        <label>
+                                            Hash-ban media
+                                            <input type="checkbox" name="media-hash-ban">
+                                        </label>
+                                        <label>
+                                            Reason:
+                                            <input type="text" name="hash-ban-reason" placeholder="hash-ban reason">
+                                        </label>
+                                        <input class="btn btn-primary" type="submit" value="Submit">
+                                    </form>
+                                </div>
+                            </div>
+                            <hr>
+                        {%endfor%}
+                    {%endfor%}
+                </div>
+            </div>
+        </form>
+    </body>
+    <script src="{{ url_for('static', filename='js/themes.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/posting.js') }}"></script>
+</html>

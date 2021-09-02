@@ -13,33 +13,37 @@
         <nav>
             {% include 'nav.html' %}
         </nav>
-        <form action="/latest/delete" method="POST">
+        <form action="/latest/actions" method="POST">
             <div class="box box-settings">
                 <h2 class="box-header">Post actions</h2>
                 <div id="latest-posts-actions" class="settings-category">
                     <label>
                         Delete posts
-                        <input type="checkbox" name="delete-posts" value="delete-posts">
+                        <input type="checkbox" name="multiple-delete-posts" value="on">
                     </label>
                     <label>
                         Delete media
-                        <input type="checkbox" name="delete-media" value="delete-media">
+                        <input type="checkbox" name="multiple-delete-media" value="on">
                     </label>
                     <label>
                         Hash ban media
-                        <input type="checkbox" name="delete-media" value="delete-media">
+                        <input type="checkbox" name="multiple-hash-ban-media" value="on">
+                    </label>
+                    <label>
+                        Hash ban reason
+                        <input type="text" name="multiple-hash-ban-reason" placeholder="hash-ban reason">
                     </label>
                     <label>
                         Ban posters
-                        <input type="checkbox" name="ban-posters" value="delete-media">
+                        <input type="checkbox" name="multiple-ban-posters" value="on">
                     </label>
                     <label>
                         Reason:
-                        <input type="text" name="ban-reason" placeholder="ban reason">
+                        <input type="text" name="multiple-ban-reason" placeholder="ban reason">
                     </label>
                     <label>
                         Duration:
-                        <input type="text" name="ban-duration" placeholder="1y2m3d4h5">
+                        <input type="text" name="multiple-ban-duration" placeholder="1y2m3d4h5">
                     </label>
                     <input class="btn btn-primary" type="submit" value="Submit">
                 </div>
@@ -51,7 +55,7 @@
                         <div class="replyDiv" id="{{post['number']}}">
                             <div class="innerPost">
                                 <div class="postInfo">
-                                    <input type="checkbox" name="{{post['number']}}-{{post['board']}}">
+                                    <input type="checkbox" name="post-{{post['number']}}-{{post['board']}}" value="{{post['number']}}-{{post['board']}}">
                                     {%if post['subject'] != None%}
                                         <span class="subject">{{post['subject']}}</span>
                                     {%endif%}
@@ -115,6 +119,7 @@
                                                 {%endif%}
                                             </a>
                                         </div>
+                                        <hr>
                                     {%endfor%}
                                     </div>
                                 {%endif%}
@@ -122,30 +127,41 @@
                                 </div>
                             </div>
                         <div id="latest-individual-post-buttons" class="settings-category">
-                            <h4>Delete post</h4>
-                            <form action="/latest/delete" method="POST">
-                                <input class="btn btn-primary" type="submit" value="Delete Post">
-                            </form>
-                            <h4>Delete Media</h4>
-                            <form action="/latest/deleteMedia" method="POST">
-                                <input class="btn btn-primary" type="submit" value="Delete Media">
-                            </form>
-                            <h4>Ban poster</h4>
-                            <form action="/latest/ban" method="POST">
+                            <label>
+                                Delete post
+                                <input type="checkbox" name="media-delete">
+                            </label>
+                            <label>
+                                Ban poster
+                                <input type="checkbox" name="media-ban-poster">
+                            </label>
+                            <label>
+                                Reason:
+                                <input type="text" name="ban-reason" placeholder="ban reason">
+                            </label>
+                            <label>
+                                Duration:
+                                <input type="text" name="ban-duration" placeholder="1y2m3d4h5">
+                            </label>
+                            {%if post['files'] != None%}
+                                <label>
+                                    Delete media
+                                    <input type="checkbox" name="media-delete">
+                                </label>
+                                <label>
+                                    Spoil media
+                                    <input type="checkbox" name="media-spoil">
+                                </label>
+                                <label>
+                                    Hash-ban media
+                                    <input type="checkbox" name="media-hash-ban">
+                                </label>
                                 <label>
                                     Reason:
-                                    <input type="text" name="ban-reason" placeholder="ban reason">
+                                    <input type="text" name="hash-ban-reason" placeholder="hash-ban reason">
                                 </label>
-                                <label>
-                                    Duration:
-                                    <input type="text" name="ban-duration" placeholder="1y2m3d4h5">
-                                </label>
-                                <label>
-                                    Delete post
-                                    <input type="checkbox" name="delete-post" value="delete-post">
-                                </label>
-                                <input class="btn btn-primary" type="submit" value="Ban">
-                            </form>
+                            {%endif%}
+                            <input class="btn btn-primary" type="submit" value="Submit">
                         </div>
                         <hr>
                     {%endfor%}

@@ -427,6 +427,13 @@ def simplifyTime(minutes):
 @app.template_filter("loadJSON")
 def loadJSON(string):
     return json.loads(string)
+
+#Returns MD5 hash of file.
+@app.template_filter("getFileHash")
+def getFileHash(file):
+    return hashlib.md5(open(file,'rb').read()).hexdigest()
+
+
 #Make local timestamps
 #add relative times
 
@@ -1682,6 +1689,80 @@ def latest():
     cursor.execute(query)
     posts = cursor.fetchall()
     return render_template('latest.html', posts=posts, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+
+@app.route('/latest/actions', methods=['POST'])
+def latestActions():
+    if request.method == 'POST':
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        requestData = json.loads(json.dumps(request.form))
+        print(requestData)
+        for x in requestData:
+            print(x)
+            if x.startswith("post-"):
+                number = requestData[x].split('-')[0]
+                board = requestData[x].split('-')[1]
+                cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
+                post = cursor.fetchone()
+                print("number: " + number)
+                print(board)
+                print(post)
+                if "multiple-ban-posters" in request.form: #Checks if the post need to be banned.
+                    if request.form['multiple-ban-posters'] == "on": #Checks if the posters need to be banned before the files are deleted
+                        reason = None
+                        length = None
+                        if 'multiple-ban-reason' in request.form: #Checks if a reason is given
+                            if len(request.form['multiple-ban-reason']) > 0:
+                                reason = request.form['multiple-ban-reason']
+                        if 'multiple-ban-length' in request.form: #Checks if the length is given
+                            if len(request.form['multiple-ban-length']) > 0:
+                                reason = request.form['multiple-ban-reason']
+                        cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, %s, %s)", (reason, length, post['ip'], time.time()))
+                if 'multiple-hash-ban-media' in request.form: #Checks if media needs to be banned. STILL NEED TO CHECK AND CREATE DB TABLE!!
+                    reason = None
+                    if request.form['multiple-hash-ban-media'] == 'on':
+                        if 'multiple-hash-ban-reason' in request.form: #Checks if a reason for the hash ban was given
+                            if request.form['multiple-hash-ban-reason']:
+                                reason = request.form['multiple-hash-ban-reason']
+                        for file in post.files.split(","):
+                            cursor.execute("INSERT INTO hashBans VALUES (NULL, %s, %s, %s)", (hashlib.md5(open(file,'rb').read()).hexdigest(), reason, time.time()))
+                if 'multiple-delete-media' in request.form: #Checks if the media needs to be deleted.
+                    print(post['files'])
+                    if request.form['multiple-delete-media'] == 'on':
+                        if post['files'] != None: #delete files from disk
+                            files = post['files'].split(',')
+                            for file in files:
+                                thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
+                                os.remove(file)
+                                os.remove(thumbPath)
+                        cursor.execute("UPDATE posts SET files=NULL, fileNames=NULL WHERE number=%s AND board=%s", (number, board))
+                if 'multiple-delete-posts' in request.form: #Checks if the post needs to be deleted.
+                    if request.form['multiple-delete-posts'] == 'on':
+                        if post['files'] != None: #delete files from disk
+                            files = post['files'].split(',')
+                            for file in files:
+                                thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
+                                os.remove(file)
+                                os.remove(thumbPath)
+                        cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (number, board))
+                mysql.connection.commit()
+                return redirect(url_for('latest'))
+    else:
+        return errors['RequestNotPost']
+
+
+
+
+@app.route('/media', methods=['GET'])
+def media():
+    if session['group'] > 3:
+        return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute('SELECT * FROM posts WHERE files IS NOT NULL')
+    posts = cursor.fetchall()
+    return render_template('mediaManagement.html', posts=posts, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+
+
+
 
 
 if __name__ == "__main__":
