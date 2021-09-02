@@ -545,3 +545,9 @@ p {
 .log:nth-child(even) {
     background-color: var(--background-2);
 }
+
+/*media management page*/
+
+.media-post, .media-options {
+    display: inline-block;
+}
