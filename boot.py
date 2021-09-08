@@ -1693,6 +1693,8 @@ def latest():
 @app.route('/latest/actions', methods=['POST'])
 def latestActions():
     if request.method == 'POST':
+        if session['group'] > 3: #Returns error if insufficient perms
+            return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         requestData = json.loads(json.dumps(request.form))
         print(requestData)
@@ -1744,8 +1746,22 @@ def latestActions():
                                 os.remove(file)
                                 os.remove(thumbPath)
                         cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (number, board))
-                mysql.connection.commit()
-                return redirect(url_for('latest'))
+            if x.startswith("delete-"): #Delete individual post
+                print(requestData[x])
+                print(requestData[x].split("-"))
+                number = requestData[x].split('-')[0]
+                board = requestData[x].split('-')[1]
+                cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
+                post = cursor.fetchone()
+                if post['files'] != None: #delete files from disk
+                    files = post['files'].split(',')
+                    for file in files:
+                        thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
+                        os.remove(file)
+                        os.remove(thumbPath)
+                cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (number, board))
+            mysql.connection.commit()
+        return redirect(url_for('latest'))
     else:
         return errors['RequestNotPost']
 

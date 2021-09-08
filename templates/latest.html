@@ -129,36 +129,36 @@
                         <div id="latest-individual-post-buttons" class="settings-category">
                             <label>
                                 Delete post
-                                <input type="checkbox" name="media-delete">
+                                <input type="checkbox" name="delete-{{post['number']}}-{{post['board']}}" value="{{post['number']}}-{{post['board']}}">
                             </label>
                             <label>
                                 Ban poster
-                                <input type="checkbox" name="media-ban-poster">
+                                <input type="checkbox" name="ban-{{post['number']}}-{{post['board']}}" value="{{post['number']}}-{{post['board']}}">
                             </label>
                             <label>
                                 Reason:
-                                <input type="text" name="ban-reason" placeholder="ban reason">
+                                <input type="text" name="banreason-{{post['number']}}-{{post['board']}}" placeholder="ban reason">
                             </label>
                             <label>
                                 Duration:
-                                <input type="text" name="ban-duration" placeholder="1y2m3d4h5">
+                                <input type="text" name="banduration-{{post['number']}}-{{post['board']}}" placeholder="1y2m3d4h5">
                             </label>
                             {%if post['files'] != None%}
                                 <label>
                                     Delete media
-                                    <input type="checkbox" name="media-delete">
+                                    <input type="checkbox" name="deletemedia-{{post['number']}}-{{post['board']}}"value="{{post['number']}}-{{post['board']}}">
                                 </label>
                                 <label>
                                     Spoil media
-                                    <input type="checkbox" name="media-spoil">
+                                    <input type="checkbox" name="spoil-{{post['number']}}-{{post['board']}}" value="{{post['number']}}-{{post['board']}}">
                                 </label>
                                 <label>
                                     Hash-ban media
-                                    <input type="checkbox" name="media-hash-ban">
+                                    <input type="checkbox" name="hashban-{{post['number']}}-{{post['board']}}" value="{{post['number']}}-{{post['board']}}">
                                 </label>
                                 <label>
                                     Reason:
-                                    <input type="text" name="hash-ban-reason" placeholder="hash-ban reason">
+                                    <input type="text" name="hashbanreason-{{post['number']}}-{{post['board']}}" placeholder="hash-ban reason">
                                 </label>
                             {%endif%}
                             <input class="btn btn-primary" type="submit" value="Submit">
