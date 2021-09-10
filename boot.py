@@ -120,7 +120,7 @@ logConfig = reloadLogSettings()
 def getUserGroups():
     with app.app_context():
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute("SELECT * FROM groups")
+        cursor.execute("SELECT * FROM `groups`")
         groups = cursor.fetchall()
         return groups
 groups = getUserGroups()
@@ -1697,17 +1697,12 @@ def latestActions():
             return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         requestData = json.loads(json.dumps(request.form))
-        print(requestData)
         for x in requestData:
-            print(x)
             if x.startswith("post-"):
                 number = requestData[x].split('-')[0]
                 board = requestData[x].split('-')[1]
                 cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
                 post = cursor.fetchone()
-                print("number: " + number)
-                print(board)
-                print(post)
                 if "multiple-ban-posters" in request.form: #Checks if the post need to be banned.
                     if request.form['multiple-ban-posters'] == "on": #Checks if the posters need to be banned before the files are deleted
                         reason = None
@@ -1723,10 +1718,10 @@ def latestActions():
                     reason = None
                     if request.form['multiple-hash-ban-media'] == 'on':
                         if 'multiple-hash-ban-reason' in request.form: #Checks if a reason for the hash ban was given
-                            if request.form['multiple-hash-ban-reason']:
+                            if len(request.form['multiple-hash-ban-reason']) > 0:
                                 reason = request.form['multiple-hash-ban-reason']
-                        for file in post.files.split(","):
-                            cursor.execute("INSERT INTO hashBans VALUES (NULL, %s, %s, %s)", (hashlib.md5(open(file,'rb').read()).hexdigest(), reason, time.time()))
+                        for file in post["files"].split(","):
+                            cursor.execute("INSERT INTO hashbans VALUES (%s, %s, %s, %s)", (hashlib.md5(open(file,'rb').read()).hexdigest(), reason, session['username'], time.time()))
                 if 'multiple-delete-media' in request.form: #Checks if the media needs to be deleted.
                     print(post['files'])
                     if request.form['multiple-delete-media'] == 'on':
@@ -1746,6 +1741,51 @@ def latestActions():
                                 os.remove(file)
                                 os.remove(thumbPath)
                         cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (number, board))
+            if x.startswith("ban-"): #Ban individual poster
+                number = requestData[x].split('-')[0]
+                board = requestData[x].split('-')[1]
+                cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
+                post = cursor.fetchone()
+                reason = None
+                length = None
+                if f"banreason-{number}-{board}" in request.form: #Check if reaosn for ban was given
+                    if len(request.form[f"banreason-{number}-{board}"]) > 0:
+                        reason = request.form[f"banreason-{number}-{board}"]
+                if f"banduration-{number}-{board}" in request.form: #Check if length of ban was given
+                    if len(request.form[f"banduration-{number}-{board}"]) > 0:
+                        length = request.form[f"banduration-{number}-{board}"]
+                cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s)", (reason, length, str(post['ip']), time.time()))
+            if x.startswith("deletemedia-"): #Remove media from post
+                number = requestData[x].split('-')[0]
+                board = requestData[x].split('-')[1]
+                cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
+                post = cursor.fetchone()
+                if post['files'] != None:
+                    files = post['files'].split(',')
+                    for file in files:
+                        thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
+                        os.remove(file)
+                        os.remove(thumbPath)
+                    cursor.execute("UPDATE posts SET files=NULL WHERE number=%s AND board=%s", (number, board))
+            if x.startswith("spoil-"): #Spoil files
+                number = requestData[x].split('-')[0]
+                board = requestData[x].split('-')[1]
+                cursor.execute("UPDATE posts SET spoiler=1 WHERE number=%s AND board=%s", (number, board))
+            if x.startswith("unspoil-"): #Remove spoiler
+                number = requestData[x].split('-')[0]
+                board = requestData[x].split('-')[1]
+                cursor.execute("UPDATE posts SET spoiler=0 WHERE number=%s AND board=%s", (number, board))
+            if x.startswith("hashban-"): #Individual post hash ban
+                number = requestData[x].split('-')[0]
+                board = requestData[x].split('-')[1]
+                reason = None
+                cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
+                post = cursor.fetchone()
+                if f'hashbanreason-{number}-{board}' in request.form:
+                    if len(request.form[f'hashbanreason-{number}-{board}']) > 0:
+                        reason = request.form[f'hashbanreason-{number}-{board}']
+                for file in post["files"].split(","):
+                    cursor.execute("INSERT INTO hashbans VALUES (%s, %s, %s, %s)", (hashlib.md5(open(file,'rb').read()).hexdigest(), reason, session['username'], time.time()))
             if x.startswith("delete-"): #Delete individual post
                 print(requestData[x])
                 print(requestData[x].split("-"))

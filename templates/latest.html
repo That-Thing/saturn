@@ -148,10 +148,17 @@
                                     Delete media
                                     <input type="checkbox" name="deletemedia-{{post['number']}}-{{post['board']}}"value="{{post['number']}}-{{post['board']}}">
                                 </label>
+                                {%if post['spoiler'] == 0%}
                                 <label>
                                     Spoil media
                                     <input type="checkbox" name="spoil-{{post['number']}}-{{post['board']}}" value="{{post['number']}}-{{post['board']}}">
                                 </label>
+                                {%else%}
+                                <label>
+                                    Remove spoiler
+                                    <input type="checkbox" name="unspoil-{{post['number']}}-{{post['board']}}" value="{{post['number']}}-{{post['board']}}">
+                                </label>
+                                {%endif%}
                                 <label>
                                     Hash-ban media
                                     <input type="checkbox" name="hashban-{{post['number']}}-{{post['board']}}" value="{{post['number']}}-{{post['board']}}">
