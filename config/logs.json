@@ -1,7 +1,7 @@
 {
-    "log-logins": "off",
+    "log-logins": "on",
     "log-register": "on",
-    "log-logout": "off",
+    "log-logout": "on",
     "log-global-settings": "on",
     "log-log-settings": "on",
     "log-rules": "on",

@@ -290,6 +290,17 @@ def getMinutes(text):
         else:
             minutes += int(x[0])
     return minutes
+
+def checkBanned(ip):
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT * FROM bans WHERE ip=%s", [ip])
+    print(cursor.fetchall())
+    if cursor.fetchall() == None:
+        return False
+    else:
+        return True
+
+
 #filters
 @app.template_filter('ut') #convert unix time to normal datetime
 def normalizetime(timestamp):
@@ -1102,6 +1113,8 @@ def uploadFile(f, board, filename, spoiler):
 @app.route('/newThread', methods=['POST'])
 def newThread():
     if request.method == 'POST':
+        if checkBanned(str(request.remote_addr)) == True:
+            return render_template('error.html', errorMsg=errors['banned'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         filePass = checkFilePass()
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         if "board" not in request.form: #Checks if a board was given.
@@ -1239,6 +1252,8 @@ def thread(board, thread):
 @app.route('/reply', methods=['POST'])
 def reply():
     if request.method == 'POST':
+        if checkBanned(str(request.remote_addr)) == True:
+            return render_template('error.html', errorMsg=errors['banned'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         filePass = checkFilePass()
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         if "board" not in request.form: #Checks if a board was given.
