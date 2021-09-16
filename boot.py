@@ -1757,6 +1757,7 @@ def latestActions():
                                 os.remove(thumbPath)
                         cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (number, board))
             if x.startswith("ban-"): #Ban individual poster
+                currentTime = time.time()
                 number = requestData[x].split('-')[0]
                 board = requestData[x].split('-')[1]
                 cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
@@ -1769,7 +1770,9 @@ def latestActions():
                 if f"banduration-{number}-{board}" in request.form: #Check if length of ban was given
                     if len(request.form[f"banduration-{number}-{board}"]) > 0:
                         length = request.form[f"banduration-{number}-{board}"]
-                cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s)", (reason, length, str(post['ip']), time.time()))
+                cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s)", (reason, length, str(post['ip']), currentTime))
+                if logConfig['log-user-ban'] == 'on':
+                    storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {'ip':str(post['ip'])  , 'reason': reason, 'length':length}, None)
             if x.startswith("deletemedia-"): #Remove media from post
                 number = requestData[x].split('-')[0]
                 board = requestData[x].split('-')[1]

@@ -2,7 +2,7 @@
     "port": 8080,
     "mediaLocation": "./media",
     "siteName": "Saturn",
-    "logoUrl": "static/images/logo.png",
+    "logoUrl": "static/images/LogoS.png",
     "faviconUrl": "static/images/favicon.png",
     "spoilerImage": "static/images/spoiler.png",
     "bannerLocation": "static/banners",

@@ -15,6 +15,7 @@
     "log-thread-creation": "on",
     "log-reply": "on",
     "log-post-delete": "on",
+    "log-media-delete": "on",
     "log-mod-user-update": "on",
     "log-mod-user-delete": "on",
     "log-mod-user-create": "on",
