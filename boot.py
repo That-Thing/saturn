@@ -1727,8 +1727,10 @@ def latestActions():
                                 reason = request.form['multiple-ban-reason']
                         if 'multiple-ban-length' in request.form: #Checks if the length is given
                             if len(request.form['multiple-ban-length']) > 0:
-                                reason = request.form['multiple-ban-reason']
-                        cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, %s, %s)", (reason, length, post['ip'], currentTime))
+                                length = getMinutes(request.form['multiple-ban-length'])
+                        cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s)", (reason, length, str(post['ip']), currentTime))
+                        if logConfig['log-user-ban'] == 'on':
+                            storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {'ip':str(post['ip'])  , 'reason': reason, 'length':length}, None)
                 if 'multiple-hash-ban-media' in request.form: #Checks if media needs to be banned. STILL NEED TO CHECK AND CREATE DB TABLE!!
                     reason = None
                     if request.form['multiple-hash-ban-media'] == 'on':
@@ -1772,7 +1774,7 @@ def latestActions():
                         reason = request.form[f"banreason-{number}-{board}"]
                 if f"banduration-{number}-{board}" in request.form: #Check if length of ban was given
                     if len(request.form[f"banduration-{number}-{board}"]) > 0:
-                        length = request.form[f"banduration-{number}-{board}"]
+                        length = getMinutes(request.form[f"banduration-{number}-{board}"])
                 cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s)", (reason, length, str(post['ip']), currentTime))
                 if logConfig['log-user-ban'] == 'on':
                     storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {'ip':str(post['ip'])  , 'reason': reason, 'length':length}, None)
