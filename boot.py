@@ -294,8 +294,7 @@ def getMinutes(text):
 def checkBanned(ip):
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("SELECT * FROM bans WHERE ip=%s", [ip])
-    print(cursor.fetchall())
-    if cursor.fetchall() == None:
+    if len(cursor.fetchall()) == 0:
         return False
     else:
         return True
@@ -1712,6 +1711,7 @@ def latestActions():
             return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         requestData = json.loads(json.dumps(request.form))
+        currentTime = time.time()
         for x in requestData:
             if x.startswith("post-"):
                 number = requestData[x].split('-')[0]
@@ -1728,7 +1728,7 @@ def latestActions():
                         if 'multiple-ban-length' in request.form: #Checks if the length is given
                             if len(request.form['multiple-ban-length']) > 0:
                                 reason = request.form['multiple-ban-reason']
-                        cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, %s, %s)", (reason, length, post['ip'], time.time()))
+                        cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, %s, %s)", (reason, length, post['ip'], currentTime))
                 if 'multiple-hash-ban-media' in request.form: #Checks if media needs to be banned. STILL NEED TO CHECK AND CREATE DB TABLE!!
                     reason = None
                     if request.form['multiple-hash-ban-media'] == 'on':
@@ -1736,7 +1736,9 @@ def latestActions():
                             if len(request.form['multiple-hash-ban-reason']) > 0:
                                 reason = request.form['multiple-hash-ban-reason']
                         for file in post["files"].split(","):
-                            cursor.execute("INSERT INTO hashbans VALUES (%s, %s, %s, %s)", (hashlib.md5(open(file,'rb').read()).hexdigest(), reason, session['username'], time.time()))
+                            if logConfig['log-hash-ban'] == 'on':
+                                storeLog("hashBan", "Media has been hash banned", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(file,'rb').read()).hexdigest(), 'Post': post['number']}, board)
+                            cursor.execute("INSERT INTO hashbans VALUES (%s, %s, %s, %s)", (hashlib.md5(open(file,'rb').read()).hexdigest(), reason, session['username'], currentTime))
                 if 'multiple-delete-media' in request.form: #Checks if the media needs to be deleted.
                     print(post['files'])
                     if request.form['multiple-delete-media'] == 'on':
@@ -1744,9 +1746,11 @@ def latestActions():
                             files = post['files'].split(',')
                             for file in files:
                                 thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
+                                if logConfig['log-media-delete'] == 'on':
+                                    storeLog("mediaDelete", "Media has been deleted", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(file,'rb').read()).hexdigest()}, board)
                                 os.remove(file)
                                 os.remove(thumbPath)
-                        cursor.execute("UPDATE posts SET files=NULL, fileNames=NULL WHERE number=%s AND board=%s", (number, board))
+                        cursor.execute("UPDATE posts SET files=NULL, filenames=NULL WHERE number=%s AND board=%s", (number, board))
                 if 'multiple-delete-posts' in request.form: #Checks if the post needs to be deleted.
                     if request.form['multiple-delete-posts'] == 'on':
                         if post['files'] != None: #delete files from disk
@@ -1757,7 +1761,6 @@ def latestActions():
                                 os.remove(thumbPath)
                         cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (number, board))
             if x.startswith("ban-"): #Ban individual poster
-                currentTime = time.time()
                 number = requestData[x].split('-')[0]
                 board = requestData[x].split('-')[1]
                 cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
@@ -1782,17 +1785,27 @@ def latestActions():
                     files = post['files'].split(',')
                     for file in files:
                         thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
-                        os.remove(file)
                         os.remove(thumbPath)
-                    cursor.execute("UPDATE posts SET files=NULL WHERE number=%s AND board=%s", (number, board))
+                        if logConfig['log-media-delete'] == 'on':
+                            storeLog("mediaDelete", "Media has been deleted", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(file,'rb').read()).hexdigest()}, board)
+                        os.remove(file)
+                    cursor.execute("UPDATE posts SET files=NULL, filenames=NULL WHERE number=%s AND board=%s", (number, board))
             if x.startswith("spoil-"): #Spoil files
                 number = requestData[x].split('-')[0]
                 board = requestData[x].split('-')[1]
+                cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
+                post = cursor.fetchone()
                 cursor.execute("UPDATE posts SET spoiler=1 WHERE number=%s AND board=%s", (number, board))
+                if logConfig['log-media-spoil'] == 'on':
+                    storeLog("mediaSpoil", "Media has been spoiled", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'url': f"/{board}/thread/{post['thread']}#{number}"}, board)
             if x.startswith("unspoil-"): #Remove spoiler
                 number = requestData[x].split('-')[0]
                 board = requestData[x].split('-')[1]
+                cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
+                post = cursor.fetchone()
                 cursor.execute("UPDATE posts SET spoiler=0 WHERE number=%s AND board=%s", (number, board))
+                if logConfig['log-media-spoil'] == 'on':
+                    storeLog("mediaSpoil", "Media has been unspoiled", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'url': f"/{board}/thread/{post['thread']}#{number}"}, board)
             if x.startswith("hashban-"): #Individual post hash ban
                 number = requestData[x].split('-')[0]
                 board = requestData[x].split('-')[1]
@@ -1803,7 +1816,9 @@ def latestActions():
                     if len(request.form[f'hashbanreason-{number}-{board}']) > 0:
                         reason = request.form[f'hashbanreason-{number}-{board}']
                 for file in post["files"].split(","):
-                    cursor.execute("INSERT INTO hashbans VALUES (%s, %s, %s, %s)", (hashlib.md5(open(file,'rb').read()).hexdigest(), reason, session['username'], time.time()))
+                    if logConfig['log-hash-ban'] == 'on':
+                        storeLog("hashBan", "Media has been hash banned", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(file,'rb').read()).hexdigest(), 'Post': post['number']}, board)
+                    cursor.execute("INSERT INTO hashbans VALUES (%s, %s, %s, %s)", (hashlib.md5(open(file,'rb').read()).hexdigest(), reason, session['username'], currentTime))
             if x.startswith("delete-"): #Delete individual post
                 print(requestData[x])
                 print(requestData[x].split("-"))
@@ -1815,8 +1830,12 @@ def latestActions():
                     files = post['files'].split(',')
                     for file in files:
                         thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
+                        if logConfig['log-media-delete'] == 'on':
+                            storeLog("mediaDelete", "Media has been deleted", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'],'MD5': hashlib.md5(open(file,'rb').read()).hexdigest()}, board)
                         os.remove(file)
                         os.remove(thumbPath)
+                if logConfig['log-post-delete'] == 'on':
+                    storeLog("modPostDelete", "A moderator deleted posts", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread']}, board)
                 cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (number, board))
             mysql.connection.commit()
         return redirect(url_for('latest'))

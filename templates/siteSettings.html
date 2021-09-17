@@ -216,9 +216,19 @@
                         <input type="hidden" name="log-post-delete" value="off"/>
                     </label>
                     <label>
+                        Log media spoil/unspoil:
+                        <input type="checkbox" name="log-media-spoil" id="log-media-spoil" {%if logData['log-media-spoil'] == 'on'%}checked{%endif%} value="on">
+                        <input type="hidden" name="log-media-spoil" value="off"/>
+                    </label>
+                    <label>
                         Log media deletion:
                         <input type="checkbox" name="log-media-delete" id="log-media-delete" {%if logData['log-media-delete'] == 'on'%}checked{%endif%} value="on">
                         <input type="hidden" name="log-media-delete" value="off"/>
+                    </label>
+                    <label>
+                        Log hash bans:
+                        <input type="checkbox" name="log-hash-ban" id="log-hash-ban" {%if logData['log-hash-ban'] == 'on'%}checked{%endif%} value="on">
+                        <input type="hidden" name="log-hash-ban" value="off"/>
                     </label>
                     <hr>
                     <label>
