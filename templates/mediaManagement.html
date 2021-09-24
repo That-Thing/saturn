@@ -13,41 +13,33 @@
         <nav>
             {% include 'nav.html' %}
         </nav>
-        <form action="/media/globalactions" method="POST">
+        <form action="{{url_for('mediaActions')}}" method="POST">
             <div class="box box-settings">
                 <h2 class="box-header">Media actions</h2>
                 <div id="media-actions" class="settings-category">
                     <label>
                         Delete files
-                        <input type="checkbox" name="media-delete" value="media-delete">
-                    </label>
-                    <label>
-                        Unlink file
-                        <input type="checkbox" name="media-unlink" value="media-unlink">
-                    </label>
-                    <label>
-                        Spoil media
-                        <input type="checkbox" name="media-spoil" value="media-spoil">
+                        <input type="checkbox" name="multiple-media-delete" value="on">
                     </label>
                     <label>
                         Hash ban media
-                        <input type="checkbox" name="media-hash-ban" value="media-hash-ban">
+                        <input type="checkbox" name="multiple-media-hash-ban" value="on">
                     </label>
                     <label>
                         Reason:
-                        <input type="text" name="hash-ban-reason" placeholder="hash-ban reason">
+                        <input type="text" name="multiple-hash-ban-reason" placeholder="hash-ban reason">
                     </label>
                     <label>
                         Ban posters
-                        <input type="checkbox" name="ban-posters" value="ban-posters">
+                        <input type="checkbox" name="multiple-ban-posters" value="on">
                     </label>
                     <label>
                         Reason:
-                        <input type="text" name="ban-reason" placeholder="ban reason">
+                        <input type="text" name="multiple-ban-reason" placeholder="ban reason">
                     </label>
                     <label>
-                        Duration:
-                        <input type="text" name="ban-duration" placeholder="1y2m3d4h5">
+                        Length:
+                        <input type="text" name="multiple-ban-length" placeholder="1y2m3d4h5">
                     </label>
                     <input class="btn btn-primary" type="submit" value="Submit">
                 </div>
@@ -61,7 +53,7 @@
                         {%for file in files%}
                             <div class="media-post">
                                 <span class="media-info">
-                                    <input type="checkbox" name="post" value="{{'file'}}">
+                                    <input type="checkbox" name="media-{{file}}" value="media-{{file}}">
                                     <a class="filename" href="/{{file}}" target="_blank">{{filenames[files.index(file)]}}</a>
                                     {%if file | checkimage == True%}
                                         <span class="fileSize text-icon">({{file | filesize}}, {{file | dimensions}})</span>
@@ -74,38 +66,37 @@
                                 <img loading="lazy" class="thumbnail" src="/{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
                                 <div class="media-options settings-category">
                                     <form action="/media/individualactions" method="POST">
-                                        <input type="hidden" name="media" value="{{file}}"> 
                                         <label>
                                             Delete media
-                                            <input type="checkbox" name="media-delete">
+                                            <input type="checkbox" name="delete-{{file}}" value="delete-{{file}}">
                                         </label>
                                         <label>
                                             Unlink file
-                                            <input type="checkbox" name="media-unlink" value="media-unlink">
+                                            <input type="checkbox" name="unlink-{{file}}" value="unlink-{{file}}">
                                         </label>
                                         <label>
                                             Spoil media
-                                            <input type="checkbox" name="media-spoil">
+                                            <input type="checkbox" name="spoil-{{file}}" value="spoii">
                                         </label>
                                         <label>
                                             Ban poster
-                                            <input type="checkbox" name="media-ban-poster">
+                                            <input type="checkbox" name="ban-{{file}}" value="ban-{{file}}">
                                         </label>
                                         <label>
                                             Reason:
-                                            <input type="text" name="ban-reason" placeholder="ban reason">
+                                            <input type="text" name="ban-reason-{{file}}" placeholder="ban reason">
                                         </label>
                                         <label>
                                             Duration:
-                                            <input type="text" name="ban-duration" placeholder="1y2m3d4h5">
+                                            <input type="text" name="ban-duration-{{file}}" placeholder="1y2m3d4h5">
                                         </label>
                                         <label>
                                             Hash-ban media
-                                            <input type="checkbox" name="media-hash-ban">
+                                            <input type="checkbox" name="hash-ban-{{file}}">
                                         </label>
                                         <label>
                                             Reason:
-                                            <input type="text" name="hash-ban-reason" placeholder="hash-ban reason">
+                                            <input type="text" name="hash-ban-reason-{{file}}" placeholder="hash-ban reason">
                                         </label>
                                         <input class="btn btn-primary" type="submit" value="Submit">
                                     </form>

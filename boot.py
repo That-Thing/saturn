@@ -299,6 +299,12 @@ def checkBanned(ip):
     else:
         return True
 
+#Check if the request is post
+def checkPost():
+    if request.method != 'POST':
+        return errors['RequestNotPost']
+
+
 
 #filters
 @app.template_filter('ut') #convert unix time to normal datetime
@@ -1454,11 +1460,11 @@ def users():
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
             cursor.execute("SELECT * FROM accounts")
             users = cursor.fetchall()
-            cursor.execute("SELECT * FROM groups")
+            cursor.execute("SELECT * FROM `groups`")
             groups = cursor.fetchall()
             cursor.execute("SELECT * FROM boards")
             boards = cursor.fetchall()
-            cursor.execute("SELECT * FROM groups WHERE id > %s", [session['group']])
+            cursor.execute("SELECT * FROM `groups` WHERE id > %s", [session['group']])
             availableGroups = cursor.fetchall()
             return render_template('users.html', users=users, groups=groups, aGroups=availableGroups,boards=boards,data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         else:
@@ -1474,7 +1480,7 @@ def manageUser(user):
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute("SELECT * FROM accounts WHERE username = %s", [user])
         user = cursor.fetchone()
-        cursor.execute("SELECT * FROM groups WHERE id > %s", [session['group']])
+        cursor.execute("SELECT * FROM `groups` WHERE id > %s", [session['group']])
         groups = cursor.fetchall()
         cursor.execute("SELECT * FROM bans WHERE user = %s", [user['username']])
         ban = cursor.fetchone()
@@ -1642,27 +1648,27 @@ def banUser(user):
 #Unban user
 @app.route("/user/<user>/unban", methods=['POST'])
 def unbanUser(user):
-    if request.method == 'POST':
-        try:
-            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            cursor.execute("SELECT * FROM accounts WHERE username=%s", [user])
-            userData = cursor.fetchone()
-            if userData == None: #Checks if the user exists. 
-                return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
-            if userData['banned'] == 0: #Checks if the user is not banned. 
-                return render_template('error.html', errorMsg=errors['notBanned'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-            if int(session['group']) <= 1 and session['group'] < userData['group']:
-                cursor.execute("DELETE FROM bans WHERE user=%s", [user])
-                cursor.execute("UPDATE accounts SET banned=0 WHERE username=%s", [user])
-                if logConfig['log-user-unban']:
-                    storeLog("userUnban", "A user has been unbanned", session['username'], request.remote_addr, time.time(), {'user':user}, None)
-                mysql.connection.commit()
-                return redirect(url_for("manageUser", user=user))
-            else:
-                return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-        except Exception as e:
-            print(e)
-            return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+    checkPost()
+    try:
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT * FROM accounts WHERE username=%s", [user])
+        userData = cursor.fetchone()
+        if userData == None: #Checks if the user exists. 
+            return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
+        if userData['banned'] == 0: #Checks if the user is not banned. 
+            return render_template('error.html', errorMsg=errors['notBanned'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        if int(session['group']) <= 1 and session['group'] < userData['group']:
+            cursor.execute("DELETE FROM bans WHERE user=%s", [user])
+            cursor.execute("UPDATE accounts SET banned=0 WHERE username=%s", [user])
+            if logConfig['log-user-unban']:
+                storeLog("userUnban", "A user has been unbanned", session['username'], request.remote_addr, time.time(), {'user':user}, None)
+            mysql.connection.commit()
+            return redirect(url_for("manageUser", user=user))
+        else:
+            return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+    except Exception as e:
+        print(e)
+        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 
 @app.route("/logs", methods=['GET'])
 def logs():
@@ -1706,143 +1712,144 @@ def latest():
 
 @app.route('/latest/actions', methods=['POST'])
 def latestActions():
-    if request.method == 'POST':
-        if session['group'] > 3: #Returns error if insufficient perms
-            return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        requestData = json.loads(json.dumps(request.form))
-        currentTime = time.time()
-        for x in requestData:
-            if x.startswith("post-"):
-                number = requestData[x].split('-')[0]
-                board = requestData[x].split('-')[1]
-                cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
-                post = cursor.fetchone()
-                if "multiple-ban-posters" in request.form: #Checks if the post need to be banned.
-                    if request.form['multiple-ban-posters'] == "on": #Checks if the posters need to be banned before the files are deleted
-                        reason = None
-                        length = None
-                        if 'multiple-ban-reason' in request.form: #Checks if a reason is given
-                            if len(request.form['multiple-ban-reason']) > 0:
-                                reason = request.form['multiple-ban-reason']
-                        if 'multiple-ban-length' in request.form: #Checks if the length is given
-                            if len(request.form['multiple-ban-length']) > 0:
-                                length = getMinutes(request.form['multiple-ban-length'])
-                        cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s)", (reason, length, str(post['ip']), currentTime))
-                        if logConfig['log-user-ban'] == 'on':
-                            storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {'ip':str(post['ip'])  , 'reason': reason, 'length':length}, None)
-                if 'multiple-hash-ban-media' in request.form: #Checks if media needs to be banned. STILL NEED TO CHECK AND CREATE DB TABLE!!
+    checkPost()
+    if session['group'] > 3: #Returns error if insufficient perms
+        return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    requestData = json.loads(json.dumps(request.form))
+    currentTime = time.time()
+    for x in requestData:
+        if x.startswith("post-"):
+            number = requestData[x].split('-')[0]
+            board = requestData[x].split('-')[1]
+            cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
+            post = cursor.fetchone()
+            if "multiple-ban-posters" in request.form: #Checks if the post need to be banned.
+                if request.form['multiple-ban-posters'] == "on": #Checks if the posters need to be banned before the files are deleted
                     reason = None
-                    if request.form['multiple-hash-ban-media'] == 'on':
-                        if 'multiple-hash-ban-reason' in request.form: #Checks if a reason for the hash ban was given
-                            if len(request.form['multiple-hash-ban-reason']) > 0:
-                                reason = request.form['multiple-hash-ban-reason']
-                        for file in post["files"].split(","):
-                            if logConfig['log-hash-ban'] == 'on':
-                                storeLog("hashBan", "Media has been hash banned", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(file,'rb').read()).hexdigest(), 'Post': post['number']}, board)
-                            cursor.execute("INSERT INTO hashbans VALUES (%s, %s, %s, %s)", (hashlib.md5(open(file,'rb').read()).hexdigest(), reason, session['username'], currentTime))
-                if 'multiple-delete-media' in request.form: #Checks if the media needs to be deleted.
-                    print(post['files'])
-                    if request.form['multiple-delete-media'] == 'on':
-                        if post['files'] != None: #delete files from disk
-                            files = post['files'].split(',')
-                            for file in files:
-                                thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
-                                if logConfig['log-media-delete'] == 'on':
-                                    storeLog("mediaDelete", "Media has been deleted", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(file,'rb').read()).hexdigest()}, board)
-                                os.remove(file)
-                                os.remove(thumbPath)
-                        cursor.execute("UPDATE posts SET files=NULL, filenames=NULL WHERE number=%s AND board=%s", (number, board))
-                if 'multiple-delete-posts' in request.form: #Checks if the post needs to be deleted.
-                    if request.form['multiple-delete-posts'] == 'on':
-                        if post['files'] != None: #delete files from disk
-                            files = post['files'].split(',')
-                            for file in files:
-                                thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
-                                os.remove(file)
-                                os.remove(thumbPath)
-                        cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (number, board))
-            if x.startswith("ban-"): #Ban individual poster
-                number = requestData[x].split('-')[0]
-                board = requestData[x].split('-')[1]
-                cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
-                post = cursor.fetchone()
+                    length = None
+                    cursor.execute("SELECT * FROM bans WHERE ip=%s", [post['ip']]) #New ban overwrites the old one
+                    if cursor.fetchone() != None:
+                        cursor.execute("DELETE FROM bans WHEre ip=%s", [post['ip']])
+                    if 'multiple-ban-reason' in request.form: #Checks if a reason is given
+                        if len(request.form['multiple-ban-reason']) > 0:
+                            reason = request.form['multiple-ban-reason']
+                    if 'multiple-ban-length' in request.form: #Checks if the length is given
+                        if len(request.form['multiple-ban-length']) > 0:
+                            length = getMinutes(request.form['multiple-ban-length'])
+                    cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s)", (reason, length, str(post['ip']), currentTime))
+                    if logConfig['log-user-ban'] == 'on':
+                        storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {'ip':str(post['ip'])  , 'reason': reason, 'length':length}, None)
+            if 'multiple-hash-ban-media' in request.form: #Checks if media needs to be banned. STILL NEED TO CHECK AND CREATE DB TABLE!!
                 reason = None
-                length = None
-                if f"banreason-{number}-{board}" in request.form: #Check if reaosn for ban was given
-                    if len(request.form[f"banreason-{number}-{board}"]) > 0:
-                        reason = request.form[f"banreason-{number}-{board}"]
-                if f"banduration-{number}-{board}" in request.form: #Check if length of ban was given
-                    if len(request.form[f"banduration-{number}-{board}"]) > 0:
-                        length = getMinutes(request.form[f"banduration-{number}-{board}"])
-                cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s)", (reason, length, str(post['ip']), currentTime))
-                if logConfig['log-user-ban'] == 'on':
-                    storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {'ip':str(post['ip'])  , 'reason': reason, 'length':length}, None)
-            if x.startswith("deletemedia-"): #Remove media from post
-                number = requestData[x].split('-')[0]
-                board = requestData[x].split('-')[1]
-                cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
-                post = cursor.fetchone()
-                if post['files'] != None:
-                    files = post['files'].split(',')
-                    for file in files:
-                        thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
-                        os.remove(thumbPath)
-                        if logConfig['log-media-delete'] == 'on':
-                            storeLog("mediaDelete", "Media has been deleted", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(file,'rb').read()).hexdigest()}, board)
-                        os.remove(file)
+                if request.form['multiple-hash-ban-media'] == 'on':
+                    if 'multiple-hash-ban-reason' in request.form: #Checks if a reason for the hash ban was given
+                        if len(request.form['multiple-hash-ban-reason']) > 0:
+                            reason = request.form['multiple-hash-ban-reason']
+                    for file in post["files"].split(","):
+                        if logConfig['log-hash-ban'] == 'on':
+                            storeLog("hashBan", "Media has been hash banned", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(file,'rb').read()).hexdigest(), 'Post': post['number']}, board)
+                        cursor.execute("INSERT INTO hashbans VALUES (%s, %s, %s, %s)", (hashlib.md5(open(file,'rb').read()).hexdigest(), reason, session['username'], currentTime))
+            if 'multiple-delete-media' in request.form: #Checks if the media needs to be deleted.
+                print(post['files'])
+                if request.form['multiple-delete-media'] == 'on':
+                    if post['files'] != None: #delete files from disk
+                        files = post['files'].split(',')
+                        for file in files:
+                            thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
+                            if logConfig['log-media-delete'] == 'on':
+                                storeLog("mediaDelete", "Media has been deleted", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(file,'rb').read()).hexdigest()}, board)
+                            os.remove(file)
+                            os.remove(thumbPath)
                     cursor.execute("UPDATE posts SET files=NULL, filenames=NULL WHERE number=%s AND board=%s", (number, board))
-            if x.startswith("spoil-"): #Spoil files
-                number = requestData[x].split('-')[0]
-                board = requestData[x].split('-')[1]
-                cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
-                post = cursor.fetchone()
-                cursor.execute("UPDATE posts SET spoiler=1 WHERE number=%s AND board=%s", (number, board))
-                if logConfig['log-media-spoil'] == 'on':
-                    storeLog("mediaSpoil", "Media has been spoiled", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'url': f"/{board}/thread/{post['thread']}#{number}"}, board)
-            if x.startswith("unspoil-"): #Remove spoiler
-                number = requestData[x].split('-')[0]
-                board = requestData[x].split('-')[1]
-                cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
-                post = cursor.fetchone()
-                cursor.execute("UPDATE posts SET spoiler=0 WHERE number=%s AND board=%s", (number, board))
-                if logConfig['log-media-spoil'] == 'on':
-                    storeLog("mediaSpoil", "Media has been unspoiled", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'url': f"/{board}/thread/{post['thread']}#{number}"}, board)
-            if x.startswith("hashban-"): #Individual post hash ban
-                number = requestData[x].split('-')[0]
-                board = requestData[x].split('-')[1]
-                reason = None
-                cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
-                post = cursor.fetchone()
-                if f'hashbanreason-{number}-{board}' in request.form:
-                    if len(request.form[f'hashbanreason-{number}-{board}']) > 0:
-                        reason = request.form[f'hashbanreason-{number}-{board}']
-                for file in post["files"].split(","):
-                    if logConfig['log-hash-ban'] == 'on':
-                        storeLog("hashBan", "Media has been hash banned", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(file,'rb').read()).hexdigest(), 'Post': post['number']}, board)
-                    cursor.execute("INSERT INTO hashbans VALUES (%s, %s, %s, %s)", (hashlib.md5(open(file,'rb').read()).hexdigest(), reason, session['username'], currentTime))
-            if x.startswith("delete-"): #Delete individual post
-                print(requestData[x])
-                print(requestData[x].split("-"))
-                number = requestData[x].split('-')[0]
-                board = requestData[x].split('-')[1]
-                cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
-                post = cursor.fetchone()
-                if post['files'] != None: #delete files from disk
-                    files = post['files'].split(',')
-                    for file in files:
-                        thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
-                        if logConfig['log-media-delete'] == 'on':
-                            storeLog("mediaDelete", "Media has been deleted", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'],'MD5': hashlib.md5(open(file,'rb').read()).hexdigest()}, board)
-                        os.remove(file)
-                        os.remove(thumbPath)
-                if logConfig['log-post-delete'] == 'on':
-                    storeLog("modPostDelete", "A moderator deleted posts", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread']}, board)
-                cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (number, board))
-            mysql.connection.commit()
-        return redirect(url_for('latest'))
-    else:
-        return errors['RequestNotPost']
+            if 'multiple-delete-posts' in request.form: #Checks if the post needs to be deleted.
+                if request.form['multiple-delete-posts'] == 'on':
+                    if post['files'] != None: #delete files from disk
+                        files = post['files'].split(',')
+                        for file in files:
+                            thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
+                            os.remove(file)
+                            os.remove(thumbPath)
+                    cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (number, board))
+        if x.startswith("ban-"): #Ban individual poster
+            number = requestData[x].split('-')[0]
+            board = requestData[x].split('-')[1]
+            cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
+            post = cursor.fetchone()
+            reason = None
+            length = None
+            if f"banreason-{number}-{board}" in request.form: #Check if reaosn for ban was given
+                if len(request.form[f"banreason-{number}-{board}"]) > 0:
+                    reason = request.form[f"banreason-{number}-{board}"]
+            if f"banduration-{number}-{board}" in request.form: #Check if length of ban was given
+                if len(request.form[f"banduration-{number}-{board}"]) > 0:
+                    length = getMinutes(request.form[f"banduration-{number}-{board}"])
+            cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s)", (reason, length, str(post['ip']), currentTime))
+            if logConfig['log-user-ban'] == 'on':
+                storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {'ip':str(post['ip'])  , 'reason': reason, 'length':length}, None)
+        if x.startswith("deletemedia-"): #Remove media from post
+            number = requestData[x].split('-')[0]
+            board = requestData[x].split('-')[1]
+            cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
+            post = cursor.fetchone()
+            if post['files'] != None:
+                files = post['files'].split(',')
+                for file in files:
+                    thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
+                    os.remove(thumbPath)
+                    if logConfig['log-media-delete'] == 'on':
+                        storeLog("mediaDelete", "Media has been deleted", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(file,'rb').read()).hexdigest()}, board)
+                    os.remove(file)
+                cursor.execute("UPDATE posts SET files=NULL, filenames=NULL WHERE number=%s AND board=%s", (number, board))
+        if x.startswith("spoil-"): #Spoil files
+            number = requestData[x].split('-')[0]
+            board = requestData[x].split('-')[1]
+            cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
+            post = cursor.fetchone()
+            cursor.execute("UPDATE posts SET spoiler=1 WHERE number=%s AND board=%s", (number, board))
+            if logConfig['log-media-spoil'] == 'on':
+                storeLog("mediaSpoil", "Media has been spoiled", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'url': f"/{board}/thread/{post['thread']}#{number}"}, board)
+        if x.startswith("unspoil-"): #Remove spoiler
+            number = requestData[x].split('-')[0]
+            board = requestData[x].split('-')[1]
+            cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
+            post = cursor.fetchone()
+            cursor.execute("UPDATE posts SET spoiler=0 WHERE number=%s AND board=%s", (number, board))
+            if logConfig['log-media-spoil'] == 'on':
+                storeLog("mediaSpoil", "Media has been unspoiled", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'url': f"/{board}/thread/{post['thread']}#{number}"}, board)
+        if x.startswith("hashban-"): #Individual post hash ban
+            number = requestData[x].split('-')[0]
+            board = requestData[x].split('-')[1]
+            reason = None
+            cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
+            post = cursor.fetchone()
+            if f'hashbanreason-{number}-{board}' in request.form:
+                if len(request.form[f'hashbanreason-{number}-{board}']) > 0:
+                    reason = request.form[f'hashbanreason-{number}-{board}']
+            for file in post["files"].split(","):
+                if logConfig['log-hash-ban'] == 'on':
+                    storeLog("hashBan", "Media has been hash banned", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(file,'rb').read()).hexdigest(), 'Post': post['number']}, board)
+                cursor.execute("INSERT INTO hashbans VALUES (%s, %s, %s, %s)", (hashlib.md5(open(file,'rb').read()).hexdigest(), reason, session['username'], currentTime))
+        if x.startswith("delete-"): #Delete individual post
+            print(requestData[x])
+            print(requestData[x].split("-"))
+            number = requestData[x].split('-')[0]
+            board = requestData[x].split('-')[1]
+            cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
+            post = cursor.fetchone()
+            if post['files'] != None: #delete files from disk
+                files = post['files'].split(',')
+                for file in files:
+                    thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
+                    if logConfig['log-media-delete'] == 'on':
+                        storeLog("mediaDelete", "Media has been deleted", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'],'MD5': hashlib.md5(open(file,'rb').read()).hexdigest()}, board)
+                    os.remove(file)
+                    os.remove(thumbPath)
+            if logConfig['log-post-delete'] == 'on':
+                storeLog("modPostDelete", "A moderator deleted posts", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread']}, board)
+            cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (number, board))
+        mysql.connection.commit()
+    return redirect(url_for('latest'))
 
 
 
@@ -1857,8 +1864,60 @@ def media():
     return render_template('mediaManagement.html', posts=posts, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 
 
-
-
+@app.route('/media/actions', methods=['POST'])
+def mediaActions():
+    checkPost()
+    if session['group'] > 3: #Returns error if insufficient perms
+        return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    requestData = json.loads(json.dumps(request.form))
+    currentTime = time.time()
+    for x in requestData:
+        print(x)
+        if x.startswith("media-"):
+            currentFile = requestData[x].split("-")[1]
+            cursor.execute("SELECT * FROM posts WHERE files LIKE '%"+currentFile+"%'") #Don't ask.
+            post = cursor.fetchone()
+            if "multiple-ban-posters" in request.form: #Checks if the post need to be banned.
+                if request.form['multiple-ban-posters'] == "on": #Checks if the posters need to be banned
+                    reason = None
+                    length = None
+                    cursor.execute("SELECT * FROM bans WHERE ip=%s", [post['ip']]) #New ban overwrites the old one
+                    if cursor.fetchone() != None:
+                        cursor.execute("DELETE FROM bans WHEre ip=%s", [post['ip']])
+                    if 'multiple-ban-reason' in request.form: #Checks if a reason is given
+                        if len(request.form['multiple-ban-reason']) > 0:
+                            reason = request.form['multiple-ban-reason']
+                    if 'multiple-ban-length' in request.form: #Checks if the length is given
+                        if len(request.form['multiple-ban-length']) > 0:
+                            length = getMinutes(request.form['multiple-ban-length'])
+                    cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s)", (reason, length, str(post['ip']), currentTime))
+                    if logConfig['log-user-ban'] == 'on':
+                        storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {'ip':str(post['ip'])  , 'reason': reason, 'length':length}, None)
+            if 'multiple-hash-ban-media' in request.form: #Checks if media needs to be banned. STILL NEED TO CHECK AND CREATE DB TABLE!!
+                reason = None
+                if request.form['multiple-hash-ban-media'] == 'on':
+                    if 'multiple-hash-ban-reason' in request.form: #Checks if a reason for the hash ban was given
+                        if len(request.form['multiple-hash-ban-reason']) > 0:
+                            reason = request.form['multiple-hash-ban-reason']
+                    for file in post["files"].split(","):
+                        if logConfig['log-hash-ban'] == 'on':
+                            storeLog("hashBan", "Media has been hash banned", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(file,'rb').read()).hexdigest(), 'Post': post['number']}, board)
+                        cursor.execute("INSERT INTO hashbans VALUES (%s, %s, %s, %s)", (hashlib.md5(open(file,'rb').read()).hexdigest(), reason, session['username'], currentTime))
+            if 'multiple-media-delete' in request.form: #Checks if the media needs to be deleted.
+                print(post['files'])
+                if request.form['multiple-media-delete'] == 'on':
+                    if post['files'] != None: #delete files from disk
+                        files = post['files'].split(',')
+                        for file in files:
+                            thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
+                            if logConfig['log-media-delete'] == 'on':
+                                storeLog("mediaDelete", "Media has been deleted", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(file,'rb').read()).hexdigest()}, post['board'])
+                            os.remove(file)
+                            os.remove(thumbPath)
+                    cursor.execute("UPDATE posts SET files=NULL, filenames=NULL WHERE number=%s AND board=%s", (post['number'], post['board']))
+            mysql.connection.commit()
+    return redirect(url_for('media'))
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=configData["port"])
