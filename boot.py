@@ -1724,6 +1724,8 @@ def latestActions():
             board = requestData[x].split('-')[1]
             cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
             post = cursor.fetchone()
+            if post == None: #Returns error if post is none
+                return render_template('error.html', errorMsg=errors['invalidPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
             if "multiple-ban-posters" in request.form: #Checks if the post need to be banned.
                 if request.form['multiple-ban-posters'] == "on": #Checks if the posters need to be banned before the files are deleted
                     reason = None
@@ -1776,6 +1778,8 @@ def latestActions():
             board = requestData[x].split('-')[1]
             cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
             post = cursor.fetchone()
+            if post == None: #Returns error if post is none
+                return render_template('error.html', errorMsg=errors['invalidPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
             reason = None
             length = None
             if f"banreason-{number}-{board}" in request.form: #Check if reaosn for ban was given
@@ -1792,6 +1796,8 @@ def latestActions():
             board = requestData[x].split('-')[1]
             cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
             post = cursor.fetchone()
+            if post == None: #Returns error if post is none
+                return render_template('error.html', errorMsg=errors['invalidPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
             if post['files'] != None:
                 files = post['files'].split(',')
                 for file in files:
@@ -1806,6 +1812,8 @@ def latestActions():
             board = requestData[x].split('-')[1]
             cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
             post = cursor.fetchone()
+            if post == None: #Returns error if post is none
+                return render_template('error.html', errorMsg=errors['invalidPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
             cursor.execute("UPDATE posts SET spoiler=1 WHERE number=%s AND board=%s", (number, board))
             if logConfig['log-media-spoil'] == 'on':
                 storeLog("mediaSpoil", "Media has been spoiled", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'url': f"/{board}/thread/{post['thread']}#{number}"}, board)
@@ -1814,6 +1822,8 @@ def latestActions():
             board = requestData[x].split('-')[1]
             cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
             post = cursor.fetchone()
+            if post == None: #Returns error if post is none
+                return render_template('error.html', errorMsg=errors['invalidPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
             cursor.execute("UPDATE posts SET spoiler=0 WHERE number=%s AND board=%s", (number, board))
             if logConfig['log-media-spoil'] == 'on':
                 storeLog("mediaSpoil", "Media has been unspoiled", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'url': f"/{board}/thread/{post['thread']}#{number}"}, board)
@@ -1823,6 +1833,8 @@ def latestActions():
             reason = None
             cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
             post = cursor.fetchone()
+            if post == None: #Returns error if post is none
+                return render_template('error.html', errorMsg=errors['invalidPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
             if f'hashbanreason-{number}-{board}' in request.form:
                 if len(request.form[f'hashbanreason-{number}-{board}']) > 0:
                     reason = request.form[f'hashbanreason-{number}-{board}']
@@ -1831,12 +1843,12 @@ def latestActions():
                     storeLog("hashBan", "Media has been hash banned", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(file,'rb').read()).hexdigest(), 'Post': post['number']}, board)
                 cursor.execute("INSERT INTO hashbans VALUES (%s, %s, %s, %s)", (hashlib.md5(open(file,'rb').read()).hexdigest(), reason, session['username'], currentTime))
         if x.startswith("delete-"): #Delete individual post
-            print(requestData[x])
-            print(requestData[x].split("-"))
             number = requestData[x].split('-')[0]
             board = requestData[x].split('-')[1]
             cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
             post = cursor.fetchone()
+            if post == None: #Returns error if post is none
+                return render_template('error.html', errorMsg=errors['invalidPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
             if post['files'] != None: #delete files from disk
                 files = post['files'].split(',')
                 for file in files:
@@ -1876,8 +1888,10 @@ def mediaActions():
         print(x)
         if x.startswith("media-"):
             currentFile = requestData[x].split("-")[1]
-            cursor.execute("SELECT * FROM posts WHERE files LIKE '%"+currentFile+"%'") #Don't ask.
+            cursor.execute("SELECT * FROM posts WHERE files LIKE '%"+currentFile+"%'") #Get post that has this file.
             post = cursor.fetchone()
+            if post == None: #Returns error if post is none
+                return render_template('error.html', errorMsg=errors['invalidPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
             if "multiple-ban-posters" in request.form: #Checks if the post need to be banned.
                 if request.form['multiple-ban-posters'] == "on": #Checks if the posters need to be banned
                     reason = None
@@ -1905,7 +1919,6 @@ def mediaActions():
                             storeLog("hashBan", "Media has been hash banned", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(file,'rb').read()).hexdigest(), 'Post': post['number']}, board)
                         cursor.execute("INSERT INTO hashbans VALUES (%s, %s, %s, %s)", (hashlib.md5(open(file,'rb').read()).hexdigest(), reason, session['username'], currentTime))
             if 'multiple-media-delete' in request.form: #Checks if the media needs to be deleted.
-                print(post['files'])
                 if request.form['multiple-media-delete'] == 'on':
                     if post['files'] != None: #delete files from disk
                         files = post['files'].split(',')
@@ -1916,7 +1929,23 @@ def mediaActions():
                             os.remove(file)
                             os.remove(thumbPath)
                     cursor.execute("UPDATE posts SET files=NULL, filenames=NULL WHERE number=%s AND board=%s", (post['number'], post['board']))
-            mysql.connection.commit()
+        if x.startswith('delete-'):
+            currentFile = requestData[x].split('-')[1]
+            cursor.execute("SELECT * FROM posts WHERE files LIKE '%"+currentFile+"%'")
+            post = cursor.fetchone()
+            if post == None: #Returns error if post is none
+                return render_template('error.html', errorMsg=errors['invalidPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+            if post['files'] != None: #delete files from disk
+                files = post['files'].split(',')
+                for file in files:
+                    thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
+                    if logConfig['log-media-delete'] == 'on':
+                        storeLog("mediaDelete", "Media has been deleted", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(file,'rb').read()).hexdigest()}, post['board'])
+                    os.remove(file)
+                    os.remove(thumbPath)
+            cursor.execute("UPDATE posts SET files=NULL, filenames=NULL WHERE number=%s AND board=%s", (post['number'], post['board']))
+        mysql.connection.commit()
+    #Delete posts that don't have a message if the file is deleted. 
     return redirect(url_for('media'))
 
 if __name__ == "__main__":

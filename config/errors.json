@@ -14,5 +14,6 @@
     "alreadyBanned": "User is already banned",
     "notBanned": "User is not banned",
     "confirmBoardDeletion": "Please confirm board deletion",
-    "banned": "You are banned."
+    "banned": "You are banned.",
+    "invalidPost": "Invalid post"
 }
