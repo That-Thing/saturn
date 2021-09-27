@@ -18,6 +18,7 @@ from PIL import Image
 import re
 import hashlib
 from deepdiff import DeepDiff
+import magic
 from flask_socketio import SocketIO, send
 with open('./config/config.json') as configFile: #global config file
     configData = json.load(configFile)
@@ -1106,7 +1107,11 @@ def thumbnail(image, board, filename, ext):
     except IOError:
         pass
 def uploadFile(f, board, filename, spoiler):
+    mimeTypes = globalSettings['mimeTypes'].split(',')
     extention = pathlib.Path(secure_filename(f.filename)).suffix
+    if magic.from_buffer(f.read(1024), mime=True) not in mimeTypes:
+        return None
+    f.seek(0)
     nFilename = filename+extention
     path = os.path.join(globalSettings['mediaLocation'], board, nFilename)
     f.save(path)
@@ -1129,7 +1134,6 @@ def newThread():
         if board == None: #Returns a 404 if board doesn't exist
             return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
         tripcode = None
-        mimeTypes = globalSettings['mimeTypes'].split(',')
         curTime = time.time()
         if "name" in request.form and len(request.form['name']) > 0: #Checks if a name is given
             name = request.form['name']
@@ -1180,12 +1184,11 @@ def newThread():
             filenames = []
             filePaths = []
             for f in files: #downloads the files and stores them on the disk
-                if f.mimetype in mimeTypes:
-                    filename = uploadFile(f, board['uri'], str(curTime), spoiler)
-                    filePaths.append(filename)
-                    filenames.append(secure_filename(f.filename))
-                else:
-                    return render_template('error.html', errorMsg=errors['incorrectFiletype'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
+                filename = uploadFile(f, board['uri'], str(curTime), spoiler)
+                if filename == None: #This means the uploaded file was invalid. 
+                    return render_template('error.html', errorMsg=errors['incorrectFiletype']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                filePaths.append(filename)
+                filenames.append(secure_filename(f.filename))
             filenames = ','.join([str(x) for x in filenames])
             filePaths = ','.join([str(x) for x in filePaths])
         number = board['posts']+1
@@ -1268,7 +1271,6 @@ def reply():
         if board == None: #Returns a 404 if board doesn't exist
             return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
         tripcode = None
-        mimeTypes = globalSettings['mimeTypes'].split(',')
         curTime = time.time()
         number = board['posts']+1
         if "name" in request.form and len(request.form['name']) > 0: #Checks if a name is given
@@ -1322,12 +1324,11 @@ def reply():
                 filenames = []
                 filePaths = []
                 for f in files: #downloads the files and stores them on the disk
-                    if f.mimetype in mimeTypes:
-                        filename = uploadFile(f, board['uri'], str(time.time()), spoiler)
-                        filePaths.append(filename)
-                        filenames.append(secure_filename(f.filename))
-                    else:
-                        return render_template('error.html', errorMsg=errors['incorrectFiletype'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
+                    filename = uploadFile(f, board['uri'], str(time.time()), spoiler)
+                    if filename == None: #This means the uploaded file was invalid. 
+                        return render_template('error.html', errorMsg=errors['incorrectFiletype']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                    filePaths.append(filename)
+                    filenames.append(secure_filename(f.filename))
                 filenames = ','.join([str(x) for x in filenames])
                 filePaths = ','.join([str(x) for x in filePaths])
                 cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s, %s, %s, NULL)', (name, subject, options, comment, number, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode))                

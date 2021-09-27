@@ -9,7 +9,7 @@
     "accountExists": "An account with that username already exists, please enter a different username",
     "emailRegexFail": "Incorrectly formatted email address",
     "fileLimitExceeded": "Maximum file limit exceeded",
-    "incorrectFiletype": "Incorrect file type submitted",
+    "incorrectFiletype": "Incorrect file type submitted: ",
     "incorrectCaptcha": "Incorrect captcha",
     "alreadyBanned": "User is already banned",
     "notBanned": "User is not banned",
