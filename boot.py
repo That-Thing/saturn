@@ -1949,7 +1949,27 @@ def mediaActions():
                             cursor.execute("UPDATE posts SET files=%s, filenames=%s WHERE number=%s AND board=%s", (files, filenames, post['number'], post['board']))
                         if post['message'] == None or len(post['message']) == 0: #Delete posts that don't have a message if the files are deleted
                                 cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (post['number'], post['board']))
-        if x.startswith('delete-'):
+        if x.startswith('spoil-'): #Spoil individual media
+            cursor.execute("UPDATE posts SET spoiler=1 WHERE files LIKE '%"+x.split('-')[1]+"%'")
+        if x.startswith("ban-"):
+            currentFile = x.split('-')[1]
+            print(currentFile)
+            cursor.execute("SELECT * FROM posts WHERE files LIKE '%"+currentFile+"%'")
+            post = cursor.fetchone()
+            if post == None: #Returns error if post is none
+                return render_template('error.html', errorMsg=errors['invalidPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+            reason = None
+            length = None
+            if f"banreason-{currentFile}" in request.form: #Check if reaosn for ban was given
+                if len(request.form[f"banreason-{currentFile}"]) > 0:
+                    reason = request.form[f"banreason-{currentFile}"]
+            if f"banduration-{currentFile}" in request.form: #Check if length of ban was given
+                if len(request.form[f"banduration-{currentFile}"]) > 0:
+                    length = getMinutes(request.form[f"banduration-{currentFile}"])
+            cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s)", (reason, length, str(post['ip']), currentTime))
+            if logConfig['log-user-ban'] == 'on':
+                storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {'ip':str(post['ip'])  , 'reason': reason, 'length':length}, None)
+        if x.startswith('delete-'): #Delete individual file.
             currentFile = requestData[x].split('-')[1]
             cursor.execute("SELECT * FROM posts WHERE files LIKE '%"+currentFile+"%'")
             post = cursor.fetchone()
