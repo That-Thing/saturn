@@ -1937,9 +1937,18 @@ def mediaActions():
                                 storeLog("mediaDelete", "Media has been deleted", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(file,'rb').read()).hexdigest()}, post['board'])
                             os.remove(file)
                             os.remove(thumbPath)
-                    cursor.execute("UPDATE posts SET files=NULL, filenames=NULL WHERE number=%s AND board=%s", (post['number'], post['board']))
-                    if post['message'] == None or len(post['message']) == 0: #Delete posts that don't have a message if the files are deleted
-                        cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (post['number'], post['board']))
+                        filenames = post['filenames'].split(',')
+                        del filenames[files.index(currentFile)]
+                        ",".join(filenames)
+                        files.remove(currentFile)
+                        print(files)
+                        ",".join(files)
+                        if len(files) == 0:
+                            cursor.execute("UPDATE posts SET files=NULL, filenames=NULL WHERE number=%s AND board=%s", (post['number'], post['board']))
+                        else:
+                            cursor.execute("UPDATE posts SET files=%s, filenames=%s WHERE number=%s AND board=%s", (files, filenames, post['number'], post['board']))
+                        if post['message'] == None or len(post['message']) == 0: #Delete posts that don't have a message if the files are deleted
+                                cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (post['number'], post['board']))
         if x.startswith('delete-'):
             currentFile = requestData[x].split('-')[1]
             cursor.execute("SELECT * FROM posts WHERE files LIKE '%"+currentFile+"%'")
@@ -1949,14 +1958,24 @@ def mediaActions():
             if post['files'] != None: #delete files from disk
                 files = post['files'].split(',')
                 for file in files:
-                    thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
-                    if logConfig['log-media-delete'] == 'on':
-                        storeLog("mediaDelete", "Media has been deleted", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(file,'rb').read()).hexdigest()}, post['board'])
-                    os.remove(file)
-                    os.remove(thumbPath)
-            cursor.execute("UPDATE posts SET files=NULL, filenames=NULL WHERE number=%s AND board=%s", (post['number'], post['board']))
-            if post['message'] == None or len(post['message']) == 0: #Delete posts that don't have a message if the files are deleted
-                    cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (post['number'], post['board']))
+                    if file == currentFile:
+                        thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
+                        if logConfig['log-media-delete'] == 'on':
+                            storeLog("mediaDelete", "Media has been deleted", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(file,'rb').read()).hexdigest()}, post['board'])
+                        os.remove(file)
+                        os.remove(thumbPath)
+                filenames = post['filenames'].split(',')
+                del filenames[files.index(currentFile)]
+                ",".join(filenames)
+                files.remove(currentFile)
+                print(files)
+                ",".join(files)
+                if len(files) == 0:
+                    cursor.execute("UPDATE posts SET files=NULL, filenames=NULL WHERE number=%s AND board=%s", (post['number'], post['board']))
+                else:
+                    cursor.execute("UPDATE posts SET files=%s, filenames=%s WHERE number=%s AND board=%s", (files, filenames, post['number'], post['board']))
+                if post['message'] == None or len(post['message']) == 0: #Delete posts that don't have a message if the files are deleted
+                        cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (post['number'], post['board']))
         mysql.connection.commit() 
     return redirect(url_for('media'))
 
