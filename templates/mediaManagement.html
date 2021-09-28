@@ -60,46 +60,43 @@
                                     {%else%}
                                         <span class="fileSize text-icon">({{file | filesize}})</span>
                                     {%endif%}
-                                    <br>
-                                    <span>MD5 Hash: {{file | getFileHash}}</span>
+                                    <span class="md5">MD5 Hash: {{file | getFileHash}}</span>
                                 </span>
                                 <img loading="lazy" class="thumbnail" src="/{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
                                 <div class="media-options settings-category">
-                                    <form action="/media/individualactions" method="POST">
-                                        <label>
-                                            Delete media
-                                            <input type="checkbox" name="delete-{{file}}" value="delete-{{file}}">
-                                        </label>
-                                        <label>
-                                            Unlink file
-                                            <input type="checkbox" name="unlink-{{file}}" value="unlink-{{file}}">
-                                        </label>
-                                        <label>
-                                            Spoil media
-                                            <input type="checkbox" name="spoil-{{file}}" value="spoii">
-                                        </label>
-                                        <label>
-                                            Ban poster
-                                            <input type="checkbox" name="ban-{{file}}" value="ban-{{file}}">
-                                        </label>
-                                        <label>
-                                            Reason:
-                                            <input type="text" name="ban-reason-{{file}}" placeholder="ban reason">
-                                        </label>
-                                        <label>
-                                            Duration:
-                                            <input type="text" name="ban-duration-{{file}}" placeholder="1y2m3d4h5">
-                                        </label>
-                                        <label>
-                                            Hash-ban media
-                                            <input type="checkbox" name="hash-ban-{{file}}">
-                                        </label>
-                                        <label>
-                                            Reason:
-                                            <input type="text" name="hash-ban-reason-{{file}}" placeholder="hash-ban reason">
-                                        </label>
-                                        <input class="btn btn-primary" type="submit" value="Submit">
-                                    </form>
+                                    <label>
+                                        Delete media
+                                        <input type="checkbox" name="delete-{{file}}" value="delete-{{file}}">
+                                    </label>
+                                    <label>
+                                        Unlink file
+                                        <input type="checkbox" name="unlink-{{file}}" value="unlink-{{file}}">
+                                    </label>
+                                    <label>
+                                        Spoil media
+                                        <input type="checkbox" name="spoil-{{file}}" value="spoii">
+                                    </label>
+                                    <label>
+                                        Ban poster
+                                        <input type="checkbox" name="ban-{{file}}" value="ban-{{file}}">
+                                    </label>
+                                    <label>
+                                        Reason:
+                                        <input type="text" name="ban-reason-{{file}}" placeholder="ban reason">
+                                    </label>
+                                    <label>
+                                        Duration:
+                                        <input type="text" name="ban-duration-{{file}}" placeholder="1y2m3d4h5">
+                                    </label>
+                                    <label>
+                                        Hash-ban media
+                                        <input type="checkbox" name="hash-ban-{{file}}">
+                                    </label>
+                                    <label>
+                                        Reason:
+                                        <input type="text" name="hash-ban-reason-{{file}}" placeholder="hash-ban reason">
+                                    </label>
+                                    <input class="btn btn-primary" type="submit" value="Submit">
                                 </div>
                             </div>
                             <hr>

@@ -551,3 +551,9 @@ p {
 .media-post, .media-options {
     display: inline-block;
 }
+/*MD5 Hash text*/
+.md5 {
+    white-space: nowrap;
+    font-size: 80%;
+    color: var(--small-text);
+}

@@ -852,11 +852,15 @@ def setOwner(board):
 def uploadBanner(board):
     if request.method == 'POST':
         banner = request.files['file']
+        mimes = ['image/jpeg', 'image/png', 'image/apng', 'image/webp', 'image/gif'] #allowed mime types for banners. 
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
         sqlData = cursor.fetchone()
         try:
             if sqlData['owner'] == session['username'] or int(session['group']) <= 1:
+                if magic.from_buffer(banner.read(1024), mime=True) not in mimes: #Check if the banner is an image,
+                    return render_template('error.html', errorMsg=errors['incorrectFiletype']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                banner.seek(0)
                 path = os.path.join(globalSettings['bannerLocation'], board)
                 filename = secure_filename(banner.filename)
                 extention = pathlib.Path(filename).suffix
@@ -1765,6 +1769,8 @@ def latestActions():
                             os.remove(file)
                             os.remove(thumbPath)
                     cursor.execute("UPDATE posts SET files=NULL, filenames=NULL WHERE number=%s AND board=%s", (number, board))
+                    if post['message'] == None or len(post['message']) == 0: #Delete posts that don't have a message if the files are deleted
+                        cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (post['number'], post['board']))
             if 'multiple-delete-posts' in request.form: #Checks if the post needs to be deleted.
                 if request.form['multiple-delete-posts'] == 'on':
                     if post['files'] != None: #delete files from disk
@@ -1808,6 +1814,8 @@ def latestActions():
                         storeLog("mediaDelete", "Media has been deleted", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(file,'rb').read()).hexdigest()}, board)
                     os.remove(file)
                 cursor.execute("UPDATE posts SET files=NULL, filenames=NULL WHERE number=%s AND board=%s", (number, board))
+                if post['message'] == None or len(post['message']) == 0: #Delete posts that don't have a message if the files are deleted
+                    cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (post['number'], post['board']))
         if x.startswith("spoil-"): #Spoil files
             number = requestData[x].split('-')[0]
             board = requestData[x].split('-')[1]
@@ -1872,7 +1880,7 @@ def media():
     if session['group'] > 3:
         return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute('SELECT * FROM posts WHERE files IS NOT NULL')
+    cursor.execute('SELECT * FROM posts WHERE files IS NOT NULL ORDER BY number DESC')
     posts = cursor.fetchall()
     return render_template('mediaManagement.html', posts=posts, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 
@@ -1930,6 +1938,8 @@ def mediaActions():
                             os.remove(file)
                             os.remove(thumbPath)
                     cursor.execute("UPDATE posts SET files=NULL, filenames=NULL WHERE number=%s AND board=%s", (post['number'], post['board']))
+                    if post['message'] == None or len(post['message']) == 0: #Delete posts that don't have a message if the files are deleted
+                        cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (post['number'], post['board']))
         if x.startswith('delete-'):
             currentFile = requestData[x].split('-')[1]
             cursor.execute("SELECT * FROM posts WHERE files LIKE '%"+currentFile+"%'")
@@ -1945,8 +1955,9 @@ def mediaActions():
                     os.remove(file)
                     os.remove(thumbPath)
             cursor.execute("UPDATE posts SET files=NULL, filenames=NULL WHERE number=%s AND board=%s", (post['number'], post['board']))
-        mysql.connection.commit()
-    #Delete posts that don't have a message if the file is deleted. 
+            if post['message'] == None or len(post['message']) == 0: #Delete posts that don't have a message if the files are deleted
+                    cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (post['number'], post['board']))
+        mysql.connection.commit() 
     return redirect(url_for('media'))
 
 if __name__ == "__main__":
