@@ -8,7 +8,7 @@ from flask import session
 import json
 import os
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import pathlib
 import math
 import random
@@ -977,7 +977,7 @@ def register():
 #Checks if captcha has expired. If it has, returns true so generateCaptcha() can generate a new one. 
 def checkCaptchaState():
     if "captchaExpire" in session and "captcha" in session and "captchaF" in session and os.path.isfile(session["captchaF"]):
-        if datetime.now() >= session["captchaExpire"]:
+        if datetime.now(timezone.utc) >= session["captchaExpire"]:
             return True
         else:
             return False
@@ -992,15 +992,13 @@ def generateCaptcha(difficulty):
     if "captchaF" in session and os.path.isfile(session["captchaF"]): #removes old captcha file.
         os.remove(session["captchaF"])
     captchaText = randomString(difficulty)
-    print("#########################")
-    print(captchaText)
-    print("#########################")
     currentCaptcha = captcha.generate(captchaText)
     filename = time.time()
     captcha.write(captchaText, f'./static/captchas/{filename}.png')
     session["captcha"] = captchaText
     session["captchaF"] = f'./static/captchas/{filename}.png'
-    session["captchaExpire"] = datetime.now() + timedelta(minutes = globalSettings['captchaExpire']) #Set expire time for captcha. Add into global settings later. 
+    expire = datetime.now(timezone.utc) + timedelta(minutes = globalSettings['captchaExpire'])
+    session["captchaExpire"] = expire #Set expire time for captcha. Add into global settings later.
     return f'./static/captchas/{filename}.png'
 
 def clearCaptcha():
@@ -1020,7 +1018,7 @@ def getThreads(uri):
 #board page
 @app.route('/<board>/', methods=['GET'])
 def boardPage(board):
-    #try:
+#    try:
         if request.cookies.get('ownedPosts') != None:
             ownedPosts = json.loads(request.cookies.get('ownedPosts')) #gets posts the current user has made for (you)s
         else:
@@ -1049,9 +1047,9 @@ def boardPage(board):
         else:
             return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, threads=posts, filePass=filePass, postLength=postLength, owned=ownedPosts, hidden=hidden,page=1, themes=themes)
         return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
-    #except Exception as e:
-    #    print(e)
-    #    return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+#    except Exception as e:
+#        print(e)
+#        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 
 #individual pages
 @app.route('/<board>/<int:page>', methods=['GET'])
@@ -1181,12 +1179,12 @@ def newThread():
         comment = request.form['comment']
         comment = stripHTML(comment)
         postLink = checkPostLink(comment)
-        if board['captcha'] == 1: #Checks if the board has captcha enabled, and if so, checks if the entred captcha text is correct
-            clearCaptcha() #clears captcha so it can't be used again to make a new thread.
+        if board['captcha'] == 1: #Checks if the board has captcha enabled, and if so, checks if the entred captcha text is correct.
             if 'captcha' not in request.form:
                 return render_template('error.html', errorMsg=errors['unfilledFields'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
             if session['captcha'] != request.form['captcha']: #Checks if the captcha is incorrect.
                 return render_template('error.html', errorMsg=errors['incorrectCaptcha'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+            clearCaptcha() #clears captcha so it can't be used again to make a new thread
         files = request.files.getlist("file") #Gets all the files from the request
         if len(files) > globalSettings['maxFiles']: #check if too many files are uploaded
             return render_template('error.html', errorMsg=errors['fileLimitExceeded'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
@@ -1768,7 +1766,6 @@ def latestActions():
                             storeLog("hashBan", "Media has been hash banned", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(file,'rb').read()).hexdigest(), 'Post': post['number']}, board)
                         cursor.execute("INSERT INTO hashbans VALUES (%s, %s, %s, %s)", (hashlib.md5(open(file,'rb').read()).hexdigest(), reason, session['username'], currentTime))
             if 'multiple-delete-media' in request.form: #Checks if the media needs to be deleted.
-                print(post['files'])
                 if request.form['multiple-delete-media'] == 'on':
                     if post['files'] != None: #delete files from disk
                         files = post['files'].split(',')
@@ -1904,7 +1901,6 @@ def mediaActions():
     requestData = json.loads(json.dumps(request.form))
     currentTime = time.time()
     for x in requestData:
-        print(x)
         if x.startswith("media-"):
             currentFile = requestData[x].split("-")[1]
             cursor.execute("SELECT * FROM posts WHERE files LIKE '%"+currentFile+"%'") #Get post that has this file.
@@ -1951,7 +1947,6 @@ def mediaActions():
                         del filenames[files.index(currentFile)]
                         ",".join(filenames)
                         files.remove(currentFile)
-                        print(files)
                         ",".join(files)
                         if len(files) == 0:
                             cursor.execute("UPDATE posts SET files=NULL, filenames=NULL WHERE number=%s AND board=%s", (post['number'], post['board']))
@@ -1961,9 +1956,18 @@ def mediaActions():
                                 cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (post['number'], post['board']))
         if x.startswith('spoil-'): #Spoil individual media
             cursor.execute("UPDATE posts SET spoiler=1 WHERE files LIKE '%"+x.split('-')[1]+"%'")
+            if logConfig['log-media-spoil'] == 'on':
+                cursor.execute("SELECT * FROM posts WHERE files LIKE '%"+x.split('-')[1]+"%'")
+                post = cursor.fetchone()
+                storeLog("mediaSpoil", "Media has been spoiled", session['username'], request.remote_addr, time.time(), {'post': post['number'], 'url': f"/{post['board']}/thread/{post['thread']}#{post['number']}"}, post['board'])
+        if x.startswith('unspoil-'):
+            cursor.execute("UPDATE posts SET spoiler=0 WHERE files LIKE '%"+x.split('-')[1]+"%'")
+            if logConfig['log-media-spoil'] == 'on':
+                cursor.execute("SELECT * FROM posts WHERE files LIKE '%"+x.split('-')[1]+"%'")
+                post = cursor.fetchone()
+                storeLog("mediaSpoil", "Media has been unspoiled", session['username'], request.remote_addr, time.time(), {'post': post['number'], 'url': f"/{post['board']}/thread/{post['thread']}#{post['number']}"}, post['board'])
         if x.startswith("ban-"):
             currentFile = x.split('-')[1]
-            print(currentFile)
             cursor.execute("SELECT * FROM posts WHERE files LIKE '%"+currentFile+"%'")
             post = cursor.fetchone()
             if post == None: #Returns error if post is none
@@ -2009,7 +2013,6 @@ def mediaActions():
                 del filenames[files.index(currentFile)]
                 ",".join(filenames)
                 files.remove(currentFile)
-                print(files)
                 ",".join(files)
                 if len(files) == 0:
                     cursor.execute("UPDATE posts SET files=NULL, filenames=NULL WHERE number=%s AND board=%s", (post['number'], post['board']))

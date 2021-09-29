@@ -69,8 +69,13 @@
                                         <input type="checkbox" name="delete-{{file}}" value="delete-{{file}}">
                                     </label>
                                     <label>
-                                        Spoil media
-                                        <input type="checkbox" name="spoil-{{file}}" value="spoii">
+                                        {%if post['spoiler'] == 0%}
+                                            Spoil media
+                                            <input type="checkbox" name="spoil-{{file}}" value="spoil">
+                                        {%else%}
+                                            Remove spoiler
+                                            <input type="checkbox" name="unspoil-{{file}}" value="spoil">
+                                        {%endif%}
                                     </label>
                                     <label>
                                         Ban poster
