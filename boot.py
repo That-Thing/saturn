@@ -1111,8 +1111,14 @@ def thumbnail(image, board, filename, ext):
     except IOError:
         pass
 def uploadFile(f, board, filename, spoiler):
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     mimeTypes = globalSettings['mimeTypes'].split(',')
     extention = pathlib.Path(secure_filename(f.filename)).suffix
+    cursor.execute("SELECT * FROM hashbans WHERE hash=%s", [hashlib.md5(f.read()).hexdigest()]) #Check if file being uploaded is banned. 
+    ban = cursor.fetchone()
+    if ban != None:
+        return "Banned"
+    f.seek(0)
     if magic.from_buffer(f.read(1024), mime=True) not in mimeTypes:
         return None
     f.seek(0)
@@ -1189,6 +1195,8 @@ def newThread():
             filePaths = []
             for f in files: #downloads the files and stores them on the disk
                 filename = uploadFile(f, board['uri'], str(curTime), spoiler)
+                if filename == "Banned": #File was hash-banned
+                    return render_template('error.html', errorMsg=errors['fileBanned']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
                 if filename == None: #This means the uploaded file was invalid. 
                     return render_template('error.html', errorMsg=errors['incorrectFiletype']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
                 filePaths.append(filename)
@@ -1329,6 +1337,8 @@ def reply():
                 filePaths = []
                 for f in files: #downloads the files and stores them on the disk
                     filename = uploadFile(f, board['uri'], str(time.time()), spoiler)
+                    if filename == "Banned": #File was hash-banned
+                        return render_template('error.html', errorMsg=errors['fileBanned']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
                     if filename == None: #This means the uploaded file was invalid. 
                         return render_template('error.html', errorMsg=errors['incorrectFiletype']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
                     filePaths.append(filename)

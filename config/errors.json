@@ -10,6 +10,7 @@
     "emailRegexFail": "Incorrectly formatted email address",
     "fileLimitExceeded": "Maximum file limit exceeded",
     "incorrectFiletype": "Incorrect file type submitted: ",
+    "fileBanned": "The file you are trying to post is banned: ",
     "incorrectCaptcha": "Incorrect captcha",
     "alreadyBanned": "User is already banned",
     "notBanned": "User is not banned",
