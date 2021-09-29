@@ -957,11 +957,13 @@ def register():
                     msg = 'Invalid email address!'
             elif not re.match(r'^[a-zA-Z0-9_.-]*$', username):
                 msg = 'Username must contain only characters and numbers'
-            elif not username or not password:
+            elif not username:
                 msg = 'Please fill out the form'
             else:
                 # Account doesnt exists and the form data is valid, now insert new account into accounts table
+                password = request.form['password']
                 password = returnHash(password)
+                print(password)
                 cursor.execute('INSERT INTO accounts VALUES (NULL, %s, %s, %s, 4, %s, %s, 0)', (username, password, email, time.time(), str(request.remote_addr)))
                 mysql.connection.commit()
                 msg = 'You have successfully registered!'
@@ -989,6 +991,7 @@ def checkCaptchaState():
 def generateCaptcha(difficulty):
     if checkCaptchaState() == False: #If current session captcha is not expired, return current captcha. 
         return session["captchaF"]
+
     if "captchaF" in session and os.path.isfile(session["captchaF"]): #removes old captcha file.
         os.remove(session["captchaF"])
     captchaText = randomString(difficulty)
