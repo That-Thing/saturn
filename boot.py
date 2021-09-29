@@ -1969,6 +1969,17 @@ def mediaActions():
             cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s)", (reason, length, str(post['ip']), currentTime))
             if logConfig['log-user-ban'] == 'on':
                 storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {'ip':str(post['ip'])  , 'reason': reason, 'length':length}, None)
+        if x.startswith("hashban-"):
+            reason = None
+            currentFile = x.split('-')[1]
+            currentTime = time.time()
+            cursor.execute("SELECT * FROM posts WHERE files LIKE '%"+currentFile+"%'")
+            post = cursor.fetchone()
+            if f'hashbanreason-{currentFile}' in request.form:
+                reason = request.form[f'hashbanreason-{currentFile}']
+            if logConfig['log-hash-ban'] == 'on':
+                storeLog("hashBan", "Media has been hash banned", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(currentFile,'rb').read()).hexdigest(), 'Post': post['number']}, post['board'])
+            cursor.execute("INSERT INTO hashbans VALUES (%s, %s, %s, %s)", (hashlib.md5(open(currentFile,'rb').read()).hexdigest(), reason, session['username'], currentTime))
         if x.startswith('delete-'): #Delete individual file.
             currentFile = requestData[x].split('-')[1]
             cursor.execute("SELECT * FROM posts WHERE files LIKE '%"+currentFile+"%'")
