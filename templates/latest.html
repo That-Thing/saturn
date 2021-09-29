@@ -52,123 +52,125 @@
                 <h2 class="box-header">Latest Posts</h2>
                 <div id="postList">
                     {%for post in posts%}
-                        <div class="replyDiv" id="{{post['number']}}">
-                            <div class="innerPost">
-                                <div class="postInfo">
-                                    <input type="checkbox" name="post-{{post['number']}}-{{post['board']}}" value="{{post['number']}}-{{post['board']}}">
-                                    {%if post['subject'] != None%}
-                                        <span class="subject">{{post['subject']}}</span>
-                                    {%endif%}
-                                    {%if post['trip']|hasSignature == True%}
-                                        {%if post['options'] != None%}
-                                            <a class="name optionsName" href="mailto:{{post['options']}}" target="_blank">{{post['name']}}##<span class="{{post['trip']}}">{{post['trip']}}</span></a>
-                                        {%else%}
-                                            <span class="name">{{post['name']}}##<span class="{{post['trip']}}">{{post['trip']}}</span></a></span>
+                        <div class="manage-post">
+                            <div class="replyDiv" id="{{post['number']}}">
+                                <div class="innerPost">
+                                    <div class="postInfo">
+                                        <input type="checkbox" name="post-{{post['number']}}-{{post['board']}}" value="{{post['number']}}-{{post['board']}}">
+                                        {%if post['subject'] != None%}
+                                            <span class="subject">{{post['subject']}}</span>
                                         {%endif%}
-                                    {%else%}
-                                        {%if post['trip'] != None%}
+                                        {%if post['trip']|hasSignature == True%}
                                             {%if post['options'] != None%}
-                                                <a class="name optionsName" href="mailto:{{post['options']}}" target="_blank">{{post['name']}}##{{post['trip']}}</a>
+                                                <a class="name optionsName" href="mailto:{{post['options']}}" target="_blank">{{post['name']}}##<span class="{{post['trip']}}">{{post['trip']}}</span></a>
                                             {%else%}
-                                                <span class="name">{{post['name']}}##{{post['trip']}}</span>
+                                                <span class="name">{{post['name']}}##<span class="{{post['trip']}}">{{post['trip']}}</span></a></span>
                                             {%endif%}
                                         {%else%}
-                                            {%if post['options'] != None%}
-                                                <a class="name optionsName" href="mailto:{{post['options']}}" target="_blank">{{post['name']}}</a>
+                                            {%if post['trip'] != None%}
+                                                {%if post['options'] != None%}
+                                                    <a class="name optionsName" href="mailto:{{post['options']}}" target="_blank">{{post['name']}}##{{post['trip']}}</a>
+                                                {%else%}
+                                                    <span class="name">{{post['name']}}##{{post['trip']}}</span>
+                                                {%endif%}
                                             {%else%}
-                                                <span class="name">{{post['name']}}</span>
+                                                {%if post['options'] != None%}
+                                                    <a class="name optionsName" href="mailto:{{post['options']}}" target="_blank">{{post['name']}}</a>
+                                                {%else%}
+                                                    <span class="name">{{post['name']}}</span>
+                                                {%endif%}
                                             {%endif%}
                                         {%endif%}
-                                    {%endif%}
-                                    <span>{{post['date'] | ut}}</span>
-                                    <span><a class="postNumber" href="/{{post['board']}}/thread/{{post['thread']}}#{{post['number']}}">No.</a><a href="/{{post['board']}}/thread/{{post['thread']}}#q{{post['number']}}" onclick="reply(this)" class="postNumber">{{post['number']}}</a></span>
-                                    {%if post['replies'] != None and post['replies'].split(',')%}
-                                        <span>
-                                            {%set replies = post['replies'].split(',')%}
-                                            {%for reply in replies%}
-                                                {%set reply = reply.split("/")%}
-                                                <a href="/{{post['board']}}/thread/{{reply[0]}}#{{reply[1]}}">>>{{reply[1]}}</a>
-                                            {%endfor%}
-                                        </span>
-                                    {%endif%}
-                                </div>
-                                {%if post['files'] != None%}
-                                    {%set files = post['files'].split(',')%}
-                                    {%set filenames = post['filenames'].split(',')%}
-                                    {%if files | length > 1%}
-                                        <div class="uploads multiple-files">
-                                    {%else%}
-                                        <div class="uploads">
-                                    {%endif%}
-                                    {%for file in files%}
-                                        <div class="fileDiv">
-                                            <div class="file-info">
-                                                <a class="filename" href="/{{file}}" target="_blank">{{filenames[files.index(file)]}}</a>
-                                                <a href="/{{file}}" download="{{filenames[files.index(file)]}}"><i class="fas fa-download text-icon"></i></a>
-                                                {%if file | checkimage == True%}
-                                                    <span class="fileSize text-icon">({{file | filesize}}, {{file | dimensions}})</span>
-                                                {%else%}
-                                                    <span class="fileSize text-icon">({{file | filesize}})</span>
-                                                {%endif%}
-                                            </div>
-                                            <a class="linkImg" target="_blank" href="/{{file}}">
-                                                {%if post['spoiler'] == 1%}
-                                                    <img loading="lazy" class="thumbnail" src="/{{data['spoilerImage']}}">
-                                                {%else%}
-                                                    <img loading="lazy" class="thumbnail" src="/{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
-                                                {%endif%}
-                                            </a>
-                                        </div>
-                                        <hr>
-                                    {%endfor%}
+                                        <span>{{post['date'] | ut}}</span>
+                                        <span><a class="postNumber" href="/{{post['board']}}/thread/{{post['thread']}}#{{post['number']}}">No.</a><a href="/{{post['board']}}/thread/{{post['thread']}}#q{{post['number']}}" onclick="reply(this)" class="postNumber">{{post['number']}}</a></span>
+                                        {%if post['replies'] != None and post['replies'].split(',')%}
+                                            <span>
+                                                {%set replies = post['replies'].split(',')%}
+                                                {%for reply in replies%}
+                                                    {%set reply = reply.split("/")%}
+                                                    <a href="/{{post['board']}}/thread/{{reply[0]}}#{{reply[1]}}">>>{{reply[1]}}</a>
+                                                {%endfor%}
+                                            </span>
+                                        {%endif%}
                                     </div>
-                                {%endif%}
-                                <blockquote class="comment">{{post['message'] | checkMarkdown(post['thread'], post['board'], post['number']) | safe}}</blockquote>
+                                    {%if post['files'] != None%}
+                                        {%set files = post['files'].split(',')%}
+                                        {%set filenames = post['filenames'].split(',')%}
+                                        {%if files | length > 1%}
+                                            <div class="uploads multiple-files">
+                                        {%else%}
+                                            <div class="uploads">
+                                        {%endif%}
+                                        {%for file in files%}
+                                            <div class="fileDiv">
+                                                <div class="file-info">
+                                                    <a class="filename" href="/{{file}}" target="_blank">{{filenames[files.index(file)]}}</a>
+                                                    <a href="/{{file}}" download="{{filenames[files.index(file)]}}"><i class="fas fa-download text-icon"></i></a>
+                                                    {%if file | checkimage == True%}
+                                                        <span class="fileSize text-icon">({{file | filesize}}, {{file | dimensions}})</span>
+                                                    {%else%}
+                                                        <span class="fileSize text-icon">({{file | filesize}})</span>
+                                                    {%endif%}
+                                                </div>
+                                                <a class="linkImg" target="_blank" href="/{{file}}">
+                                                    {%if post['spoiler'] == 1%}
+                                                        <img loading="lazy" class="thumbnail" src="/{{data['spoilerImage']}}">
+                                                    {%else%}
+                                                        <img loading="lazy" class="thumbnail" src="/{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
+                                                    {%endif%}
+                                                </a>
+                                            </div>
+                                            <hr>
+                                        {%endfor%}
+                                        </div>
+                                    {%endif%}
+                                    <blockquote class="comment">{{post['message'] | checkMarkdown(post['thread'], post['board'], post['number']) | safe}}</blockquote>
+                                    </div>
                                 </div>
-                            </div>
-                        <div id="latest-individual-post-buttons" class="settings-category">
-                            <label>
-                                Delete post
-                                <input type="checkbox" name="delete-{{post['number']}}-{{post['board']}}" value="{{post['number']}}-{{post['board']}}">
-                            </label>
-                            <label>
-                                Ban poster
-                                <input type="checkbox" name="ban-{{post['number']}}-{{post['board']}}" value="{{post['number']}}-{{post['board']}}">
-                            </label>
-                            <label>
-                                Reason:
-                                <input type="text" name="banreason-{{post['number']}}-{{post['board']}}" placeholder="ban reason">
-                            </label>
-                            <label>
-                                Duration:
-                                <input type="text" name="banduration-{{post['number']}}-{{post['board']}}" placeholder="1y2m3d4h5">
-                            </label>
-                            {%if post['files'] != None%}
+                            <div id="latest-individual-post-buttons" class="settings-category">
                                 <label>
-                                    Delete media
-                                    <input type="checkbox" name="deletemedia-{{post['number']}}-{{post['board']}}"value="{{post['number']}}-{{post['board']}}">
+                                    Delete post
+                                    <input type="checkbox" name="delete-{{post['number']}}-{{post['board']}}" value="{{post['number']}}-{{post['board']}}">
                                 </label>
-                                {%if post['spoiler'] == 0%}
                                 <label>
-                                    Spoil media
-                                    <input type="checkbox" name="spoil-{{post['number']}}-{{post['board']}}" value="{{post['number']}}-{{post['board']}}">
-                                </label>
-                                {%else%}
-                                <label>
-                                    Remove spoiler
-                                    <input type="checkbox" name="unspoil-{{post['number']}}-{{post['board']}}" value="{{post['number']}}-{{post['board']}}">
-                                </label>
-                                {%endif%}
-                                <label>
-                                    Hash-ban media
-                                    <input type="checkbox" name="hashban-{{post['number']}}-{{post['board']}}" value="{{post['number']}}-{{post['board']}}">
+                                    Ban poster
+                                    <input type="checkbox" name="ban-{{post['number']}}-{{post['board']}}" value="{{post['number']}}-{{post['board']}}">
                                 </label>
                                 <label>
                                     Reason:
-                                    <input type="text" name="hashbanreason-{{post['number']}}-{{post['board']}}" placeholder="hash-ban reason">
+                                    <input type="text" name="banreason-{{post['number']}}-{{post['board']}}" placeholder="ban reason">
                                 </label>
-                            {%endif%}
-                            <input class="btn btn-primary" type="submit" value="Submit">
+                                <label>
+                                    Duration:
+                                    <input type="text" name="banduration-{{post['number']}}-{{post['board']}}" placeholder="1y2m3d4h5">
+                                </label>
+                                {%if post['files'] != None%}
+                                    <label>
+                                        Delete media
+                                        <input type="checkbox" name="deletemedia-{{post['number']}}-{{post['board']}}"value="{{post['number']}}-{{post['board']}}">
+                                    </label>
+                                    {%if post['spoiler'] == 0%}
+                                    <label>
+                                        Spoil media
+                                        <input type="checkbox" name="spoil-{{post['number']}}-{{post['board']}}" value="{{post['number']}}-{{post['board']}}">
+                                    </label>
+                                    {%else%}
+                                    <label>
+                                        Remove spoiler
+                                        <input type="checkbox" name="unspoil-{{post['number']}}-{{post['board']}}" value="{{post['number']}}-{{post['board']}}">
+                                    </label>
+                                    {%endif%}
+                                    <label>
+                                        Hash-ban media
+                                        <input type="checkbox" name="hashban-{{post['number']}}-{{post['board']}}" value="{{post['number']}}-{{post['board']}}">
+                                    </label>
+                                    <label>
+                                        Reason:
+                                        <input type="text" name="hashbanreason-{{post['number']}}-{{post['board']}}" placeholder="hash-ban reason">
+                                    </label>
+                                {%endif%}
+                                <input class="btn btn-primary" type="submit" value="Submit">
+                            </div>
                         </div>
                         <hr>
                     {%endfor%}

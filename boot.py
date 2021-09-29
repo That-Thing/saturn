@@ -1119,7 +1119,7 @@ def uploadFile(f, board, filename, spoiler):
     if ban != None:
         return "Banned"
     f.seek(0)
-    if magic.from_buffer(f.read(1024), mime=True) not in mimeTypes:
+    if magic.from_buffer(f.read(1024), mime=True) not in mimeTypes: #Check if file is allowed.
         return None
     f.seek(0)
     nFilename = filename+extention

@@ -551,6 +551,11 @@ p {
 .media-post, .media-options {
     display: inline-block;
 }
+/*latest posts page*/
+.manage-post {
+    display: flex;
+    align-items: center;
+}
 /*MD5 Hash text*/
 .md5 {
     white-space: nowrap;
