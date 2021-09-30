@@ -75,12 +75,10 @@
             <h2 class="box-header">Banners</h2>
             <div id="bannerManagement">
                 <h4 class="center">Upload banners</h4>
-                <div id="drop-area">
-                    <form class="my-form">
-                        <input type="file" id="fileElem" multiple accept="image/*" onchange="handleFiles(this.files)">
-                        <label class="button center" for="fileElem">Drag or select files</label>
-                    </form>
-                </div>
+                <form class="center" action="{{url_for('uploadBanner', board=board['uri'])}}" method="POST" enctype="multipart/form-data">
+                    <input type="file" name="file" id="banner-file-select" required accept="image/*">
+                    <input class="btn btn-primary" type="submit" value="Upload">
+                </form>
             </div>
             <hr>
             <h4 class="center">Existing banners:</h4>
@@ -124,58 +122,6 @@
                 </ol>
             </div>
         </div>
-        <script>
-            let dropArea = document.getElementById('drop-area')
-            ;['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, preventDefaults, false)
-            })
-
-            function preventDefaults (e) {
-            e.preventDefault()
-            e.stopPropagation()
-            }
-            ;['dragenter', 'dragover'].forEach(eventName => {
-            dropArea.addEventListener(eventName, highlight, false)
-            })
-
-            ;['dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, unhighlight, false)
-            })
-
-            function highlight(e) {
-            dropArea.classList.add('highlight')
-            }
-
-            function unhighlight(e) {
-            dropArea.classList.remove('highlight')
-            }
-            dropArea.addEventListener('drop', handleDrop, false)
-
-            function handleDrop(e) {
-            let dt = e.dataTransfer
-            let files = dt.files
-
-            handleFiles(files)
-            }
-            function handleFiles(files) {
-            ([...files]).forEach(uploadFile)
-            }
-            function uploadFile(file) {
-                
-            var url = "{{url_for('uploadBanner', board=board['uri'])}}"
-            let formData = new FormData()
-
-            formData.append('file', file)
-            console.log(file)
-
-            fetch(url, {
-                method: 'POST',
-                body: formData
-                
-            })
-            .catch(() => {console.log("The opposite of success")})
-            }
-        </script>
         <script src="{{ url_for('static', filename='js/themes.js') }}"></script>
     </body>
 </html>

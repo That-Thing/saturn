@@ -852,6 +852,7 @@ def setOwner(board):
 def uploadBanner(board):
     if request.method == 'POST':
         banner = request.files['file']
+        print(request.files)
         mimes = ['image/jpeg', 'image/png', 'image/apng', 'image/webp', 'image/gif'] #allowed mime types for banners. 
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
@@ -871,7 +872,7 @@ def uploadBanner(board):
                 mysql.connection.commit()
                 if logConfig['log-banners'] == 'on':
                     storeLog("bannerUpload", "Banner upload", session['username'], request.remote_addr, time.time(), {'filename': filename}, board)
-                return redirect(url_for('manageBoard', board=board)) #Find a better solution for this. 
+                return redirect(url_for('manageBoard', board=board))
         except Exception as e:
             print(e)
             return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
