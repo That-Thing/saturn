@@ -196,6 +196,16 @@ def storeLog(type, action, user, ip, date, data, board):
         cursor.execute("INSERT INTO logs VALUES(NULL, %s, %s, %s, %s, %s, %s, %s)", (type, action, json.dumps(actionData), user, str(ip), board,date))
         mysql.connection.commit()
 
+def deleteFile(file):
+    try:
+        thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
+        if logConfig['log-media-delete'] == 'on':
+            storeLog("mediaDelete", "Media has been deleted", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(file,'rb').read()).hexdigest()}, post['board'])
+        os.remove(file)
+        os.remove(thumbPath)
+    except:
+        print(f"Could not delete {file}. Skipping...")
+
 #allow files in the media folder to be served
 @app.route('/media/<path:path>')
 def showMedia(path):
@@ -1397,9 +1407,7 @@ def postActions(board):
                 if post['files'] != None: #delete files from disk
                     files = post['files'].split(',')
                     for file in files:
-                        thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
-                        os.remove(file)
-                        os.remove(thumbPath)
+                        deleteFile(file)
                 if post['type'] == 1: #Check if post is a thread and delete all child posts. 
                     cursor.execute("SELECT * FROM posts WHERE thread=%s AND board=%s AND type=2", (int(request.form['post']), board))
                     posts = cursor.fetchall()
@@ -1408,9 +1416,7 @@ def postActions(board):
                         if x['files'] != None:
                             files = files + x['files'].split(',')
                         for file in files:
-                            thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
-                            os.remove(file)
-                            os.remove(thumbPath)
+                            deleteFile(file)
                     cursor.execute("DELETE FROM posts WHERE thread=%s AND board=%s  AND type=2", (int(request.form['post']), board))
                 if logConfig['log-post-delete'] == 'on':
                     if session['group'] <= 3:
@@ -1442,9 +1448,7 @@ def passworddelete(board):
             if post['files'] != None: #delete files from disk
                 files = post['files'].split(',')
                 for file in files:
-                    thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
-                    os.remove(file)
-                    os.remove(thumbPath)
+                    deleteFile(file)
             if post['type'] == 1: #Check if post is a thread and delete all child posts. 
                 cursor.execute("SELECT * FROM posts WHERE thread=%s AND board=%s AND type=2", (post['number'], board))
                 children = cursor.fetchall()
@@ -1453,9 +1457,7 @@ def passworddelete(board):
                     if x['files'] != None:
                         files = files + x['files'].split(',')
                     for file in files:
-                        thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
-                        os.remove(file)
-                        os.remove(thumbPath)
+                        deleteFile(file)
                 cursor.execute("DELETE FROM posts WHERE thread=%s AND board=%s AND type=2", (post['number'], board))
         if logConfig['log-post-delete'] == 'on':
             numbers = []
@@ -1787,9 +1789,7 @@ def latestActions():
                     if post['files'] != None: #delete files from disk
                         files = post['files'].split(',')
                         for file in files:
-                            thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
-                            os.remove(file)
-                            os.remove(thumbPath)
+                            deleteFile(file)
                     cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (number, board))
         if x.startswith("ban-"): #Ban individual poster
             number = requestData[x].split('-')[0]
@@ -1872,11 +1872,7 @@ def latestActions():
             if post['files'] != None: #delete files from disk
                 files = post['files'].split(',')
                 for file in files:
-                    thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
-                    if logConfig['log-media-delete'] == 'on':
-                        storeLog("mediaDelete", "Media has been deleted", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'],'MD5': hashlib.md5(open(file,'rb').read()).hexdigest()}, board)
-                    os.remove(file)
-                    os.remove(thumbPath)
+                    deleteFile(file)
             if logConfig['log-post-delete'] == 'on':
                 storeLog("modPostDelete", "A moderator deleted posts", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread']}, board)
             cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (number, board))
@@ -1942,11 +1938,7 @@ def mediaActions():
                     if post['files'] != None: #delete files from disk
                         files = post['files'].split(',')
                         for file in files:
-                            thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
-                            if logConfig['log-media-delete'] == 'on':
-                                storeLog("mediaDelete", "Media has been deleted", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(file,'rb').read()).hexdigest()}, post['board'])
-                            os.remove(file)
-                            os.remove(thumbPath)
+                            deleteFile(file)
                         filenames = post['filenames'].split(',')
                         del filenames[files.index(currentFile)]
                         ",".join(filenames)
@@ -2008,11 +2000,7 @@ def mediaActions():
                 files = post['files'].split(',')
                 for file in files:
                     if file == currentFile:
-                        thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
-                        if logConfig['log-media-delete'] == 'on':
-                            storeLog("mediaDelete", "Media has been deleted", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(file,'rb').read()).hexdigest()}, post['board'])
-                        os.remove(file)
-                        os.remove(thumbPath)
+                        deleteFile(file)
                 filenames = post['filenames'].split(',')
                 del filenames[files.index(currentFile)]
                 ",".join(filenames)
