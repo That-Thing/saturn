@@ -200,11 +200,20 @@ def deleteFile(file):
     try:
         thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
         if logConfig['log-media-delete'] == 'on':
-            storeLog("mediaDelete", "Media has been deleted", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(file,'rb').read()).hexdigest()}, post['board'])
+            storeLog("mediaDelete", "Media has been deleted", session['username'], request.remote_addr, time.time(), {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(file,'rb').read()).hexdigest()}, post['board'])
         os.remove(file)
         os.remove(thumbPath)
     except:
         print(f"Could not delete {file}. Skipping...")
+
+def logError(error, url):
+    storeLog("error", "An error ocurred", None, request.remote_addr, time.time(), {'error': str(error), 'url': str(url)}, None)
+    print(f'''
+        An error has occurred
+        Time: {time.time()} 
+        Error: {error}
+        Request URL: {url}
+    ''')
 
 #allow files in the media folder to be served
 @app.route('/media/<path:path>')
@@ -515,7 +524,7 @@ def siteSettings():
         else:
             return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     except Exception as e:
-        print(e)
+        logError(e, request.base_url)
         return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 #Save global settings
 @app.route('/saveSettings', methods=['POST'])
@@ -538,8 +547,8 @@ def saveSettings():
             else:
                 return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         except Exception as e:
-            print(e)
-            return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
+            logError(e, request.base_url)
+            return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     else:
         return render_template('error.html', errorMsg=errors['RequestNotPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 @app.route('/saveLogSettings', methods=['POST'])
@@ -559,43 +568,51 @@ def saveLogSettings():
             else:
                 return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         except Exception as e:
-            print(e)
-            return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
+            logError(e, request.base_url)
+            return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     else:
         return render_template('error.html', errorMsg=errors['RequestNotPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 
 #Global Rules page
 @app.route('/rules', methods=['GET'])
 def rules():
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT * FROM rules WHERE type = 0")
-    rules = cursor.fetchall()
-    return render_template('rules.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes, rules=rules, board="Global")
+    try:
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT * FROM rules WHERE type = 0")
+        rules = cursor.fetchall()
+        return render_template('rules.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes, rules=rules, board="Global")
+    except Exception as e:
+        logError(e, request.base_url)
+        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 #Add rule
 @app.route('/addRule', methods=['POST'])
 def addRule():
-    if request.method == 'POST':
-        if request.form['board'] == "NULL":
-            board = None
+    try:
+        if request.method == 'POST':
+            if request.form['board'] == "NULL":
+                board = None
+            else:
+                board = request.form['board']
+            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute("SELECT * FROM boards WHERE uri = %s", [board])
+            currentBoard = cursor.fetchone()
+            if int(session['group']) <= 1 or currentBoard != None: #checks if the board exists or the user has admin+ perms
+                if int(session['group']) <= 1 or currentBoard['owner'] == session['username']: #checks if the user has admin+ perms first
+                    if logConfig['log-rules'] == 'on':
+                        storeLog("addRule", "Rule added", session['username'], request.remote_addr, time.time(), {"board": board, "rule": request.form['newRule']}, None)
+                    cursor.execute("INSERT INTO rules VALUES (NULL, %s, %s, %s)", (request.form['newRule'], request.form['type'], board))
+                    mysql.connection.commit()
+                    if request.form['type'] == "0":
+                        return redirect(url_for("siteSettings"))
+                    else:
+                        return redirect(url_for("manageBoard", board=board))
+            else:
+                return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)        
         else:
-            board = request.form['board']
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute("SELECT * FROM boards WHERE uri = %s", [board])
-        currentBoard = cursor.fetchone()
-        if int(session['group']) <= 1 or currentBoard != None: #checks if the board exists or the user has admin+ perms
-            if int(session['group']) <= 1 or currentBoard['owner'] == session['username']: #checks if the user has admin+ perms first
-                if logConfig['log-rules'] == 'on':
-                    storeLog("addRule", "Rule added", session['username'], request.remote_addr, time.time(), {"board": board, "rule": request.form['newRule']}, None)
-                cursor.execute("INSERT INTO rules VALUES (NULL, %s, %s, %s)", (request.form['newRule'], request.form['type'], board))
-                mysql.connection.commit()
-                if request.form['type'] == "0":
-                    return redirect(url_for("siteSettings"))
-                else:
-                    return redirect(url_for("manageBoard", board=board))
-        else:
-            return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)        
-    else:
-        return render_template('error.html', errorMsg=errors['RequestNotPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+            return render_template('error.html', errorMsg=errors['RequestNotPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+    except Exception as e:
+        logError(e, request.base_url)
+        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 
 #Delete Rule
 #Add checks so you can't delete rules from other boards or global settings by changing the HTML of rules on board management pages. 
@@ -1711,7 +1728,8 @@ def logs():
         id = "id"
     else:
         id = f'"{request.args.get("id", type=str)}"'
-    query = f"SELECT * FROM logs WHERE id={id} AND type={action} AND user={user} AND ip={ip} AND board={board} ORDER BY id desc" #It just has to be done like this
+    query = f"SELECT * FROM logs WHERE id={id} AND type={action} AND user={user} AND ip={ip} AND board={board} ORDER BY id desc"
+    print(query)
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute(query)
     logs = cursor.fetchall()
@@ -1776,11 +1794,7 @@ def latestActions():
                     if post['files'] != None: #delete files from disk
                         files = post['files'].split(',')
                         for file in files:
-                            thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
-                            if logConfig['log-media-delete'] == 'on':
-                                storeLog("mediaDelete", "Media has been deleted", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(file,'rb').read()).hexdigest()}, board)
-                            os.remove(file)
-                            os.remove(thumbPath)
+                            deleteFile(file)
                     cursor.execute("UPDATE posts SET files=NULL, filenames=NULL WHERE number=%s AND board=%s", (number, board))
                     if post['message'] == None or len(post['message']) == 0: #Delete posts that don't have a message if the files are deleted
                         cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (post['number'], post['board']))
@@ -1819,11 +1833,7 @@ def latestActions():
             if post['files'] != None:
                 files = post['files'].split(',')
                 for file in files:
-                    thumbPath = ".".join(file.split('.')[:-1])+"s."+file.split('.')[3]
-                    os.remove(thumbPath)
-                    if logConfig['log-media-delete'] == 'on':
-                        storeLog("mediaDelete", "Media has been deleted", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(file,'rb').read()).hexdigest()}, board)
-                    os.remove(file)
+                    deleteFile(file)
                 cursor.execute("UPDATE posts SET files=NULL, filenames=NULL WHERE number=%s AND board=%s", (number, board))
                 if post['message'] == None or len(post['message']) == 0: #Delete posts that don't have a message if the files are deleted
                     cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (post['number'], post['board']))
