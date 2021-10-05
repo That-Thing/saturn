@@ -1709,15 +1709,15 @@ def unbanUser(user):
 @app.route("/logs", methods=['GET'])
 def logs():
     if not request.args.get('board', type=str): #Board filter arguments
-        board = "board OR board=NULL"
+        board = "board OR board IS NULL"
     else:
         board = f'"{request.args.get("board", type=str)}"'
     if not request.args.get('user', type=str): #user filter arguments
-        user = "user OR user=NULL"
+        user = "user OR user IS NULL"
     else:
         user = f'"{request.args.get("user", type=str)}"'
     if not request.args.get('ip', type=str): #IP filter arguments
-        ip = "ip OR ip=NULL"
+        ip = "ip OR ip IS NULL"
     else:
         ip = f'"{request.args.get("ip", type=str)}"'
     if not request.args.get("action", type=str): #type of action
@@ -1728,7 +1728,7 @@ def logs():
         id = "id"
     else:
         id = f'"{request.args.get("id", type=str)}"'
-    query = f"SELECT * FROM logs WHERE id={id} AND type={action} AND user={user} AND ip={ip} AND board={board} ORDER BY id desc"
+    query = f"SELECT * FROM logs WHERE id={id} AND (type={action}) AND (user={user}) AND (ip={ip}) AND (board={board}) ORDER BY id desc"
     print(query)
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute(query)
