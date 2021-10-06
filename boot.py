@@ -460,6 +460,14 @@ def simplifyTime(minutes):
             minutes = minutes - floor*time[unit]
     return result
 
+@app.template_filter("futureTime")
+def futureTime(start, minutes):
+    if minutes == None:
+        return "Never"
+    future = datetime.now()+timedelta(minutes = minutes)
+    return future.strftime("%d-%m-%Y %H:%M")
+
+
 @app.template_filter("loadJSON")
 def loadJSON(string):
     return json.loads(string)

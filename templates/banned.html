@@ -21,7 +21,8 @@
                     <h1 class="box-header center">Banned</h1>
                     <div class="center content">
                         You are banned for <span class="banned-user">{{banned['length'] | simplifyTime}}</span><br>
-                        Reason: {{banned['reason']}}
+                        Reason: {{banned['reason']}}<br>
+                        Unban date: {{banned['date'] |futureTime(banned['length'])}}
                     </div>
                 {%endif%}
             </div>
