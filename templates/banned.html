@@ -1,0 +1,31 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>{%if banned==None%}Not Banned{%else%}Banned{%endif%}</title>
+        <link href="{{ url_for('static', filename='css/global.css') }}" type="text/css" rel="stylesheet">
+        <link rel="shortcut icon" type="image/png" href="/{{data['faviconUrl']}}"/>
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+    </head>
+    <body class="{{currentTheme}}">
+        <nav>
+            {% include 'nav.html' %}
+        </nav>
+        <div class="view-content">
+            <div class="box box-readable" id="ban-box">
+                {%if banned == None%}
+                    <h1 class="box-header center">You are not banned</h1>
+                    <div class="center content">
+                        You are not currently banned from posting on {{data['siteName']}}
+                    </div>
+                {%else%}
+                    <h1 class="box-header center">Banned</h1>
+                    <div class="center content">
+                        You are banned for <span class="banned-user">{{banned['length'] | simplifyTime}}</span><br>
+                        Reason: {{banned['reason']}}
+                    </div>
+                {%endif%}
+            </div>
+        </div>
+        <script src="{{ url_for('static', filename='js/themes.js') }}"></script>
+    </body>
+</html>

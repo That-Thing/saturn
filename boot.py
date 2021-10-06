@@ -2025,5 +2025,13 @@ def mediaActions():
         mysql.connection.commit() 
     return redirect(url_for('media'))
 
+
+@app.route("/banned", methods=["GET"])
+def banned():
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute(f"SELECT * FROM bans WHERE ip='{request.remote_addr}'")
+    banned = cursor.fetchone()
+    return render_template('banned.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes, banned=banned)
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=configData["port"])

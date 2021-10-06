@@ -406,7 +406,7 @@ p {
     margin-top: 5%;
     width: 80%;
 }
-#help-box .content {
+#help-box .content, #ban-box .content {
     padding: 1em;
 }
 #error-box {
