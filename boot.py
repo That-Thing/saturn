@@ -2039,7 +2039,10 @@ def banned():
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute(f"SELECT * FROM bans WHERE ip='{request.remote_addr}'")
     banned = cursor.fetchone()
-    return render_template('banned.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes, banned=banned)
+    image=None
+    if len(os.listdir("static/images/banned")) > 0:
+        image = os.path.join("static/images/banned", random.choice(os.listdir("static/images/banned")))
+    return render_template('banned.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes, banned=banned, image=image)
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=configData["port"])
