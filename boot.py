@@ -479,7 +479,8 @@ def getFileHash(file):
 
 @app.template_filter("hash")
 def hash(text):
-    return returnHash(text)
+    text = text+salt
+    return hashlib.sha256(text.encode("UTF-8")).hexdigest()
 
 
 #Make local timestamps
