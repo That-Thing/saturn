@@ -20,7 +20,7 @@
                     {%for ban in bans%}
                         <div class="ban">
                             <span>Ban ID: {{ban['id']}}</span>
-                            <span>IP: {%if session['group'] < 3%}{{ban['ip']}}{%else%}{{ban['ip'] | hash}}{%endif%}</span>
+                            <span>IP: {%if session['group'] <  data['cleartextIp']%}{{ban['ip']}}{%else%}{{ban['ip'] | hash}}{%endif%}</span>
                             <span>Reason: {{ban['reason']}}</span>
                             <span>Duration: {{ban['length'] | simplifyTime}}</span>
                             <span>Date: {{ban['date'] | ut}}</span>

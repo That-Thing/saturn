@@ -56,6 +56,14 @@
                         </select>
                     </label>
                     <label>
+                        Minimum permission level to see cleartext IPs:
+                        <select name="cleartextIp" id="cleartextIp">
+                            {% for group in groups %}
+                                <option value="{{group['id']}}"  {% if data['cleartextIp'] == group['id'] | string %}selected{% endif %}>{{group['name']}}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                    <label>
                         Allow registrations:
                         <select name="enableRegistration" id="enableRegistration">
                             {% if data['enableRegistration'] == 'on' %}
