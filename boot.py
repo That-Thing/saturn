@@ -1784,7 +1784,7 @@ def latestActions():
                     if 'multiple-ban-length' in request.form: #Checks if the length is given
                         if len(request.form['multiple-ban-length']) > 0:
                             length = getMinutes(request.form['multiple-ban-length'])
-                    cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s)", (reason, length, str(post['ip']), currentTime))
+                    cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s, %s, %s)", (reason, length, str(post['ip']), currentTime, post['number'], post['board']))
                     if logConfig['log-user-ban'] == 'on':
                         storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {'ip':str(post['ip'])  , 'reason': reason, 'length':length}, None)
             if 'multiple-hash-ban-media' in request.form: #Checks if media needs to be banned. STILL NEED TO CHECK AND CREATE DB TABLE!!
@@ -1828,7 +1828,7 @@ def latestActions():
             if f"banduration-{number}-{board}" in request.form: #Check if length of ban was given
                 if len(request.form[f"banduration-{number}-{board}"]) > 0:
                     length = getMinutes(request.form[f"banduration-{number}-{board}"])
-            cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s)", (reason, length, str(post['ip']), currentTime))
+            cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s, %s, %s)", (reason, length, str(post['ip']), currentTime, post['number'], post['board']))
             if logConfig['log-user-ban'] == 'on':
                 storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {'ip':str(post['ip'])  , 'reason': reason, 'length':length}, None)
         if x.startswith("deletemedia-"): #Remove media from post
@@ -1938,7 +1938,7 @@ def mediaActions():
                     if 'multiple-ban-length' in request.form: #Checks if the length is given
                         if len(request.form['multiple-ban-length']) > 0:
                             length = getMinutes(request.form['multiple-ban-length'])
-                    cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s)", (reason, length, str(post['ip']), currentTime))
+                    cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s, %s, %s)", (reason, length, str(post['ip']), currentTime, post['number'], post['board']))
                     if logConfig['log-user-ban'] == 'on':
                         storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {'ip':str(post['ip'])  , 'reason': reason, 'length':length}, None)
             if 'multiple-hash-ban-media' in request.form: #Checks if media needs to be banned. STILL NEED TO CHECK AND CREATE DB TABLE!!
@@ -1994,7 +1994,7 @@ def mediaActions():
             if f"banduration-{currentFile}" in request.form: #Check if length of ban was given
                 if len(request.form[f"banduration-{currentFile}"]) > 0:
                     length = getMinutes(request.form[f"banduration-{currentFile}"])
-            cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s)", (reason, length, str(post['ip']), currentTime))
+            cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s, %s, %s)", (reason, length, str(post['ip']), currentTime, post['number'], post['board']))
             if logConfig['log-user-ban'] == 'on':
                 storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {'ip':str(post['ip'])  , 'reason': reason, 'length':length}, None)
         if x.startswith("hashban-"):
@@ -2043,6 +2043,15 @@ def banned():
     if len(os.listdir("static/images/banned")) > 0:
         image = os.path.join("static/images/banned", random.choice(os.listdir("static/images/banned")))
     return render_template('banned.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes, banned=banned, image=image)
+
+@app.route("/bans", methods=['GET'])
+def bans():
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT * FROM bans WHERE ip IS NOT NULL")
+    bans=cursor.fetchall()
+    return render_template('bans.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes, bans=bans)
+
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=configData["port"])

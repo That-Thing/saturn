@@ -56,6 +56,7 @@
                 {% if session['group'] | int<=1%}
                     <a href="{{url_for('users')}}"><i class="fas fa-users-cog text-icon"></i>Users</a>
                 {% endif %}
+                <a href="{{url_for('bans')}}"><i class="fas fa-gavel text-icon"></i>Bans</a>
             </div>
         {% endif %}
         <script src="{{ url_for('static', filename='js/themes.js') }}"></script>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{data['siteName']}} - Bans</title>
+        <meta charset="UTF-8">
+        <link href="{{ url_for('static', filename='css/global.css') }}" type="text/css" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/markdown.css') }}" type="text/css" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/help.css') }}" type="text/css" rel="stylesheet">
+        <link rel="shortcut icon" type="image/png" href="/{{data['faviconUrl']}}"/>
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+    </head>
+    <body class="{{currentTheme}}">
+        <nav>
+            {% include 'nav.html' %}
+        </nav>
+        <div class="view-content" id="rules">
+            <div class="box box-readable" id="">
+                <h2 class="box-header center">Bans</h2>
+                <div id="ban-container">
+                    {%for ban in bans%}
+                        <div class="ban">
+                            <span>Ban ID: {{ban['id']}}</span>
+                            <span>IP: {%if session['group'] < 3%}{{ban['ip']}}{%else%}{{ban['ip'] | hash}}{%endif%}</span>
+                            <span>Reason: {{ban['reason']}}</span>
+                            <span>Duration: {{ban['length'] | simplifyTime}}</span>
+                            <span>Date: {{ban['date'] | ut}}</span>
+                            <span>Post: No.{{ban['post']}} on /{{ban['board']}}/</span>
+                        </div>
+                    {%endfor%}
+                </div>
+            </div>
+        </div>
+        <script src="{{ url_for('static', filename='js/themes.js') }}"></script>
+    </body>
+</html>
