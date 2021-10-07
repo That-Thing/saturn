@@ -477,6 +477,10 @@ def loadJSON(string):
 def getFileHash(file):
     return hashlib.md5(open(file,'rb').read()).hexdigest()
 
+@app.template_filter("hash")
+def hash(text):
+    return returnHash(text)
+
 
 #Make local timestamps
 #add relative times
@@ -673,8 +677,7 @@ def updatePassword():
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
             cursor.execute("SELECT * FROM accounts WHERE username=%s", [session['username']])
             accountData = cursor.fetchone()
-            saltedPass = request.form['currentPassword'] + salt
-            passwordHash = hashlib.sha512(saltedPass.encode("UTF-8")).hexdigest()
+            passwordHash = returnHash(request.form['currentPassword'])
             newPassword = request.form['newPassword']
             confirmPassword = request.form['confirmPassword']
             if passwordHash == accountData['password']:
@@ -999,7 +1002,6 @@ def register():
                 # Account doesnt exists and the form data is valid, now insert new account into accounts table
                 password = request.form['password']
                 password = returnHash(password)
-                print(password)
                 cursor.execute('INSERT INTO accounts VALUES (NULL, %s, %s, %s, 4, %s, %s, 0)', (username, password, email, time.time(), str(request.remote_addr)))
                 mysql.connection.commit()
                 msg = 'You have successfully registered!'
