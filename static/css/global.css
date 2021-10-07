@@ -562,3 +562,6 @@ p {
     font-size: 80%;
     color: var(--small-text);
 }
+#ban-image {
+    max-width: 50%;
+}
