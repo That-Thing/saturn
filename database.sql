@@ -32,7 +32,7 @@ CREATE TABLE `accounts` (
   `ip` varchar(50) DEFAULT NULL COMMENT 'Registration IP',
   `banned` tinyint(1) NOT NULL DEFAULT '0' COMMENT '1 if banned, 0 if not. ',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=92 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=93 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -63,8 +63,10 @@ CREATE TABLE `bans` (
   `user` tinytext COMMENT 'Username of banned person',
   `ip` text,
   `date` int DEFAULT NULL,
+  `post` text,
+  `board` tinytext,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Banned users and IPs ';
+) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Banned users and IPs ';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -135,7 +137,7 @@ CREATE TABLE `logs` (
   `date` int NOT NULL COMMENT 'Unix timestamp',
   PRIMARY KEY (`id`),
   CONSTRAINT `logs_chk_1` CHECK (json_valid(`actionData`))
-) ENGINE=InnoDB AUTO_INCREMENT=205 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Logs for user actions. ';
+) ENGINE=InnoDB AUTO_INCREMENT=298 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Logs for user actions. ';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -196,7 +198,7 @@ CREATE TABLE `rules` (
   `type` int NOT NULL COMMENT '0 for global 1 for board',
   `board` text,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -221,4 +223,4 @@ CREATE TABLE `server` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-09-25 17:33:52
+-- Dump completed on 2021-10-07 14:47:11

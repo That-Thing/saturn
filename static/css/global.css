@@ -565,3 +565,6 @@ p {
 #ban-image {
     max-width: 50%;
 }
+.ban {
+    display: grid;
+}

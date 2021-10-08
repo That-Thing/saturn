@@ -532,10 +532,9 @@ def siteSettings():
     cursor.execute("SELECT * FROM rules WHERE type = 0")
     rules = cursor.fetchall()
     try:
-        if int(session['group']) <= 1:
-            return render_template('siteSettings.html', data=globalSettings, logData=reloadLogSettings(), currentTheme=request.cookies.get('theme'), themes=themes, groups=groups, rules=rules)
-        else:
+        if int(session['group']) > 1:
             return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        return render_template('siteSettings.html', data=globalSettings, logData=reloadLogSettings(), currentTheme=request.cookies.get('theme'), themes=themes, groups=groups, rules=rules)
     except Exception as e:
         logError(e, request.base_url)
         return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
@@ -544,21 +543,20 @@ def siteSettings():
 def saveSettings():
     if request.method == 'POST':
         try:
-            if int(session['group']) <= 1:
-                result = request.form.to_dict()
-                for x in result:
-                    if result[x].isnumeric() == True:
-                        result[x] = int(result[x])
-                if logConfig['log-global-settings'] == 'on': #Checks if logs are enabled
-                    difference = DeepDiff(globalSettings, result, ignore_order=True)
-                    if len(difference) > 0:
-                        difference = difference.to_json()
-                        storeLog("globalSettingsUpdate", "Global Settings Updated", session['username'], request.remote_addr, time.time(), {'changes': difference}, None)
-                with open('./config/config.json', 'w') as f:
-                    json.dump(result, f, indent=4)
-                return redirect(url_for('siteSettings'))
-            else:
+            if int(session['group']) > 1:
                 return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+            result = request.form.to_dict()
+            for x in result:
+                if result[x].isnumeric() == True:
+                    result[x] = int(result[x])
+            if logConfig['log-global-settings'] == 'on': #Checks if logs are enabled
+                difference = DeepDiff(globalSettings, result, ignore_order=True)
+                if len(difference) > 0:
+                    difference = difference.to_json()
+                    storeLog("globalSettingsUpdate", "Global Settings Updated", session['username'], request.remote_addr, time.time(), {'changes': difference}, None)
+            with open('./config/config.json', 'w') as f:
+                json.dump(result, f, indent=4)
+            return redirect(url_for('siteSettings'))
         except Exception as e:
             logError(e, request.base_url)
             return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
@@ -568,18 +566,18 @@ def saveSettings():
 def saveLogSettings():
     if request.method == 'POST':
         try:
-            if int(session['group']) <= 1:
-                result = request.form.to_dict()
-                if logConfig['log-log-settings'] == 'on': #Checks if logs are enabled
-                    difference = DeepDiff(logConfig, result, ignore_order=True)
-                    if len(difference) > 0:
-                        difference = difference.to_json()
-                        storeLog("globalSettingsUpdate", "Logging Settings Updated", session['username'], request.remote_addr, time.time(), {'changes': difference}, None)
-                with open('./config/logs.json', 'w') as f:
-                    json.dump(result, f, indent=4)
-                return redirect(url_for('siteSettings'))
-            else:
+            if int(session['group']) > 1:
                 return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+            result = request.form.to_dict()
+            if logConfig['log-log-settings'] == 'on': #Checks if logs are enabled
+                difference = DeepDiff(logConfig, result, ignore_order=True)
+                if len(difference) > 0:
+                    difference = difference.to_json()
+                    storeLog("globalSettingsUpdate", "Logging Settings Updated", session['username'], request.remote_addr, time.time(), {'changes': difference}, None)
+            with open('./config/logs.json', 'w') as f:
+                json.dump(result, f, indent=4)
+            return redirect(url_for('siteSettings'))
+                
         except Exception as e:
             logError(e, request.base_url)
             return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
@@ -730,14 +728,13 @@ def updateEmail():
 @app.route('/boards/manage', methods=['GET'])
 def boardManagement():
     try:
-        if int(session['group']) <= 1:
-            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            cursor.execute("SELECT * FROM boards")
-            sqlData = cursor.fetchall()
-            msg=""
-            return render_template('boardManagement.html', data=globalSettings, currentTheme=request.cookies.get('theme'), sqlData=sqlData, msg="", themes=themes)
-        else:
+        if int(session['group']) > 1:
             return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT * FROM boards")
+        sqlData = cursor.fetchall()
+        msg=""
+        return render_template('boardManagement.html', data=globalSettings, currentTheme=request.cookies.get('theme'), sqlData=sqlData, msg="", themes=themes)
     except Exception as e:
         print(e)
         return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
@@ -1623,33 +1620,32 @@ def deleteUser(user):
 def createUser():
     if request.method == 'POST':
         try:
-            if int(session['group']) <= 1: 
-                if 'username' and 'password' and 'confirm-password' and 'group' not in request.form:
-                    return render_template('error.html', errorMsg=errors['unfilledFields'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-                if request.form['password'] != request.form['confirm-password']:
-                    return render_template('error.html', errorMsg=errors['passwordsDoNotMatch'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-                if int(request.form['group']) <= int(session['group']):
-                    return "Insufficient permissions"
-                if bool(re.match(r'^[a-zA-Z0-9_.-]*$', request.form['username'])) == False:
-                    return render_template('error.html', errorMsg=errors['usernameRegexFail'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-                cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-                cursor.execute("SELECT * FROM accounts WHERE username=%s", [request.form['username']])
-                if cursor.fetchone() != None:
-                    return render_template('error.html', errorMsg=errors['accountExists'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-                if 'email' in request.form and len(request.form['email']) > 0:
-                    if bool(re.match(r'[^@]+@[^@]+\.[^@]+', request.form['email'])) == False:
-                        return render_template('error.html', errorMsg=errors['emailRegexFail'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-                    email = request.form['email']
-                else:
-                    email = None
-                creationTime = time.time()
-                cursor.execute("INSERT INTO accounts VALUES (NULL, %s, %s, %s, %s, %s, %s, 0)", (request.form['username'], returnHash(request.form['password']), email, request.form['group'], creationTime, str(request.remote_addr)))
-                if logConfig['log-mod-user-update'] == 'on':
-                    storeLog("modUserCreate", "A moderator created a user", session['username'], request.remote_addr, creationTime, {'user':request.form['username'], "group":request.form['group'], "email":email}, None)
-                mysql.connection.commit()                
-                return redirect(url_for("manageUser", user=request.form['username']))
+            if int(session['group']) > 1:
+                return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
+            if 'username' and 'password' and 'confirm-password' and 'group' not in request.form:
+                return render_template('error.html', errorMsg=errors['unfilledFields'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+            if request.form['password'] != request.form['confirm-password']:
+                return render_template('error.html', errorMsg=errors['passwordsDoNotMatch'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+            if int(request.form['group']) <= int(session['group']):
+                return "Insufficient permissions"
+            if bool(re.match(r'^[a-zA-Z0-9_.-]*$', request.form['username'])) == False:
+                return render_template('error.html', errorMsg=errors['usernameRegexFail'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute("SELECT * FROM accounts WHERE username=%s", [request.form['username']])
+            if cursor.fetchone() != None:
+                return render_template('error.html', errorMsg=errors['accountExists'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+            if 'email' in request.form and len(request.form['email']) > 0:
+                if bool(re.match(r'[^@]+@[^@]+\.[^@]+', request.form['email'])) == False:
+                    return render_template('error.html', errorMsg=errors['emailRegexFail'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                email = request.form['email']
             else:
-                return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                email = None
+            creationTime = time.time()
+            cursor.execute("INSERT INTO accounts VALUES (NULL, %s, %s, %s, %s, %s, %s, 0)", (request.form['username'], returnHash(request.form['password']), email, request.form['group'], creationTime, str(request.remote_addr)))
+            if logConfig['log-mod-user-update'] == 'on':
+                storeLog("modUserCreate", "A moderator created a user", session['username'], request.remote_addr, creationTime, {'user':request.form['username'], "group":request.form['group'], "email":email}, None)
+            mysql.connection.commit()                
+            return redirect(url_for("manageUser", user=request.form['username']))
         except Exception as e:
             print(e)
             return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
@@ -2049,6 +2045,8 @@ def banned():
 
 @app.route("/bans", methods=['GET'])
 def bans():
+    if int(session['group']) > 2:
+        return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("SELECT * FROM bans WHERE ip IS NOT NULL")
     bans=cursor.fetchall()
