@@ -459,6 +459,21 @@ def simplifyTime(minutes):
             result += f"{str(floor)} {name} "
             minutes = minutes - floor*time[unit]
     return result
+#Return time in 1y2d3m4h format
+@app.template_filter("complicateTime")
+def complicateTime(minutes): 
+    time = { #reversed
+        525600:'y',
+        43800:'m',
+        1440:'d',
+        60:'h'     
+    }
+    text=''
+    for x in time:
+        if minutes >= x:
+            text += str(math.floor(minutes/x))+time[x]
+            minutes-=x*math.floor(minutes/x)
+    return text
 
 @app.template_filter("futureTime")
 def futureTime(start, minutes):

@@ -566,5 +566,14 @@ p {
     max-width: 50%;
 }
 .ban {
+    margin: 5px;
+    display: flex;
+}
+.ban-info {
     display: grid;
+}
+.ban-actions {
+    text-align: left;
+    margin: 5px;
+    margin-left: 10px;
 }
