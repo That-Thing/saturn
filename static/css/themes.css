@@ -1,37 +1,127 @@
-/*Defualt theme*/
-:root {
-    --text-color: #ACACAC; /*Text color*/
-    --page-background: #1e2327; /*Background color for the entire page*/
-    --background-2: #2a3137; /*Background color for posts, boxes, etc*/
-    --background-3: #131618; /*Background color for lists, floating boxes, box headers*/
-    --nav-color: #131618e0; /*background color of nav bar*/
-    --border-color: #353535; /*color for things such as button borders */
-    --border-2: #464f57; /*Alternative border color for things such as thread/reply boxes*/
-    --border-radius: 5px; /*Border radius for things like boxes, posts, etc.*/
+/*
+##########
+#Tomorrow#
+##########
+*/
+
+:root{
+    --text-color: #c5c8c6; /*Text color*/
+    --page-background: #1d1f21; /*Background color for the entire page*/
+    --background-2: #282a2e; /*Background color for posts, boxes, etc*/
+    --background-3: rgb(40, 42, 46); /*Background color for lists, floating boxes, box headers*/
+    --nav-color: rgb(40, 42, 46); /*background color of nav bar*/
+    --border-color: #282a2e; /*color for things such as button borders */
+    --border-2: #111; /*Alternative border*/
+    --alternating-color: #1d1f21; /*Alternating colors on things like rules and board lists*/
+    --border-radius: 0px; /*Border radius for things like boxes, posts, etc.*/
     --font-family: arial,helvetica,sans-serif; /*Default font*/
-    --link-color: #81be84; /*Links*/
-    --link-hover: #5b8c5d; /*Link hover color*/
-    --input: #32393f; /*Background for input fields*/
-    --hr: #2f3840; /*divider tags*/
+    --link-color: #81a2be; /*Links*/
+    --link-hover: #5f89ac; /*Link hover color*/
+    --input: #282a2e; /*Background for input fields*/
+    --hr: #111; /*divider tags*/
     --small-text: #767676; /*color of small text*/
-    --button-background: #2f373d ;
-    --button-hover: #454e56; /*Hover color of buttons*/
-    --button-border: #2f373d; /*border for buttons*/
+    --button-background: #d0d0d0;
+    --button-hover: #dcdcdc; /*Hover color of buttons*/
+    --button-border: #666666; /*border for buttons*/
     --post-subject: #b294bb; /*Color of the post subject text*/
-    --post-name: #81be84; /*Color of the name attatched to a post*/
-    --post-shadow: 3px 5px 10px rgb(0 0 0 / 33%); /*Shadow behind objects like posts*/
-    --marked-post: #1d2226; /*Background of marked post*/
-    --marked-post-border: 1px #2a313742 solid; /*Border of marked post*/
+    --post-name: #c5c8c6; /*Color of the name attatched to a post*/
+    --post-shadow: none; /*Shadow behind objects like posts*/
+    --header-color: #1d1f21;
+    --marked-post: #1d1d21; /*Background of marked post*/
+    --marked-post-border: 1px solid #111; /*Border of marked post*/
     --banned-user: red; /*Banned user style*/
 }
+nav {
+    font-size: 70%;
+    border-bottom: 1px solid #111;
+}
+.box-header {
+    background-color: var(--header-color);
+}
+.author-label {
+    background-color: var(--input);
+    border: 1px solid #111;
+}
+input, textarea, select, .settings-category input {
+    color: #7d7d7d;
+    border: 1px solid #111;
+}
+.btn {
+    background: linear-gradient(to bottom, #F8F8F8, #DCDCDC) no-repeat!important;
+    border: 1px solid #BBB!important;
+    border-radius: 2px;
+    color: black!important;
+}
+.btn:active {
+    background: linear-gradient(to bottom, #dcdcdc, #b8b8b8) no-repeat!important;   
+}
+.btn:hover {
+    background: linear-gradient(to bottom, #eaeaea, #c1c1c1) no-repeat!important; 
+}
+.dropdown-content {
+    border: 1px solid #111;
+}
+#board-info h1, #board-info h4 {
+    font-weight: normal;
+    text-shadow: 1px 1px 1px rgb(167 170 168 / 60%);
+}
+/*Stuff for the login/register page*/
+.login, .register{
+    border: 1px solid #111;
+}
+.login h1, .register h1 {
+    background-color: var(--header-color);
+    margin-top: 0;
+}
+.login form label, .register form label {
+    background-color: var(--header-color);
+}
+.login form input, .register form input {
+    color: var(--text-color);
+    border: 1px solid #111;
+}
+.login form input[type="submit"], .register form input[type="submit"] {
+    background-color: var(--button-border);
+}
+.login form input[type="submit"]:hover, .register form input[type="submit"]:hover {
+    background-color: var(--input);
+    transition: background-color 0.2s;
+}
+#thread-list hr, #board-message hr {
+    border-color: #282a2e;
+}
+#boardsDiv {
+    background-color: var(--page-background);
+}
+.rule-list {
+    background-color: var(--page-background);
+}
+.board-entry {
+    border-top: 1px solid #111;
+}
+.floating-menu-header {
+    border-bottom: 1px solid #111;
+}
+.dropdown-content hr {
+    border-color: #111;
+}
+.dropdown-submit {
+    border: none;
+}
 
+#box-user-list {
+    background-color: var(--page-background);
+}
+.manage-user {
+    border-top: 1px solid #111;
+}
 
 /*
-##########################
-#                        # 
-#  Add custom CSS below  #
-#                        # 
-##########################  
+#############################
+#                           # 
+#  Add custom themes below  #
+#                           # 
+#############################
 */
 
 
@@ -46,10 +136,11 @@
     --text-color: #800000; /*Text color*/
     --page-background: #ffe url(../images/fade.png) top center repeat-x; /*Background color for the entire page*/
     --background-2: #f0e0d6; /*Background color for posts, boxes, etc*/
-    --background-3: rgba(240,224,214,0.98); /*Background color for lists, floating boxes, box headers*/
+    --background-3: white; /*Background color for lists, floating boxes, box headers*/
     --nav-color: rgba(240,224,214,0.98); /*background color of nav bar*/
     --border-color: #d9bfb7; /*color for things such as button borders */
     --border-2: var(--border-color); /*Alternative border*/
+    --alternating-color: rgba(240,224,214,0.98); /*Alternating colors on things like rules and board lists*/
     --border-radius: 0px; /*Border radius for things like boxes, posts, etc.*/
     --font-family: arial,helvetica,sans-serif; /*Default font*/
     --link-color: #0000EE; /*Links*/
@@ -141,9 +232,6 @@ body.theme-yotsuba {
 .theme-yotsuba #board-list-header {
     background-color: var(--header-color);
 }
-.theme-yotsuba #boardsDiv .board-entry:nth-child(odd), .theme-yotsuba .rule-list>li:nth-child(odd), .theme-yotsuba #box-user-list .manage-user:nth-child(even), .theme-yotsuba .log:nth-child(even) {
-    background-color: white;
-}
 .theme-yotsuba .dropdown-submit {
     border: none;
 }
@@ -160,10 +248,11 @@ body.theme-yotsuba {
     --text-color: black; /*Text color*/
     --page-background: #eef2ff url(../images/fade-blue.png) top center repeat-x; /*Background color for the entire page*/
     --background-2: #d6daf0; /*Background color for posts, boxes, etc*/
-    --background-3: rgba(214,218,240,0.98); /*Background color for lists, floating boxes, box headers*/
+    --background-3: white; /*Background color for lists, floating boxes, box headers*/
     --nav-color: rgba(214,218,240,0.98); /*background color of nav bar*/
     --border-color: #b7c5d9; /*color for things such as button borders */
     --border-2: var(--border-color); /*Alternative border*/
+    --alternating-color: rgba(214,218,240,0.98); /*Alternating colors on things like rules and board lists*/
     --border-radius: 0px; /*Border radius for things like boxes, posts, etc.*/
     --font-family: arial,helvetica,sans-serif; /*Default font*/
     --link-color: #34345c; /*Links*/
@@ -260,144 +349,8 @@ body.theme-yotsuba-b {
 .theme-yotsuba-b #board-list-header {
     background-color: var(--header-color);
 }
-.theme-yotsuba-b #boardsDiv .board-entry:nth-child(odd), .theme-yotsuba-b #box-user-list .manage-user:nth-child(even), .theme-yotsuba-b .rule-list>li:nth-child(odd), .theme-yotsuba-b .log:nth-child(even) {
-    background-color: white;
-}
 .theme-yotsuba-b .dropdown-submit {
     border: none;
-}
-
-
-
-
-/*
-##########
-#Tomorrow#
-##########
-*/
-
-.theme-tomorrow {
-    --text-color: #c5c8c6; /*Text color*/
-    --page-background: #1d1f21; /*Background color for the entire page*/
-    --background-2: #282a2e; /*Background color for posts, boxes, etc*/
-    --background-3: rgb(40, 42, 46); /*Background color for lists, floating boxes, box headers*/
-    --nav-color: rgb(40, 42, 46); /*background color of nav bar*/
-    --border-color: #282a2e; /*color for things such as button borders */
-    --border-2: #111; /*Alternative border*/
-    --border-radius: 0px; /*Border radius for things like boxes, posts, etc.*/
-    --font-family: arial,helvetica,sans-serif; /*Default font*/
-    --link-color: #81a2be; /*Links*/
-    --link-hover: #5f89ac; /*Link hover color*/
-    --input: #282a2e; /*Background for input fields*/
-    --hr: #111; /*divider tags*/
-    --small-text: #767676; /*color of small text*/
-    --button-background: #d0d0d0;
-    --button-hover: #dcdcdc; /*Hover color of buttons*/
-    --button-border: #666666; /*border for buttons*/
-    --post-subject: #b294bb; /*Color of the post subject text*/
-    --post-name: #c5c8c6; /*Color of the name attatched to a post*/
-    --post-shadow: none; /*Shadow behind objects like posts*/
-    --header-color: #1d1f21;
-    --marked-post: #1d1d21; /*Background of marked post*/
-    --marked-post-border: 1px solid #111; /*Border of marked post*/
-}
-body.theme-tomorrow {
-    -webkit-animation: none;
-    background-size: auto;
-    background: var(--page-background);
-}
-.theme-tomorrow nav {
-    font-size: 70%;
-    border-bottom: 1px solid #111;
-}
-.theme-tomorrow .box {
-    border: 1px solid #111;
-}
-.theme-tomorrow .box-header {
-    background-color: var(--header-color);
-}
-.theme-tomorrow .author-label {
-    background-color: var(--input);
-    border: 1px solid #111;
-}
-.theme-tomorrow input, .theme-tomorrow textarea, .theme-tomorrow select, .theme-tomorrow .settings-category input {
-    color: #7d7d7d;
-    border: 1px solid #111;
-}
-.theme-tomorrow .btn {
-    background: linear-gradient(to bottom, #F8F8F8, #DCDCDC) no-repeat!important;
-    border: 1px solid #BBB!important;
-    border-radius: 2px;
-    color: black!important;
-}
-.theme-tomorrow .btn:active {
-    background: linear-gradient(to bottom, #dcdcdc, #b8b8b8) no-repeat!important;   
-}
-.theme-tomorrow .btn:hover {
-    background: linear-gradient(to bottom, #eaeaea, #c1c1c1) no-repeat!important; 
-}
-.theme-tomorrow .dropdown-content {
-    border: 1px solid #111;
-}
-.theme-tomorrow #board-info h1, .theme-tomorrow #board-info h4 {
-    font-weight: normal;
-    text-shadow: 1px 1px 1px rgb(167 170 168 / 60%);
-}
-/*Stuff for the login/register page*/
-.theme-tomorrow .login, .theme-tomorrow .register{
-    border: 1px solid #111;
-}
-.theme-tomorrow .login h1, .theme-tomorrow .register h1 {
-    background-color: var(--header-color);
-    margin-top: 0;
-}
-.theme-tomorrow .login form label, .theme-tomorrow .register form label {
-    background-color: var(--header-color);
-}
-.theme-tomorrow .login form input, .theme-tomorrow .register form input {
-    color: var(--text-color);
-    border: 1px solid #111;
-}
-.theme-tomorrow .login form input[type="submit"], .theme-tomorrow .register form input[type="submit"] {
-    background-color: var(--button-border);
-}
-.theme-tomorrow .login form input[type="submit"]:hover, .theme-tomorrow .register form input[type="submit"]:hover {
-    background-color: var(--input);
-    transition: background-color 0.2s;
-}
-.theme-tomorrow #thread-list hr, .theme-tomorrow #board-message hr {
-    border-color: #282a2e;
-}
-.theme-tomorrow #board-list-header {
-    background-color: var(--page-background);
-}
-.theme-tomorrow #boardsDiv {
-    background-color: var(--page-background);
-}
-.theme-tomorrow .rule-list {
-    background-color: var(--page-background);
-}
-.theme-tomorrow .rule-list>li:nth-child(odd), .theme-tomorrow #box-user-list .manage-user:nth-child(even), .theme-tomorrow #boardsDiv .board-entry:nth-child(odd), .theme-tomorrow .log:nth-child(even){
-    background-color: rgba(255,255,255,.1);
-}
-.theme-tomorrow .board-entry {
-    border-top: 1px solid #111;
-}
-.theme-tomorrow .floating-menu-header {
-    border-bottom: 1px solid #111;
-}
-.theme-tomorrow .dropdown-content hr {
-    border-color: #111;
-}
-.theme-tomorrow .dropdown-submit {
-    border: none;
-}
-
-.theme-tomorrow #box-user-list {
-    background-color: var(--page-background);
-}
-.theme-tomorrow .manage-user {
-    border-top: 1px solid #111;
 }
 
 
@@ -411,10 +364,11 @@ body.theme-tomorrow {
     --text-color: #333; /*Text color*/
     --page-background: #eee; /*Background color for the entire page*/
     --background-2: #ddd; /*Background color for posts, boxes, etc*/
-    --background-3: rgba(221,221,221); /*Background color for lists, floating boxes, box headers*/
+    --background-3: #eee; /*Background color for lists, floating boxes, box headers*/
     --nav-color: rgba(221,221,221); /*background color of nav bar*/
     --border-color: #ccc; /*color for things such as button borders */
     --border-2: var(--border-color); /*Alternative border*/
+    --alternating-color: rgba(221,221,221); /*Alternating colors on things like rules and board lists*/
     --border-radius: 0px; /*Border radius for things like boxes, posts, etc.*/
     --font-family: arial,helvetica,sans-serif; /*Default font*/
     --link-color: #f60; /*Links*/
@@ -496,9 +450,6 @@ body.theme-photon {
     color: var(--text-color);
     border: 1px solid var(--border-color);
 }
-.theme-photon .rule-list>li:nth-child(odd), .theme-photon #box-user-list .manage-user:nth-child(even), .theme-photon #boardsDiv .board-entry:nth-child(odd), .theme-photon .log:nth-child(even){
-    background-color: var(--page-background);
-}
 .theme-photon .dropdown-content hr {
     border: 1px solid var(--border-color);
 }
@@ -519,6 +470,7 @@ body.theme-photon {
     --nav-color: #3b4252f5; /*background color of nav bar*/
     --border-color: #3a4253; /*color for things such as button borders */
     --border-2: #434C5E; /*Alternative border color for things such as thread/reply boxes*/
+    --alternating-color: var(--header-color); /*Alternating colors on things like rules and board lists*/
     --border-radius: 0px; /*Border radius for things like boxes, posts, etc.*/
     --font-family: Hack,monospace,sans-serif; /*Default font*/
     --link-color: #536da1; /*Links*/
@@ -538,12 +490,6 @@ body.theme-photon {
     --marked-post: #2E3440; /*Background of marked post*/
     --marked-post-border: 1px solid #3a4253; /*Border of marked post*/
 }
-.theme-nord .box-header {
-    background-color: var(--header-color);
-}
-.theme-nord .rule-list>li:nth-child(odd), .theme-nord #box-user-list .manage-user:nth-child(even), .theme-nord #boardsDiv .board-entry:nth-child(odd), .theme-nord .log:nth-child(even){
-    background-color: var(--header-color);
-}
 .theme-gruvbox {
     --text-color: #ebdbb2; /*Text color*/
     --page-background: #282828; /*Background color for the entire page*/
@@ -552,6 +498,7 @@ body.theme-photon {
     --nav-color: #3c3836; /*background color of nav bar*/
     --border-color: #3c3836; /*color for things such as button borders */
     --border-2: #1d2021; /*Alternative border color for things such as thread/reply boxes*/
+    --alternating-color: var(--marked-post); /*Alternating colors on things like rules and board lists*/
     --border-radius: 0px; /*Border radius for things like boxes, posts, etc.*/
     --font-family: Hack,monospace,sans-serif; /*Default font*/
     --link-color: #83a598; /*Links*/
@@ -576,7 +523,4 @@ body.theme-photon {
 }
 .theme-gruvbox nav {
     border-bottom: 1px solid var(--hr);
-}
-.theme-gruvbox #box-user-list .manage-user:nth-child(even), .theme-gruvbox .rule-list>li:nth-child(odd), .theme-gruvbox #boardsDiv .board-entry:nth-child(odd), .theme-gruvbox .log:nth-child(even){
-    background-color: var(--marked-post);
 }

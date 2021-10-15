@@ -24,6 +24,7 @@ nav {
     background-color: var(--nav-color);
     font-size: 80%;
     display: flex;
+    border-bottom: var(--border-2);
 }
 nav span{
     text-decoration: none;
@@ -138,6 +139,7 @@ input, select, textarea {
     border-color: var(--border-color);
     margin-left: auto;
     margin-right: auto;
+    border: 1px solid var(--border-2);
 }
 .box form {
     margin: 5px;
@@ -150,7 +152,7 @@ input, select, textarea {
 }
 /*Box label*/
 .box-header {
-    background-color: var(--background-3);
+    background-color: var(--header-color);
     border: none;
     border-top-left-radius: var(--border-radius);
     border-top-right-radius: var(--border-radius);
@@ -176,14 +178,14 @@ input, select, textarea {
     margin-left: 10px;
 }
 .settings-category input{
-    border: 1px var(--input) solid;
+    border: 1px var(--border-2) solid;
 }
 .settings-category label {
     display: block;
     margin: 5px;
 }
 .settings-input {
-    border: 1px var(--input) solid;
+    border: 1px var(--border-2) solid;
 }
 
 #s-thumbnail-X, #s-thumbnail-Y {
@@ -217,6 +219,7 @@ input, select, textarea {
 }
 #board-list-header {
     padding: 3px;
+    background-color: var(--header-color);
 }
 #boardsDiv {
     background-color: var(--background-3);
@@ -224,11 +227,8 @@ input, select, textarea {
 #boardsDiv .settings-category {
     margin: 0px;
 }
-#board-list-header {
-    background-color: var(--background-3);
-}
-#boardsDiv .board-entry:nth-child(odd) {
-    background-color: var(--background-2);
+#boardsDiv .board-entry:nth-child(even) {
+    background-color: var(--alternating-color);
 }
 .board-entry {
     text-align: left;
@@ -508,7 +508,7 @@ p {
     background-color: var(--background-3);
 }
 .rule-list>li:nth-child(odd){
-    background-color: var(--background-2);
+    background-color: var(--alternating-color);
 }
 .rule-list>li{
     list-style-position: inside;
@@ -518,8 +518,9 @@ p {
     background-color: var(--background-3);
 }
 #box-user-list .manage-user:nth-child(even) {
-    background-color: var(--background-2);
+    background-color: var(--alternating-color);
 }
+
 .manage-user {
     padding: 10px;
     display: flex;
@@ -547,7 +548,7 @@ p {
     padding-left: 10px;
 }
 .log:nth-child(even) {
-    background-color: var(--background-2);
+    background-color: var(--alternating-color);
 }
 
 /*media management page*/

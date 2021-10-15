@@ -1,20 +1,3 @@
-themes = {
-  "default": {
-      "name": "Default",
-      "id": "default",
-      "class": ""
-  },
-  "yotsuba": {
-      "name": "Yotsuba",
-      "id": "yotsuba",
-      "class": "theme-yotsuba"
-  },
-  "yotsuba-b": {
-      "name": "Yotsuba B",
-      "id": "yotsubaB",
-      "class": "theme-yotsuba-b"
-  }
-}
 const currentTheme = localStorage.getItem('theme');
 function changeTheme(theme, themes) {
   const body = document.body;
