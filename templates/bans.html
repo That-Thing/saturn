@@ -33,11 +33,19 @@
                                         Set new ban length:
                                         <input type="text" value="{{ban['length'] | complicateTime}}" placeholder="1y2m3d4h5">
                                     </label>
+                                    <br>
                                     <label>
                                         Edit ban reason:
                                         <input type="text" value="{{ban['reason']}}" placeholder="ban reason">
                                     </label>
+                                    <br>
                                     <input class="btn btn-primary" type="submit" value="Update">
+                                </form>
+                                <hr>
+                                <form action="/unban" method="post">
+                                    <span>Unban user</span><br>
+                                    <input type="hidden" name="id" value="{{ban['id']}}">
+                                    <input class="btn btn-primary" type="submit" value="Unban">
                                 </form>
                             </div>
                         </div>

@@ -8,7 +8,7 @@
     "bannerLocation": "static/banners",
     "requiredRole": 0,
     "cleartextIp": 1,
-    "enableRegistration": "on",
+    "enableRegistration": "off",
     "mimeTypes": "image/jpeg,image/png,image/gif",
     "maxFiles": 3,
     "tripLength": 10,

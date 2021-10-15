@@ -2067,7 +2067,14 @@ def bans():
     bans=cursor.fetchall()
     return render_template('bans.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes, bans=bans)
 
-
-
+@app.route("/bans/unban", methods=['POST'])
+def unban():
+    checkPost()
+    if session['group'] > 2: #Returns error if insufficient perms
+        return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    if 'id' not in request.form: #ID of post to unban isn't given
+        return render_template('error.html', errorMsg=errors['unfilledFields'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+    cursor.execute("SELECT * FROM bans WHERE id=%s", [request.form['id']])
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=configData["port"])
