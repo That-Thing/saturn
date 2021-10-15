@@ -1,5 +1,9 @@
 @import url("./themes.css");
 @import url("./roles.css");
+@import url("./extra.css");
+
+/* Put custom css in extra.css */
+
 body {
     color: var(--text-color);
     background: var(--page-background);

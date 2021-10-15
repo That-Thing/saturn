@@ -2,3 +2,5 @@ media/
 static/captchas/
 static/banners/
 saturn/
+config/config.json
+config/markdown.json
