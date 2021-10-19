@@ -42,7 +42,7 @@
                                     <input class="btn btn-primary" type="submit" value="Update">
                                 </form>
                                 <hr>
-                                <form action="/unban" method="post">
+                                <form action="{{url_for('unban')}}" method="post">
                                     <span>Unban user</span><br>
                                     <input type="hidden" name="id" value="{{ban['id']}}">
                                     <input class="btn btn-primary" type="submit" value="Unban">

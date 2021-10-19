@@ -1,6 +1,8 @@
 @import url("./themes.css");
 @import url("./roles.css");
-@import url("./extra.css");
+
+
+
 
 /* Put custom css in extra.css */
 
@@ -582,3 +584,14 @@ p {
     margin: 5px;
     margin-left: 10px;
 }
+
+
+
+
+
+
+
+
+
+/*Loads extra css*/
+@import url("./extra.css");
