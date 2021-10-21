@@ -28,15 +28,16 @@
                                 <span>Post: No.{{ban['post']}} on /{{ban['board']}}/</span>
                             </div>
                             <div class="ban-actions">
-                                <form action="/bans/actions" method="post">
+                                <form action="{{url_for('banUpdate')}}" method="post">
+                                    <input type="hidden" name="id" value="{{ban['id']}}">
                                     <label>
                                         Set new ban length:
-                                        <input type="text" value="{{ban['length'] | complicateTime}}" placeholder="1y2m3d4h5">
+                                        <input type="text" value="{{ban['length'] | complicateTime}}" placeholder="1y2m3d4h5" name="length">
                                     </label>
                                     <br>
                                     <label>
                                         Edit ban reason:
-                                        <input type="text" value="{{ban['reason']}}" placeholder="ban reason">
+                                        <input type="text" value="{{ban['reason']}}" placeholder="ban reason" name="reason">
                                     </label>
                                     <br>
                                     <input class="btn btn-primary" type="submit" value="Update">

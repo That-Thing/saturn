@@ -2079,5 +2079,23 @@ def unban(): #unban from bans listing page
     print(request.form['id'])
     mysql.connection.commit()
     return redirect(url_for('bans'))
+
+@app.route("/bans/update", methods=['POST'])
+def banUpdate():
+    checkPost()
+    if session['group'] > 3: #Returns error if insufficient perms
+            return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+    reason = None
+    length = None
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    if 'id' not in request.form: #ID of post to unban isn't given
+        return render_template('error.html', errorMsg=errors['unfilledFields'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+    if 'reason' in request.form: #Get new reason
+        reason = request.form['reason']
+    if 'length' in request.form: #Get new length
+        length = getMinutes(request.form['length'])
+    cursor.execute("UPDATE bans SET reason=%s, length=%s WHERE id = %s", (reason, length, request.form['id']))
+    mysql.connection.commit()
+    return redirect(url_for("bans"))
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=configData["port"])
