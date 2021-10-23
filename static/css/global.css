@@ -519,7 +519,7 @@ p {
 #box-user-list {
     background-color: var(--background-3);
 }
-#box-user-list .manage-user:nth-child(even) {
+#box-user-list .manage-user:nth-child(odd) {
     background-color: var(--alternating-color);
 }
 

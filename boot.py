@@ -2062,7 +2062,7 @@ def bans():
     if int(session['group']) > 2:
         return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT * FROM bans WHERE ip IS NOT NULL")
+    cursor.execute("SELECT * FROM bans WHERE ip IS NOT NULL AND user IS NULL")
     bans=cursor.fetchall()
     return render_template('bans.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes, bans=bans)
 
