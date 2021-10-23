@@ -997,27 +997,26 @@ def register():
         msg = ''
         if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
             username = request.form['username']
+            email = None
             if 'email' in request.form:
                 email = request.form['email']
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
             cursor.execute('SELECT * FROM accounts WHERE username = %s', (username,))
             account = cursor.fetchone()
             if account:
-                msg = 'Account already exists'
-            elif len(email) > 0:
-                if not re.match(r'[^@]+@[^@]+\.[^@]+', email):
-                    msg = 'Invalid email address!'
+                msg = "Username taken"
+            if email != None and not re.match(r'[^@]+@[^@]+\.[^@]+', email):
+                msg = "Invalid email."
             elif not re.match(r'^[a-zA-Z0-9_.-]*$', username):
-                msg = 'Username must contain only characters and numbers'
+                msg = "Invalid username"
             elif not username:
-                msg = 'Please fill out the form'
+                msg = "A username is required"
             else:
                 # Account doesnt exists and the form data is valid, now insert new account into accounts table
                 password = request.form['password']
                 password = returnHash(password)
                 cursor.execute('INSERT INTO accounts VALUES (NULL, %s, %s, %s, 4, %s, %s, 0)', (username, password, email, time.time(), str(request.remote_addr)))
                 mysql.connection.commit()
-                msg = 'You have successfully registered!'
                 if logConfig['log-register'] == 'on':
                     storeLog("loginActions", "User registered an account", username, request.remote_addr, time.time(), {}, None)
                 return render_template('login.html', msg="Registration complete, please log in", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
@@ -1025,7 +1024,7 @@ def register():
             msg = 'Please fill out the form!'
         return render_template('register.html', msg=msg, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     else:
-        return render_template('register.html', msg="Registrations are currently disabled.", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        return render_template('error.html', errorMsg=errors["registerDisabled"], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
 
 #Checks if captcha has expired. If it has, returns true so generateCaptcha() can generate a new one. 
 def checkCaptchaState():
