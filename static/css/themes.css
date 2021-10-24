@@ -42,10 +42,6 @@ nav {
     background-color: var(--input);
     border: 1px solid #111;
 }
-input, textarea, select, .settings-category input {
-    color: #7d7d7d;
-    border: 1px solid #111;
-}
 .btn {
     background: linear-gradient(to bottom, #F8F8F8, #DCDCDC) no-repeat!important;
     border: 1px solid #BBB!important;

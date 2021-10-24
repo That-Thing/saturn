@@ -1029,7 +1029,9 @@ def register():
 #Checks if captcha has expired. If it has, returns true so generateCaptcha() can generate a new one. 
 def checkCaptchaState():
     if "captchaExpire" in session and "captcha" in session and "captchaF" in session and os.path.isfile(session["captchaF"]):
-        if datetime.now(timezone.utc) >= session["captchaExpire"]:
+        print(session["captchaExpire"])
+        print(datetime.utcnow())
+        if datetime.utcnow() >= session["captchaExpire"]:
             return True
         else:
             return False
@@ -1041,7 +1043,6 @@ def checkCaptchaState():
 def generateCaptcha(difficulty):
     if checkCaptchaState() == False: #If current session captcha is not expired, return current captcha. 
         return session["captchaF"]
-
     if "captchaF" in session and os.path.isfile(session["captchaF"]): #removes old captcha file.
         os.remove(session["captchaF"])
     captchaText = randomString(difficulty)

@@ -83,6 +83,14 @@ hr {
     border-style: solid none none;
     border-color: var(--hr);
 }
+/*Input*/
+input, textarea, select, .settings-category input {
+    color: var(--small-text);
+    border: 1px solid var(--border-2);
+    background-color: var(--input);
+    font-size: 100%;
+    max-width: 100%;
+}
 /*Button*/
 .btn {
     background-color: var(--button-background);
@@ -108,14 +116,6 @@ hr {
 /*hide things*/
 .hide {
     display: none!important;
-}
-/*Inputs and text boxes*/
-input, select, textarea {
-    border: 0px solid;
-    background: var(--input);
-    color: var(--text-color);
-    font-size: 100%;
-    max-width: 100%;
 }
 /*Fontawesome icons next to text*/
 .text-icon {
