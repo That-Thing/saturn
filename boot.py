@@ -1094,7 +1094,7 @@ def boardPage(board):
         if len(os.listdir(path)) > 0:
             banner = os.path.join(path, random.choice(os.listdir(path)))
         else:
-            banner = "static/banners/defaultbanner.png"
+            banner = "static/images/defaultbanner.png"
         if board['captcha'] == 1:
             captcha = generateCaptcha(globalSettings['captchaDifficulty'])
             return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, captcha=captcha, threads=posts, filePass=filePass, postLength=postLength, owned=ownedPosts, hidden=hidden, page=1, themes=themes)
@@ -1125,7 +1125,7 @@ def boardNumPage(board, page):
             if len(os.listdir(path)) > 0:
                 banner = os.path.join(path, random.choice(os.listdir(path)))
             else:
-                banner = "static/banners/defaultbanner.png"
+                banner = "static/images/defaultbanner.png"
             if board['captcha'] == 1:
                 captcha = generateCaptcha(globalSettings['captchaDifficulty'])
                 return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, captcha=captcha, threads=posts, filePass=filePass, postLength=postLength, owned=ownedPosts, page=page, themes=themes)
@@ -1310,7 +1310,7 @@ def thread(board, thread):
         if len(os.listdir(path)) > 0:
             banner = os.path.join(path, random.choice(os.listdir(path)))
         else:
-            banner = "static/banners/defaultbanner.png"
+            banner = "static/images/defaultbanner.png"
         if board['captcha'] == 1:
             captcha = generateCaptcha(globalSettings['captchaDifficulty'])
             return render_template('thread.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, captcha=captcha, posts=posts, owned=ownedPosts, thread=parentPost[0], filePass=filePass, themes=themes)

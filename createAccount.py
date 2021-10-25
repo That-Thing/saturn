@@ -1,6 +1,8 @@
 import mysql.connector
 import argparse
 import json
+import hashlib
+import time
 parser = argparse.ArgumentParser()
 print("Usage: python createAccount.py -u Username -p Password -g 4 -e username@test.com")
 with open('./config/database.json') as configFile:
@@ -36,7 +38,9 @@ if args.email:
 else:
     email = None
 cursor = database.cursor()
-query = "INSERT INTO accounts VALUES (NULL, %s, %s, %s, %s)"
-values = (username, password, email, group)
+cursor.execute("SELECT `salt` FROM `server`")
+password = password + cursor.fetchone()[0]
+query = "INSERT INTO `accounts` VALUES (NULL, %s, %s, %s, %s, %s, NULL, 0)"
+values = (username, hashlib.sha512(password.encode("UTF-8")).hexdigest(), email, group, time.time())
 cursor.execute(query, values)
 database.commit()
