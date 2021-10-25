@@ -7,7 +7,7 @@
     "spoilerImage": "static/images/spoiler.png",
     "bannerLocation": "static/banners",
     "requiredRole": 0,
-    "cleartextIp": 1,
+    "cleartextIp": 0,
     "enableRegistration": "on",
     "mimeTypes": "image/jpeg,image/png,image/gif",
     "maxFiles": 3,
@@ -16,5 +16,6 @@
     "thumbnailX": 150,
     "thumbnailY": 150,
     "captchaDifficulty": 4,
-    "captchaExpire": 5
+    "captchaExpire": 5,
+    "banMessage": "This user has been banned."
 }

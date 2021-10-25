@@ -95,5 +95,9 @@
             </div>
         {%endif%}
         <blockquote class="comment">{{post['message'] | checkMarkdown(post['thread'], post['board'], post['number']) | safe}}</blockquote>
+        {%if post['append'] != None%}
+            <hr>
+            {%if post['append'] | length > 0%}<span title="Message appended by staff" class="redtext">{{post['append']}}</span>{%endif%}
+        {%endif%}
         </div>
     </div>

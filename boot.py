@@ -1256,7 +1256,7 @@ def newThread():
             filenames = ','.join([str(x) for x in filenames])
             filePaths = ','.join([str(x) for x in filePaths])
         number = board['posts']+1
-        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, %s, %s, %s, %s, %s, %s, %s, %s, NULL)', (name, subject, options, comment, number, curTime, number, board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode))
+        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, %s, %s, %s, %s, %s, %s, %s, %s, NULL, NULL)', (name, subject, options, comment, number, curTime, number, board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode))
         if postLink != False:
             for x in postLink:
                 cursor.execute("SELECT * FROM posts WHERE number = %s", [x])
@@ -1397,9 +1397,9 @@ def reply():
                     filenames.append(secure_filename(f.filename))
                 filenames = ','.join([str(x) for x in filenames])
                 filePaths = ','.join([str(x) for x in filePaths])
-                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s, %s, %s, NULL)', (name, subject, options, comment, number, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode))                
+                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s, %s, %s, NULL, NULL)', (name, subject, options, comment, number, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode))                
         else: #No files are given
-            cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s, %s, %s, %s, NULL)', (name, subject, options, comment, number, curTime, request.form['thread'], board['uri'], str(request.remote_addr), spoiler,filePass, tripcode))
+            cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s, %s, %s, %s, NULL, NULL)', (name, subject, options, comment, number, curTime, request.form['thread'], board['uri'], str(request.remote_addr), spoiler,filePass, tripcode))
         if postLink != False:
             for x in postLink:
                 cursor.execute("SELECT * FROM posts WHERE number = %s", [x])
@@ -1789,6 +1789,7 @@ def latestActions():
                 if request.form['multiple-ban-posters'] == "on": #Checks if the posters need to be banned before the files are deleted
                     reason = None
                     length = None
+                    message = globalSettings['banMessage']
                     cursor.execute("SELECT * FROM bans WHERE ip=%s", [post['ip']]) #New ban overwrites the old one
                     if cursor.fetchone() != None:
                         cursor.execute("DELETE FROM bans WHEre ip=%s", [post['ip']])
@@ -1798,7 +1799,11 @@ def latestActions():
                     if 'multiple-ban-length' in request.form: #Checks if the length is given
                         if len(request.form['multiple-ban-length']) > 0:
                             length = getMinutes(request.form['multiple-ban-length'])
+                    if 'multiple-ban-message' in request.form: #Checks if the length is given
+                        if len(request.form['multiple-ban-message']) > 0:
+                            message = request.form['multiple-ban-message']
                     cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s, %s, %s)", (reason, length, str(post['ip']), currentTime, post['number'], post['board']))
+                    cursor.execute("UPDATE posts SET append=%s where number=%s AND board=%s", (message, post['number'], post['board']))
                     if logConfig['log-user-ban'] == 'on':
                         storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {'ip':str(post['ip'])  , 'reason': reason, 'length':length}, None)
             if 'multiple-hash-ban-media' in request.form: #Checks if media needs to be banned. STILL NEED TO CHECK AND CREATE DB TABLE!!
@@ -1836,13 +1841,18 @@ def latestActions():
                 return render_template('error.html', errorMsg=errors['invalidPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
             reason = None
             length = None
+            message = globalSettings['banMessage']
             if f"banreason-{number}-{board}" in request.form: #Check if reaosn for ban was given
                 if len(request.form[f"banreason-{number}-{board}"]) > 0:
                     reason = request.form[f"banreason-{number}-{board}"]
             if f"banduration-{number}-{board}" in request.form: #Check if length of ban was given
                 if len(request.form[f"banduration-{number}-{board}"]) > 0:
                     length = getMinutes(request.form[f"banduration-{number}-{board}"])
+            if f"banmessage-{number}-{board}" in request.form: #Check if append message was given
+                if len(request.form[f"banmessage-{number}-{board}"]) > 0:
+                    message = request.form[f"banmessage-{number}-{board}"]
             cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s, %s, %s)", (reason, length, str(post['ip']), currentTime, post['number'], post['board']))
+            cursor.execute("UPDATE posts SET append=%s where number=%s AND board=%s", (message, post['number'], post['board']))
             if logConfig['log-user-ban'] == 'on':
                 storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {'ip':str(post['ip'])  , 'reason': reason, 'length':length}, None)
         if x.startswith("deletemedia-"): #Remove media from post
@@ -1943,6 +1953,7 @@ def mediaActions():
                 if request.form['multiple-ban-posters'] == "on": #Checks if the posters need to be banned
                     reason = None
                     length = None
+                    message = globalSettings['banMessage']
                     cursor.execute("SELECT * FROM bans WHERE ip=%s", [post['ip']]) #New ban overwrites the old one
                     if cursor.fetchone() != None:
                         cursor.execute("DELETE FROM bans WHEre ip=%s", [post['ip']])
@@ -1952,7 +1963,11 @@ def mediaActions():
                     if 'multiple-ban-length' in request.form: #Checks if the length is given
                         if len(request.form['multiple-ban-length']) > 0:
                             length = getMinutes(request.form['multiple-ban-length'])
+                    if 'multiple-ban-message' in request.form: #Checks if a mesage is given
+                        if len(request.form['multiple-ban-message']) > 0:
+                            message = request.form['multiple-ban-message']
                     cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s, %s, %s)", (reason, length, str(post['ip']), currentTime, post['number'], post['board']))
+                    cursor.execute("UPDATE posts SET append=%s where number=%s AND board=%s", (message, post['number'], post['board']))
                     if logConfig['log-user-ban'] == 'on':
                         storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {'ip':str(post['ip'])  , 'reason': reason, 'length':length}, None)
             if 'multiple-hash-ban-media' in request.form: #Checks if media needs to be banned. STILL NEED TO CHECK AND CREATE DB TABLE!!
@@ -2002,13 +2017,18 @@ def mediaActions():
                 return render_template('error.html', errorMsg=errors['invalidPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
             reason = None
             length = None
+            message = globalSettings['banMessage']
             if f"banreason-{currentFile}" in request.form: #Check if reaosn for ban was given
                 if len(request.form[f"banreason-{currentFile}"]) > 0:
                     reason = request.form[f"banreason-{currentFile}"]
             if f"banduration-{currentFile}" in request.form: #Check if length of ban was given
                 if len(request.form[f"banduration-{currentFile}"]) > 0:
                     length = getMinutes(request.form[f"banduration-{currentFile}"])
+            if f"banmessage-{currentFile}" in request.form: #Check if message for ban was given
+                if len(request.form[f"banmessage-{currentFile}"]) > 0:
+                    message = request.form[f"banmessage-{currentFile}"]
             cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s, %s, %s)", (reason, length, str(post['ip']), currentTime, post['number'], post['board']))
+            cursor.execute("UPDATE posts SET append=%s where number=%s AND board=%s", (message, post['number'], post['board']))
             if logConfig['log-user-ban'] == 'on':
                 storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {'ip':str(post['ip'])  , 'reason': reason, 'length':length}, None)
         if x.startswith("hashban-"):
@@ -2097,5 +2117,6 @@ def banUpdate():
     cursor.execute("UPDATE bans SET reason=%s, length=%s WHERE id = %s", (reason, length, request.form['id']))
     mysql.connection.commit()
     return redirect(url_for("bans"))
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=configData["port"])

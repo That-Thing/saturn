@@ -105,6 +105,11 @@
                         Captcha expire time (minutes):
                         <input type="number" step="1" name="captchaExpire" id="captchaExpire" value="{{data['captchaExpire']}}" required autocomplete="off"> <span class="small">How long the captcha is active before a new one is generated</span>
                     </label>
+                    <h4>Defaults</h4>
+                    <label>
+                        Default ban message:
+                        <input type="text" name="banMessage" id="siteBanMessageInput" value="{{data['banMessage']}}" required autocomplete="off">
+                    </label>
                     <p><input class="btn btn-primary" type="submit" value="save settings"></p>
                 </form>
             </div>

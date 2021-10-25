@@ -45,6 +45,10 @@
                         Duration:
                         <input type="text" name="multiple-ban-duration" placeholder="1y2m3d4h5">
                     </label>
+                    <label>
+                        Message:
+                        <input type="text" name="multiple-ban-message" placeholder="Message to append">
+                    </label>
                     <input class="btn btn-primary" type="submit" value="Submit">
                 </div>
             </div>
@@ -143,6 +147,10 @@
                                 <label>
                                     Duration:
                                     <input type="text" name="banduration-{{post['number']}}-{{post['board']}}" placeholder="1y2m3d4h5">
+                                </label>
+                                <label>
+                                    Message:
+                                    <input type="text" name="banmessage-{{post['number']}}-{{post['board']}}" placeholder="Message to append">
                                 </label>
                                 {%if post['files'] != None%}
                                     <label>
