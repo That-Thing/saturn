@@ -2,7 +2,7 @@
 --
 -- Host: localhost    Database: saturn
 -- ------------------------------------------------------
--- Server version	8.0.26-0ubuntu0.20.04.2
+-- Server version	8.0.26-0ubuntu0.20.04.3
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -66,7 +66,7 @@ CREATE TABLE `bans` (
   `post` text,
   `board` tinytext,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Banned users and IPs ';
+) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Banned users and IPs ';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -137,7 +137,7 @@ CREATE TABLE `logs` (
   `date` int NOT NULL COMMENT 'Unix timestamp',
   PRIMARY KEY (`id`),
   CONSTRAINT `logs_chk_1` CHECK (json_valid(`actionData`))
-) ENGINE=InnoDB AUTO_INCREMENT=298 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Logs for user actions. ';
+) ENGINE=InnoDB AUTO_INCREMENT=312 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Logs for user actions. ';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -163,7 +163,8 @@ CREATE TABLE `posts` (
   `spoiler` int NOT NULL DEFAULT '0' COMMENT '0 for normal, 1 for spoiler',
   `password` text NOT NULL COMMENT 'Password for post deletion',
   `trip` text COMMENT 'Tripcode or role signature',
-  `replies` text COMMENT 'Replies for posts'
+  `replies` text COMMENT 'Replies for posts',
+  `append` text COMMENT 'Message to be apended to the post'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -223,4 +224,4 @@ CREATE TABLE `server` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-10-07 14:47:11
+-- Dump completed on 2021-10-25 17:01:56
