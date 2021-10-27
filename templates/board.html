@@ -201,7 +201,7 @@
                             <blockquote class="comment">{{thread['message'] | checkMarkdown(thread['number'], board, thread['number']) | safe}}</blockquote>
                             {%if thread['append'] != None%}
                                 <hr>
-                                {%if thread['append'] | length > 0%}<span title="Message appended by staff" class="redtext">{{thread['append']}}</span>{%endif%}
+                                {%if post['append'] | length > 0%}<span title="Message appended by staff" class="redtext"><i class="fas fa-exclamation-triangle text-icon"></i>{{post['append']}}</span>{%endif%}
                             {%endif%}
                         </div>
                         {%set posts = thread['number'] | fivePosts(board)%}

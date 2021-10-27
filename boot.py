@@ -1029,9 +1029,7 @@ def register():
 #Checks if captcha has expired. If it has, returns true so generateCaptcha() can generate a new one. 
 def checkCaptchaState():
     if "captchaExpire" in session and "captcha" in session and "captchaF" in session and os.path.isfile(session["captchaF"]):
-        print(session["captchaExpire"])
-        print(datetime.utcnow())
-        if datetime.utcnow() >= session["captchaExpire"]:
+        if datetime.utcnow() >= session["captchaExpire"].replace(tzinfo=None):
             return True
         else:
             return False
@@ -1051,8 +1049,8 @@ def generateCaptcha(difficulty):
     captcha.write(captchaText, f'./static/captchas/{filename}.png')
     session["captcha"] = captchaText
     session["captchaF"] = f'./static/captchas/{filename}.png'
-    expire = datetime.now(timezone.utc) + timedelta(minutes = globalSettings['captchaExpire'])
-    session["captchaExpire"] = expire #Set expire time for captcha. Add into global settings later.
+    expire = datetime.utcnow() + timedelta(minutes = globalSettings['captchaExpire'])
+    session["captchaExpire"] = expire #Set expire time for captcha.
     return f'./static/captchas/{filename}.png'
 
 def clearCaptcha():
@@ -1690,7 +1688,7 @@ def banUser(user):
                     length = None
                 cursor.execute("UPDATE accounts SET banned=1 WHERE username=%s", [user])
                 currentTime = time.time()
-                cursor.execute("INSERT INTO bans VALUES(NULL, %s, %s, %s, NULL, %s)", (reason, length, user, currentTime))
+                cursor.execute("INSERT INTO bans VALUES(NULL, %s, %s, %s, NULL, %s, NULL, NULL)", (reason, length, user, currentTime))
                 if logConfig['log-user-ban'] == 'on':
                     cursor.execute("SELECT * FROM bans WHERE user=%s", [user])
                     storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {"id":cursor.fetchone()['id'],'user':user, "reason": reason, "length":length}, None)
