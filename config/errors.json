@@ -17,5 +17,6 @@
     "confirmBoardDeletion": "Please confirm board deletion",
     "banned": "You are banned.",
     "invalidPost": "Invalid post",
-    "registerDisabled": "Registrations are currently disabled"
+    "registerDisabled": "Registrations are currently disabled",
+    "invalidUri":"The uri you entered is not valid: "
 }

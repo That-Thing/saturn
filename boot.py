@@ -782,6 +782,10 @@ def createBoard():
     if request.method == 'POST':
         try:
             if globalSettings['requiredRole'] >= int(session['group']):
+                if 'uri' not in request.form or 'name' not in request.form or 'description' not in request.form: #Gives an error if board information isn't in request
+                    return render_template('error.html', errorMsg=errors['unfilledFields'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                if bool(re.match(r'^[a-z0-9]*$',request.form['uri'])) == False: #Return error if board uri doesn't match regex
+                    return render_template('error.html', errorMsg=errors['invalidUri']+request.form['uri'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
                 cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
                 cursor.execute("SELECT * FROM boards WHERE uri=%s", [request.form['uri']])
                 board = cursor.fetchone()
@@ -797,7 +801,7 @@ def createBoard():
                     os.mkdir(path) 
                     path = os.path.join(globalSettings['mediaLocation'], request.form['uri']) #make folder for files.  
                     os.mkdir(path) 
-                    return redirect(url_for('boardManagement'))
+                    return redirect(url_for('manageBoard', board=request.form['uri']))
             else:
                 return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         except Exception as e:
