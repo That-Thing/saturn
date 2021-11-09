@@ -20,6 +20,7 @@ import hashlib
 from deepdiff import DeepDiff
 import magic
 from flask_socketio import SocketIO, send
+import cv2
 with open('./config/config.json') as configFile: #global config file
     configData = json.load(configFile)
 with open('./config/logs.json') as logFile: #log config file
@@ -1164,23 +1165,33 @@ def thumbnail(image, board, filename, ext):
         image.save(os.path.join(globalSettings['mediaLocation'], board, filename + "s"+ext))
     except IOError:
         pass
+def videoThumbnail(video, board, filename, ext):
+    size = globalSettings['thumbnailX'], globalSettings['thumbnailY']
+    vidcap = cv2.VideoCapture(video)
+    success, image = vidcap.read()
+    if success:
+        cv2.imwrite(os.path.join(globalSettings['mediaLocation'], board, filename + "s.jpg", image)) #Write thumbnail image
 def uploadFile(f, board, filename, spoiler):
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     mimeTypes = globalSettings['mimeTypes'].split(',')
     extention = pathlib.Path(secure_filename(f.filename)).suffix
     cursor.execute("SELECT * FROM hashbans WHERE hash=%s", [hashlib.md5(f.read()).hexdigest()]) #Check if file being uploaded is banned. 
     ban = cursor.fetchone()
+    mimetype = magic.from_buffer(f.read(1024), mime=True)
     if ban != None:
         return "Banned"
     f.seek(0)
-    if magic.from_buffer(f.read(1024), mime=True) not in mimeTypes: #Check if file is allowed.
+    if mimetype not in mimeTypes: #Check if file is allowed.
         return None
     f.seek(0)
     nFilename = filename+extention
     path = os.path.join(globalSettings['mediaLocation'], board, nFilename)
     f.save(path)
     if spoiler == 0:
-        thumbnail(path, board, filename, extention) #generate thumbnail for uploaded image
+        if mimetype.startswith("video/"):
+            videoThumbnail(path, board, filename, extention) #generate thumbnail for video
+        else:
+            thumbnail(path, board, filename, extention) #generate thumbnail for uploaded image
     return str(path)
 
 

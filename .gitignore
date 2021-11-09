@@ -4,3 +4,4 @@ static/banners/
 saturn/
 config/config.json
 config/markdown.json
+config/database.json
