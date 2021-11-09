@@ -66,7 +66,7 @@
                                     {%endif%}
                                     <span class="md5">MD5 Hash: {{file | getFileHash}}</span>
                                 </span>
-                                <img loading="lazy" class="thumbnail" src="/{{ ((file| splittext)[:-1] | join('.')) }}s.{{ ((file| splittext)[3])}}">
+                                <img loading="lazy" class="thumbnail" src="/{{file | getThumbnailLocation}}">
                                 <div class="media-options settings-category">
                                     <label>
                                         Delete media

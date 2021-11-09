@@ -498,6 +498,21 @@ def hash(text):
     text = text+salt
     return hashlib.sha256(text.encode("UTF-8")).hexdigest()
 
+@app.template_filter("getThumbnailLocation")
+def getThumbnailLocation(file):
+    ext = pathlib.Path(file).suffix
+    ext = ext[1:]
+    mimeTypes = globalSettings['mimeTypes'].split(',')
+    mimeTypes.append("image/jpg") #This is a bad way of doing this, but it works.
+    type = [y for y in mimeTypes if ext.lower() in y.lower()][0]
+    if type.startswith('video'):
+        return f"{file[:-len(ext)-1]}s.jpg"
+    elif type.startswith('image'):
+        return f"{file[:-len(ext)-1]}s.{ext}"
+    elif type.startswith('audio'): #Generate thumbnail from album cover art later
+        return f"/static/images/audio.png"
+    else: #Default file image
+        return f"/static/images/file.png"
 
 #Make local timestamps
 #add relative times
@@ -908,7 +923,6 @@ def setOwner(board):
 def uploadBanner(board):
     if request.method == 'POST':
         banner = request.files['file']
-        print(request.files)
         mimes = ['image/jpeg', 'image/png', 'image/apng', 'image/webp', 'image/gif'] #allowed mime types for banners. 
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
@@ -1164,19 +1178,26 @@ def thumbnail(image, board, filename, ext):
         image.thumbnail(size)
         image.save(os.path.join(globalSettings['mediaLocation'], board, filename + "s"+ext))
     except IOError:
-        pass
+        return False
 def videoThumbnail(video, board, filename, ext):
-    size = globalSettings['thumbnailX'], globalSettings['thumbnailY']
-    vidcap = cv2.VideoCapture(video)
-    success, image = vidcap.read()
-    if success:
-        cv2.imwrite(os.path.join(globalSettings['mediaLocation'], board, filename + "s.jpg", image)) #Write thumbnail image
+    try:
+        size = globalSettings['thumbnailX'], globalSettings['thumbnailY']
+        vidcap = cv2.VideoCapture(video)
+        success, image = vidcap.read()
+        if success:
+            image = Image.fromarray(image)
+            image.thumbnail(size)
+            image.save(os.path.join(globalSettings['mediaLocation'], board, filename + "s.jpg"))
+            #cv2.imwrite(os.path.join(globalSettings['mediaLocation'], board, filename + "s.jpg"), image) #Write thumbnail image
+    except IOError:
+        return False
 def uploadFile(f, board, filename, spoiler):
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     mimeTypes = globalSettings['mimeTypes'].split(',')
     extention = pathlib.Path(secure_filename(f.filename)).suffix
     cursor.execute("SELECT * FROM hashbans WHERE hash=%s", [hashlib.md5(f.read()).hexdigest()]) #Check if file being uploaded is banned. 
     ban = cursor.fetchone()
+    f.seek(0)
     mimetype = magic.from_buffer(f.read(1024), mime=True)
     if ban != None:
         return "Banned"
@@ -1192,6 +1213,7 @@ def uploadFile(f, board, filename, spoiler):
             videoThumbnail(path, board, filename, extention) #generate thumbnail for video
         else:
             thumbnail(path, board, filename, extention) #generate thumbnail for uploaded image
+        
     return str(path)
 
 

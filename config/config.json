@@ -9,7 +9,7 @@
     "requiredRole": 0,
     "cleartextIp": 0,
     "enableRegistration": "on",
-    "mimeTypes": "image/jpeg,image/png,image/gif,video/mp4",
+    "mimeTypes": "image/jpeg,image/png,image/gif,video/mp4,video/webm",
     "maxFiles": 3,
     "tripLength": 10,
     "pageThreads": 20,
