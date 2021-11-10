@@ -2,12 +2,13 @@
     <div class="drag-header floating-menu-header">
         <label>Hidden Posts</label>
         <i class="fas fa-times text-icon text-icon-l close-menu" onclick='closeHidden()'></i>
-        <div class="floating-menu-inner">
+        <div class="floating-menu-inner" id="hidden-menu-inner">
             {%for post in hidden%}
-                {%if post == board%}
-                    <div class="hidden-entry" id="hidden-{{hidden[post]}}-entry">
-                        <span>{{hidden[post]}}</span>
-                        <i class="fas fa-times text-icon-l remove-hidden" onclick="removeHidden(this)"></i>
+                {% set post = post.split('/') %}
+                {%if post[0] == board%}
+                    <div class="hidden-entry" id="hidden-{{[post][1]}}-{{[post][0]}}">
+                        <span>No. {{post[1]}}</span>
+                        <i class="fas fa-times text-icon-l remove-hidden text-icon" onclick="removeHidden({{post[1]}}, {{post[0]}})"></i>
                     </div>
                     <br>
                 {%endif%}

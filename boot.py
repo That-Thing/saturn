@@ -2109,7 +2109,7 @@ def banned():
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute(f"SELECT * FROM bans WHERE ip='{request.remote_addr}'")
     banned = cursor.fetchone()
-    image=None
+    image = None
     unbanned = False
     if len(os.listdir("static/images/banned")) > 0:
         image = os.path.join("static/images/banned", random.choice(os.listdir("static/images/banned")))

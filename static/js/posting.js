@@ -24,26 +24,49 @@ window.onclick = function(event) {
   }
 }
 //hide reply to thread
-function hidePostReply(post, board) {
-  post = post.parentNode.parentNode.parentNode.parentNode.parentNode;//this is such a stupid way of doing this.
-  post.classList.add("hide");
+function hidePost(post, board) {
+  postElement = document.getElementById(post);
+  postElement.classList.add("hide");
   let hidden = JSON.parse(localStorage.getItem('hidden'));
   if(hidden == null) {
     hidden = [];
   }
-  hidden.push(post.id);
-  localStorage.setItem('hidden', JSON.stringify(hidden))
+  hidden.push(board+"/"+post);
+  localStorage.setItem('hidden', JSON.stringify(hidden));
+  var hiddenMenu = document.getElementById('hidden-menu-inner');
+  var newPost = document.createElement("div");
+  newPost.classList.add("hidden-entry");
+  newPost.id = `hidden-${post}-${board}`;
+  var newPostText = document.createElement("span");
+  newPostText.innerHTML=`No. ${post}`
+  var newPostDelete = document.createElement("i");
+  newPostDelete.className = 'fas fa-times text-icon-l text-icon remove-hidden';
+  newPostDelete.onclick = function(){removeHidden(post, board)};
+  newPost.appendChild(newPostDelete);
+  newPost.appendChild(newPostText);
+  hiddenMenu.appendChild(newPost);
 }
 //hide entire thread
-function hidePostThread(post, board) {
-  post = post.parentNode.parentNode.parentNode.parentNode.parentNode;
-  post.classList.add("hide");
+function hideThread(post, board) {
+  postElement = document.getElementById(post);
+  postElement.parentNode.classList.add("hide");
   let hidden = JSON.parse(localStorage.getItem('hidden'));
   if(hidden == null) {
     hidden = [];
   }
-  hidden.push({board:post.id});
-  localStorage.setItem('hidden', JSON.stringify(hidden))
+  hidden.push(hidden.push(board+"/"+post));
+  localStorage.setItem('hidden', JSON.stringify(hidden));
+  var hiddenMenu = document.getElementById('hidden-menu-inner');
+  var newPost = document.createElement("div");
+  newPost.classList.add("hidden-entry");
+  newPost.id = `hidden-${post}-${board}`;
+  var newPostText = document.createElement("span").innerHTML=`No. ${post}`;
+  var newPostDelete = document.createElement("i");
+  newPostDelete.className = 'fas fa-times text-icon-l text-icon remove-hidden';
+  newPostDelete.onclick = function(){removeHidden(post, board)};
+  newPost.appendChild(newPostDelete);
+  newPost.appendChild(newPostText);
+  hiddenMenu.appendChild(newPost);
 }
 
 
@@ -118,23 +141,19 @@ function checkHidden() {
 checkHidden()
 
 //Remove hidden thread or post
-function removeHidden(id) {
-  document.getElementById(id.parentNode.remove());
-  id = id.parentNode.id.replace('hidden-','');
+function removeHidden(id, board) {
+  console.log(id);
   var hidden = JSON.parse(localStorage.getItem('hidden'));
-  for( i=0; i< hidden.length; i++ ) {
-    if(hidden[i] == id) {
-      delete hidden[i]
+  for( i=0; i < hidden.length; i++ ) {
+    console.log(hidden[i]);
+    if(hidden[i] != null && hidden[i].split("/")[1] == id && hidden[i].split("/")[0] == board) {
+      hidden.splice(i,1);
     }
   }
   localStorage.setItem('hidden', JSON.stringify(hidden));
   document.getElementById(id).classList.remove('hide');
+  document.getElementById(`hidden-${id}-${board}`).remove();
 }
-
-//TODO:
-//Add a letter for board URI so it doesn't hide threads on other boards with the same number.
-
-
 
 //Post deletion
 function deletePrompt(post) {

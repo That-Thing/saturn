@@ -147,8 +147,6 @@
                         <span class="dropdown-button dropdown-button-marker" onclick="dropdownFunction(this)"><i class="fas fa-caret-right dropdown-button-marker"></i></span>
                         <form action="/{{board}}/postActions" method="POST">
                             <div class="dropdown-content">
-                                <div class="dropdown-link" onclick="hidePostThread(this)">Hide post</div>
-                                <hr>
                                 <input type="hidden" name="post" value="{{thread['number']}}">
                                 {%if session['filePassword'] == thread['password']%}
                                     <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete">
@@ -162,7 +160,7 @@
                                 <hr>  
                                 <div class="dropdown-link" type="submit">Report</div>
                                 <hr>  
-                                <div class="dropdown-link" onclick="">Filter</div>
+                                <div class="dropdown-link" onclick="hidePost({{thread['number']}}, '{{thread['board']}}')">Filter</div>
                             </div>
                         </form>
                     </span>
@@ -215,6 +213,7 @@
                     {%include 'postTemplate.html'%}
                 {%endfor%}
         </div>
+        {% include 'hiddenPostsMenu.html' %}
         <script type="text/javascript" src="{{ url_for('static', filename='js/posting.js') }}"></script>
         <script type="text/javascript" src="{{ url_for('static', filename='js/thread.js') }}"></script>
         <script type="text/javascript" src="{{ url_for('static', filename='js/themes.js') }}"></script>
