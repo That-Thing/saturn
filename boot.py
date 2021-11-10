@@ -480,7 +480,7 @@ def complicateTime(minutes):
 def futureTime(start, minutes):
     if minutes == None:
         return "Never"
-    future = datetime.now()+timedelta(minutes = minutes)
+    future = datetime.utcfromtimestamp(start)+timedelta(minutes = minutes)
     return future.strftime("%d-%m-%Y %H:%M")
 
 
@@ -2110,9 +2110,15 @@ def banned():
     cursor.execute(f"SELECT * FROM bans WHERE ip='{request.remote_addr}'")
     banned = cursor.fetchone()
     image=None
+    unbanned = False
     if len(os.listdir("static/images/banned")) > 0:
         image = os.path.join("static/images/banned", random.choice(os.listdir("static/images/banned")))
-    return render_template('banned.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes, banned=banned, image=image)
+    if banned != None:
+        if datetime.utcfromtimestamp(banned['date'])+timedelta(minutes = banned['length']) <= datetime.now(): #Checks if ban has expired. 
+            cursor.execute("DELETE FROM bans WHERE ip = %s", [banned['ip']])
+            mysql.connection.commit()
+            unbanned = True
+    return render_template('banned.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes, banned=banned, image=image, unbanned=unbanned)
 
 @app.route("/bans", methods=['GET'])
 def bans():

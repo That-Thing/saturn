@@ -24,6 +24,10 @@
                         Reason: {{banned['reason']}}<br>
                         Unban date: {{banned['date'] |futureTime(banned['length'])}}
                     </div>
+
+                {%endif%}
+                {%if unbanned == True%}
+                    <h2 class="center">Now that you have seen this message your ban has been lifted.</h2>
                 {%endif%}
             </div>
         </div>
