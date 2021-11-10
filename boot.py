@@ -1185,6 +1185,7 @@ def videoThumbnail(video, board, filename, ext):
         vidcap = cv2.VideoCapture(video)
         success, image = vidcap.read()
         if success:
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) #Changes to proper color mode. Images are weirdly colored if this isn't done.
             image = Image.fromarray(image)
             image.thumbnail(size)
             image.save(os.path.join(globalSettings['mediaLocation'], board, filename + "s.jpg"))
