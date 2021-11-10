@@ -27,26 +27,28 @@
                     <hr>
                     <h3>Site Settings</h3>
                     <hr>
+                    <h4>Display</h4>
                     <label>
                         Site Name:
-                        <input type="text" name="siteName" id="siteNameInput" value="{{data['siteName']}}" required autocomplete="off">
+                        <input type="text" name="siteName" id="siteNameInput" value="{{data['siteName']}}" required autocomplete="off" placeholder="Ex: Saturn">
                     </label>
                     <label>
                         Logo:
-                        <input type="text" name="logoUrl" id="siteLogoInput" value="{{data['logoUrl']}}" required autocomplete="off">
+                        <input type="text" name="logoUrl" id="siteLogoInput" value="{{data['logoUrl']}}" required autocomplete="off" placeholder="Ex: static/images/logo.png">
                     </label>
                     <label>
                         Favicon:
-                        <input type="text" name="faviconUrl" id="siteFaviconInput" value="{{data['faviconUrl']}}" required autocomplete="off"> <span class="small">Must be in PNG format</span>
+                        <input type="text" name="faviconUrl" id="siteFaviconInput" value="{{data['faviconUrl']}}" required autocomplete="off" placeholder="Ex: static/images/favicon.png"> <span class="small">Must be in PNG format</span>
                     </label>
                     <label>
                         Spoiler Image:
-                        <input type="text" name="spoilerImage" id="mimeFileInput" value="{{data['spoilerImage']}}" required autocomplete="off"> <span class="small"></span>
+                        <input type="text" name="spoilerImage" id="mimeFileInput" value="{{data['spoilerImage']}}" required autocomplete="off" placeholder="Ex: static/images/spoiler.png"> <span class="small"></span>
                     </label>
                     <label>
                         Banner Location:
                         <input type="text" name="bannerLocation" id="bannerLocationInput" value="{{data['bannerLocation']}}" required autocomplete="off"> <span class="small">This decides where uploaded banners will be kept</span>
                     </label>
+                    <h4>Permissions</h4>
                     <label>
                         Minimum permission level for board creation:
                         <select name="requiredRole" id="requiredRole">
@@ -75,13 +77,18 @@
                             {% endif %}
                         </select>
                     </label>
+                    <h4>Posting</h4>
                     <label>
                         Allowed MIME types:
                         <input type="text" name="mimeTypes" id="mimeTypeInput" value="{{data['mimeTypes']}}" required autocomplete="off"> <span class="small">Separate with ,</span>
                     </label>
                     <label>
                         Maximum files:
-                        <input type="number" step="1" name="maxFiles" id="mimeFileInput" value="{{data['maxFiles']}}" required autocomplete="off">
+                        <input type="number" step="1" name="maxFiles" id="maxFileInput" value="{{data['maxFiles']}}" required autocomplete="off">
+                    </label>
+                    <label>
+                        Maximum character limit:
+                        <input type="number" step="1" name="characterLimit" id="characterLimitInput" value="{{data['characterLimit']}}" required autocomplete="off">
                     </label>
                     <label>
                         Tripcode Length:
@@ -96,7 +103,7 @@
                         <input type="number" step="1" name="thumbnailX" id="s-thumbnail-X" value="{{data['thumbnailX']}}" required autocomplete="off">x<input type="number" step="1" name="thumbnailY" id="s-thumbnail-Y" value="{{data['thumbnailY']}}" required autocomplete="off">
                         <span class="small">Sizes in px</span>
                     </label>
-                    <h4>captcha</h4>
+                    <h4>Captcha</h4>
                     <label>
                         Captcha difficulty:
                         <input type="number" step="1" name="captchaDifficulty" id="captchaDifficulty" value="{{data['captchaDifficulty']}}" required autocomplete="off"> <span class="small">Sets the length of the captcha (must be a number)</span>
@@ -109,6 +116,10 @@
                     <label>
                         Default ban message:
                         <input type="text" name="banMessage" id="siteBanMessageInput" value="{{data['banMessage']}}" required autocomplete="off">
+                    </label>
+                    <label>
+                        Default anonymous name:
+                        <input type="text" name="anonName" id="anonNameInput" value="{{data['anonName']}}" required autocomplete="off" placeholder="Anonymous">
                     </label>
                     <p><input class="btn btn-primary" type="submit" value="save settings"></p>
                 </form>

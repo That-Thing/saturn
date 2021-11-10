@@ -41,7 +41,7 @@
         </div>
         <div id="author-container">  
             <span class="small">Reply mode</span>
-            <form action="/reply" method="POST" id="authorForm" enctype="multipart/form-data">
+            <form action="{{url_for('reply')}}" method="POST" id="authorForm" enctype="multipart/form-data">
                 <input type="hidden" name="board" value="{{board}}">
                 <input type="hidden" name="thread" value="{{thread['number']}}">
                 <table>
@@ -145,7 +145,7 @@
                 <div class="postInfo">
                     <span class="post-dropdown">
                         <span class="dropdown-button dropdown-button-marker" onclick="dropdownFunction(this)"><i class="fas fa-caret-right dropdown-button-marker"></i></span>
-                        <form action="/{{board}}/postActions" method="POST">
+                        <form action="{{url_for('postActions'), board=thread['board']}}" method="POST">
                             <div class="dropdown-content">
                                 <input type="hidden" name="post" value="{{thread['number']}}">
                                 {%if session['filePassword'] == thread['password']%}

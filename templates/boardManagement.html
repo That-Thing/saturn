@@ -30,7 +30,7 @@
         {% if session['group'] is defined and session['group'] <= data['requiredRole']|int %}
             <div class="box" style="width: 40%;">
                 <h2 class="box-header">Create board</h2>
-                <form id="create-board" action="/createboard" method="POST">
+                <form id="create-board" action="{{url_for('createBoard')}}" method="POST">
                     <label> 
                         Board URI:
                         <input type="text" name="uri" id="uriInput" class="settings-input" placeholder="ex: b" required autocomplete="off" pattern="^[a-z0-9]*$">

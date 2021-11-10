@@ -13,7 +13,7 @@
         <nav>
             {% include 'nav.html' %}
         </nav>
-        <form action="/latest/actions" method="POST">
+        <form action="{{url_for('latestActions')}}" method="POST">
             <div class="box box-settings">
                 <h2 class="box-header">Post actions</h2>
                 <div id="latest-posts-actions" class="settings-category">

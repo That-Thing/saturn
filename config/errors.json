@@ -18,5 +18,6 @@
     "banned": "You are banned.",
     "invalidPost": "Invalid post",
     "registerDisabled": "Registrations are currently disabled",
-    "invalidUri":"The uri you entered is not valid: "
+    "invalidUri":"The uri you entered is not valid: ",
+    "characterLimit":"Character limit exceeded"
 }

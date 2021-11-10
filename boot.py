@@ -557,7 +557,7 @@ def faq():
     return render_template('faq.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 
 #global settings redirect
-@app.route('/globalsettings', methods=['GET'])
+@app.route('/global', methods=['GET'])
 def siteSettings():
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("SELECT * FROM rules WHERE type = 0")
@@ -570,7 +570,7 @@ def siteSettings():
         logError(e, request.base_url)
         return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 #Save global settings
-@app.route('/saveSettings', methods=['POST'])
+@app.route('/global/save', methods=['POST'])
 def saveSettings():
     if request.method == 'POST':
         try:
@@ -593,7 +593,7 @@ def saveSettings():
             return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     else:
         return render_template('error.html', errorMsg=errors['RequestNotPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-@app.route('/saveLogSettings', methods=['POST'])
+@app.route('/global/logs', methods=['POST'])
 def saveLogSettings():
     if request.method == 'POST':
         try:
@@ -627,7 +627,7 @@ def rules():
         logError(e, request.base_url)
         return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 #Add rule
-@app.route('/addRule', methods=['POST'])
+@app.route('/rules/add', methods=['POST'])
 def addRule():
     try:
         if request.method == 'POST':
@@ -658,7 +658,7 @@ def addRule():
 
 #Delete Rule
 #Add checks so you can't delete rules from other boards or global settings by changing the HTML of rules on board management pages. 
-@app.route('/deleteRule', methods=['POST'])
+@app.route('/rules/delete', methods=['POST'])
 def deleteRule():
     if request.method == 'POST':
         if request.form['board'] == "NULL":
@@ -700,7 +700,7 @@ def accountSettings():
     except Exception as e:
         print(e)
         return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)   
-@app.route('/account/passwordchange', methods=['POST'])
+@app.route('/account/update/password', methods=['POST'])
 def updatePassword():
     if request.method == 'POST':
         if session['loggedin'] == True:
@@ -730,7 +730,7 @@ def updatePassword():
             
 
 
-@app.route('/account/emailchange', methods=['POST'])
+@app.route('/account/update/email', methods=['POST'])
 def updateEmail():
     if request.method == 'POST':
         try:
@@ -793,7 +793,7 @@ def manageBoard(board):
         return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         print(e)
 #create board
-@app.route('/createboard', methods=['POST'])
+@app.route('/boards/create', methods=['POST'])
 def createBoard():
     if request.method == 'POST':
         try:
@@ -808,7 +808,7 @@ def createBoard():
                 if board:
                     return redirect(url_for('boardManagement', msg="Board already exists"))
                 else:
-                    cursor.execute("INSERT INTO boards VALUES (%s, %s, %s, %s, 'Anonymous', '', 0, 0, 0, 0, %s)",(request.form['uri'].lower(), request.form['name'], request.form['description'], session['username'], globalSettings['pageThreads'])) #create the board in the MySQL database
+                    cursor.execute("INSERT INTO boards VALUES (%s, %s, %s, %s, %s, '', 0, 0, 0, 0, %s)",(request.form['uri'].lower(), request.form['name'], request.form['description'], session['username'], globalSettings['anonName'], globalSettings['pageThreads'])) #create the board in the MySQL database
                     mysql.connection.commit()
                     if logConfig['log-board-creation'] == 'on':
                         cursor.execute("SELECT * FROM boards WHERE uri=%s", [request.form['uri']])
@@ -894,7 +894,7 @@ def updateBoard(board):
     else:
         return errors['RequestNotPost']
 
-@app.route('/<board>/setowner', methods=['POST'])
+@app.route('/<board>/update/owner', methods=['POST'])
 def setOwner(board):   
     if request.method == 'POST':
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
@@ -919,7 +919,7 @@ def setOwner(board):
 #banner management
 
 #upload banner and create sql entry
-@app.route('/<board>/uploadbanner', methods=['POST'])
+@app.route('/<board>/banner', methods=['POST'])
 def uploadBanner(board):
     if request.method == 'POST':
         banner = request.files['file']
@@ -948,7 +948,7 @@ def uploadBanner(board):
             return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
     else:
         return render_template('error.html', errorMsg=errors['RequestNotPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)    
-@app.route('/<board>/deletebanner', methods=['POST'])
+@app.route('/<board>/banner/delete', methods=['POST'])
 def deleteBanner(board):
     name = request.args.get('name', type=str)
     if request.method == 'POST':
@@ -1472,7 +1472,7 @@ def reply():
 
 
 
-@app.route('/<board>/postActions', methods=['POST'])
+@app.route('/<board>/actions/', methods=['POST'])
 def postActions(board):
     if request.method == 'POST':
         if request.form['delete'] == 'Delete': #Post deletion
@@ -1510,7 +1510,7 @@ def postActions(board):
     else:
         return errors['RequestNotPost']
 
-@app.route('/<board>/passworddelete', methods=['POST'])
+@app.route('/<board>/actions/password', methods=['POST'])
 def passworddelete(board):
     if request.method == 'POST':
         if "password" not in request.form:
