@@ -137,7 +137,7 @@
                             <div class="postInfo">
                                 <span class="post-dropdown">
                                     <span class="dropdown-button dropdown-button-marker" onclick="dropdownFunction(this)"><i class="fas fa-caret-right dropdown-button-marker"></i></span>
-                                    <form action="{{url_for('postActions'), board=thread['board']}}" method="POST">
+                                    <form action="{{url_for('postActions', board=thread['board'])}}" method="POST">
                                         <div class="dropdown-content">
                                             <input type="hidden" name="post" value="{{thread['number']}}">
                                             {%if session['filePassword'] == thread['password']%}
@@ -163,7 +163,7 @@
                                     {%if thread['options'] != None%}
                                         <a class="name optionsName" href="mailto:{{thread['options']}}" target="_blank">{{thread['name']}}##<span class="{{thread['trip']}}">{{thread['trip']}}</span></a>
                                     {%else%}
-                                        <span class="name">{{thread['name']}}##<span class="{{thread['trip']}}">{{thread['trip']}}</span></a>
+                                        <span class="name">{{thread['name']}}##<span class="{{thread['trip']}}">{{thread['trip']}}</span></a></span>
                                     {%endif%}
                                 {%else%}
                                     {%if thread['trip'] != None%}
