@@ -169,16 +169,16 @@
                     {%endif%}
                     {%if thread['trip']|hasSignature == True%}
                         {%if thread['options'] != None%}
-                            <a class="name optionsName" href="mailto:{{thread['options']}}" target="_blank">{{thread['name']}}##<span class="{{thread['trip']}}">{{thread['trip']}}</span></a>
+                            <a class="name optionsName" href="mailto:{{thread['options']}}" target="_blank">{%if thread['name'] | length > 0%}{{thread['name']}}{%else%}{{boardData['anonymous']}}{%endif%}##<span class="{{thread['trip']}}">{{thread['trip']}}</span></a>
                         {%else%}
-                            <span class="name">{{thread['name']}}##<span class="{{thread['trip']}}">{{thread['trip']}}</span></a></span>
+                            <span class="name">{%if thread['name'] | length > 0%}{{thread['name']}}{%else%}{{boardData['anonymous']}}{%endif%}##<span class="{{thread['trip']}}">{{thread['trip']}}</span></a></span>
                         {%endif%}
                     {%else%}
                         {%if thread['trip'] != None%}
                             {%if thread['options'] != None%}
-                                <a class="name optionsName" href="mailto:{{thread['options']}}" target="_blank">{{thread['name']}}##{{thread['trip']}}</a>
+                                <a class="name optionsName" href="mailto:{{thread['options']}}" target="_blank">{%if thread['name'] | length > 0%}{{thread['name']}}{%else%}{{boardData['anonymous']}}{%endif%}##{{thread['trip']}}</a>
                             {%else%}
-                                <span class="name">{{thread['name']}}##{{thread['trip']}}</span>
+                                <span class="name">{%if thread['name'] | length > 0%}{{thread['name']}}{%else%}{{boardData['anonymous']}}{%endif%}##{{thread['trip']}}</span>
                             {%endif%}
                         {%else%}
                             {%if thread['options'] != None%}

@@ -28,16 +28,16 @@
             {%endif%}
             {%if post['trip']|hasSignature == True%}
                 {%if post['options'] != None%}
-                    <a class="name optionsName" href="mailto:{{post['options']}}" target="_blank">{{post['name']}}##<span class="{{post['trip']}}">{{post['trip']}}</span></a>
+                    <a class="name optionsName" href="mailto:{{post['options']}}" target="_blank">{%if post['name'] | length > 0%}{{post['name']}}{%else%}{{boardData['anonymous']}}{%endif%}##<span class="{{post['trip']}}">{{post['trip']}}</span></a>
                 {%else%}
-                    <span class="name">{{post['name']}}##<span class="{{post['trip']}}">{{post['trip']}}</span></a></span>
+                    <span class="name">{%if post['name'] | length > 0%}{{post['name']}}{%else%}{{boardData['anonymous']}}{%endif%}##<span class="{{post['trip']}}">{{post['trip']}}</span></a></span>
                 {%endif%}
             {%else%}
                 {%if post['trip'] != None%}
                     {%if post['options'] != None%}
-                        <a class="name optionsName" href="mailto:{{post['options']}}" target="_blank">{{post['name']}}##{{post['trip']}}</a>
+                        <a class="name optionsName" href="mailto:{{post['options']}}" target="_blank">{%if post['name'] | length > 0%}{{post['name']}}{%else%}{{boardData['anonymous']}}{%endif%}##{{post['trip']}}</a>
                     {%else%}
-                        <span class="name">{{post['name']}}##{{post['trip']}}</span>
+                        <span class="name">{%if post['name'] | length > 0%}{{post['name']}}{%else%}{{boardData['anonymous']}}{%endif%}##{{post['trip']}}</span>
                     {%endif%}
                 {%else%}
                     {%if post['options'] != None%}
