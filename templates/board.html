@@ -39,18 +39,18 @@
                         <tr>
                             <td class="author-label">Name</td>
                             {%if session['name']%}
-                                <td><input class="author-input" type="text" tabindex="1" name="name" autocomplete="off" value="{{session['name']}}"></td>
+                                <td><input class="author-input" type="text" tabindex="1" name="name" autocomplete="off" value="{{session['name']}}" maxlength="{{data['nameCharacterLimit']}}"></td>
                             {%else%}
-                                <td><input class="author-input" type="text" tabindex="1" name="name" autocomplete="off" placeholder="{{boardData['anonymous']}}"></td>
+                                <td><input class="author-input" type="text" tabindex="1" name="name" autocomplete="off" placeholder="{{boardData['anonymous']}}" maxlength="{{data['nameCharacterLimit']}}"></td>
                             {%endif%}
                         </tr>
                         <tr>
                             <td class="author-label">Options</td>
-                            <td><input class="author-input" tabindex="2" type="text" name="options" autocomplete="off"></td>
+                            <td><input class="author-input" tabindex="2" type="text" name="options" autocomplete="off" maxlength="{{data['optionsCharacterLimit']}}"></td>
                         </tr>
                         <tr>
                             <td class="author-label">Subject</td>
-                            <td><input class="author-input" tabindex="3" type="text" name="subject" autocomplete="off"><input class="btn" id="post-button" type="submit" value="Post" tabindex="6"></td>
+                            <td><input class="author-input" tabindex="3" type="text" name="subject" autocomplete="off" maxlength="{{data['subjectCharacterLimit']}}"><input class="btn" id="post-button" type="submit" value="Post" tabindex="6"></td>
                         </tr>
                         <tr>
                             <td class="author-label">Comment</td>
@@ -72,7 +72,7 @@
                         </tr>
                         <tr>
                             <td class="author-label">Password</td>
-                            <td><input class="author-input" tabindex="9" type="text" name="password" autocomplete="off" value="{{filePass}}"><span class="small">(For post deletion)</span>
+                            <td><input class="author-input" tabindex="9" type="text" name="password" autocomplete="off" value="{{filePass}}" maxlength="{{data['passwordCharacterLimit']}}"><span class="small">(For post deletion)</span>
                         </tr>
                         <tr id="rules">
                             <td colspan="2">
