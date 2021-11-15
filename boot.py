@@ -325,8 +325,24 @@ def checkPost():
     if request.method != 'POST':
         return errors['RequestNotPost']
 
-
-
+#Check any text is over the character limit
+def checkCharLimit(subject, name, options, comment, password):
+    if subject != None:
+        if len(subject) > globalSettings['subjectCharacterLimit']: #checks subject length
+            return True, "Subject"
+    if name != None:
+        if len(name) > globalSettings['nameCharacterLimit']: #checks name length
+            return True, "Name"
+    if options != None:
+        if len(options) > globalSettings['optionsCharacterLimit']: #checks options length
+            return True, "Options"
+    if comment != None:
+        if len(comment) > globalSettings['characterLimit']: #checks comment length
+            return True, "Comment"
+    if password != None:
+        if len(password) > globalSettings['passwordCharacterLimit']: #checks password length
+            return True, "Password"
+    return False #if no errors, return false
 #filters
 @app.template_filter('ut') #convert unix time to normal datetime
 def normalizetime(timestamp):
@@ -1268,8 +1284,9 @@ def newThread():
             return render_template('error.html', errorMsg=errors['unfilledFields'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         comment = request.form['comment']
         comment = stripHTML(comment)
-        if len(comment) > globalSettings['characterLimit']: #Checks if comment is too long
-            return render_template('error.html', errorMsg=errors['characterLimit'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        charLengthCheck = checkCharLimit(subject, name, options, comment, filePass)
+        if charLengthCheck[0] == True: #Checks if any given text is too long
+            return render_template('error.html', errorMsg=errors['characterLimit'] + charLengthCheck[1], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         postLink = checkPostLink(comment)
         if board['captcha'] == 1: #Checks if the board has captcha enabled, and if so, checks if the entred captcha text is correct.
             if 'captcha' not in request.form:
@@ -1410,8 +1427,9 @@ def reply():
             return render_template('error.html', errorMsg=errors['unfilledFields'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         comment = request.form['comment']
         comment = stripHTML(comment)
-        if len(comment) > globalSettings['characterLimit']: #Checks if comment is too long
-            return render_template('error.html', errorMsg=errors['characterLimit'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        charLengthCheck = checkCharLimit(subject, name, options, comment, filePass)
+        if charLengthCheck[0] == True: #Checks if any given text is too long
+            return render_template('error.html', errorMsg=errors['characterLimit'] + charLengthCheck[1], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         postLink = checkPostLink(comment)        
         if board['captcha'] == 1: #Checks if the board has captcha enabled, and if so, checks if the entred captcha text is correct
             clearCaptcha() #clears captcha so it can't be used again to make a new thread.
