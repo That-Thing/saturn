@@ -11,7 +11,11 @@
     "enableRegistration": "on",
     "mimeTypes": "image/jpeg,image/png,image/gif,video/mp4,video/webm",
     "maxFiles": 3,
+    "subjectCharacterLimit": 50,
+    "nameCharacterLimit": 50,
+    "optionsCharacterLimit": 50,
     "characterLimit": 2000,
+    "passwordCharacterLimit": 50,
     "tripLength": 10,
     "pageThreads": 20,
     "thumbnailX": 150,
@@ -19,5 +23,5 @@
     "captchaDifficulty": 4,
     "captchaExpire": 5,
     "banMessage": "This user has been banned.",
-    "anonName":"Anonymous"
+    "anonName": "Anonymous"
 }
