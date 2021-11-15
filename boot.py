@@ -1268,6 +1268,8 @@ def newThread():
             return render_template('error.html', errorMsg=errors['unfilledFields'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         comment = request.form['comment']
         comment = stripHTML(comment)
+        if len(comment) > globalSettings['characterLimit']: #Checks if comment is too long
+            return render_template('error.html', errorMsg=errors['characterLimit'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         postLink = checkPostLink(comment)
         if board['captcha'] == 1: #Checks if the board has captcha enabled, and if so, checks if the entred captcha text is correct.
             if 'captcha' not in request.form:
@@ -1408,6 +1410,8 @@ def reply():
             return render_template('error.html', errorMsg=errors['unfilledFields'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         comment = request.form['comment']
         comment = stripHTML(comment)
+        if len(comment) > globalSettings['characterLimit']: #Checks if comment is too long
+            return render_template('error.html', errorMsg=errors['characterLimit'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         postLink = checkPostLink(comment)        
         if board['captcha'] == 1: #Checks if the board has captcha enabled, and if so, checks if the entred captcha text is correct
             clearCaptcha() #clears captcha so it can't be used again to make a new thread.

@@ -54,7 +54,7 @@
                         </tr>
                         <tr>
                             <td class="author-label">Comment</td>
-                            <td><textarea class="author-input" id="comment" name="comment" cols="48" rows="4" wrap="soft" tabindex="4" required></textarea></td>
+                            <td><textarea class="author-input" id="comment" name="comment" cols="48" rows="4" wrap="soft" tabindex="4" maxlength="{{data['characterLimit']}}" required></textarea></td>
                         </tr>
                         {% if boardData['captcha'] == 1 %}
                             <tr>
@@ -76,8 +76,9 @@
                         </tr>
                         <tr id="rules">
                             <td colspan="2">
-                                <ul id="rules">
-                                    <li class="small">Please read the <a href="{{url_for('boardRules', board=board)}}">Board Rules</a> and <a href="{{url_for('rules')}}">Global Rules</a> before posting.</li>
+                                <ul>
+                                    <li class="small">Please read the <a href="/{{board}}/rules">Board Rules</a> and <a href="{{url_for('rules')}}">Global Rules</a> before posting.</li>
+                                    <li class="small">Max character limit: {{data['characterLimit']}}</li>
                                 </ul>
                             </td>
                         </tr>
