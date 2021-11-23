@@ -236,7 +236,7 @@ def bumpOrder(board):
         WHERE child.thread = parent.number
         AND parent.board=%s
         AND child.number = (
-            SELECT MAX(c1.number) FROM posts c1 WHERE (c1.options <> 'sage' OR c1.options IS NULL) AND c1.thread = parent.number #This seems to cause the script to only return posts with options
+            SELECT MAX(c1.number) FROM posts c1 WHERE (c1.options <> 'sage' OR c1.options IS NULL) AND c1.thread = parent.number
         )
         UNION 
         SELECT parent.*, parent.number
@@ -249,6 +249,32 @@ def bumpOrder(board):
         ORDER BY bumporder desc
         ;
     ''', (board, board))
+    posts = cursor.fetchall()
+    return posts
+#Bump order but it only returns posts with the specified text. 
+def searchBumpOrder(board, search):
+    search = search.replace ("'", "''")
+    print(search)
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute(f''' 
+        SELECT parent.*, child.number AS bumporder FROM posts parent,
+        posts child
+        WHERE child.thread = parent.number
+        AND parent.board='{board}'
+        AND child.number = (
+            SELECT MAX(c1.number) FROM posts c1 WHERE (c1.options <> 'sage' OR c1.options IS NULL) AND c1.thread = parent.number AND (c1.message LIKE '%{search}%' OR c1.subject LIKE '%{search}%')
+        )
+        UNION 
+        SELECT parent.*, parent.number
+        FROM posts parent
+        WHERE parent.board='{board}' AND
+            NOT EXISTS (SELECT * FROM posts c2
+            WHERE c2.thread = parent.number)
+            AND NOT EXISTS (SELECT * FROM posts c3
+            WHERE parent.thread = c3.number)
+        ORDER BY bumporder desc
+        ;
+    ''')
     posts = cursor.fetchall()
     return posts
 def returnHash(password):
@@ -1106,6 +1132,9 @@ def getThreads(uri):
 @app.route('/<board>/', methods=['GET'])
 def boardPage(board):
 #    try:
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
+        board = cursor.fetchone()
         if request.cookies.get('ownedPosts') != None:
             ownedPosts = json.loads(request.cookies.get('ownedPosts')) #gets posts the current user has made for (you)s
         else:
@@ -1115,12 +1144,14 @@ def boardPage(board):
         else:
             hidden = {}
         filePass = checkFilePass() #gets user's password for files
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
-        board = cursor.fetchone()
         if board == None:
             return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
-        posts = bumpOrder(board['uri'])
+        #Get search argument from url
+        if not request.args.get('search', type=str): #Board filter arguments
+            posts = bumpOrder(board['uri'])
+        else:
+            print(request.args.get('search', type=str))
+            posts = searchBumpOrder(board['uri'], request.args.get('search', type=str))
         postLength = len(posts)
         posts = posts[0:1*board['perPage']]
         path = os.path.join(globalSettings['bannerLocation'], board['uri'])
