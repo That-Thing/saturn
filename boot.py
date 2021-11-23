@@ -368,7 +368,7 @@ def checkCharLimit(subject, name, options, comment, password):
     if password != None:
         if len(password) > globalSettings['passwordCharacterLimit']: #checks password length
             return True, "Password"
-    return False #if no errors, return false
+    return False, '' #if no errors, return false
 #filters
 @app.template_filter('ut') #convert unix time to normal datetime
 def normalizetime(timestamp):
@@ -546,6 +546,7 @@ def getThumbnailLocation(file):
     ext = ext[1:]
     mimeTypes = globalSettings['mimeTypes'].split(',')
     mimeTypes.append("image/jpg") #This is a bad way of doing this, but it works.
+    mimeTypes.append("image/jfif") #I hate whoever made the JFIF format. 
     type = [y for y in mimeTypes if ext.lower() in y.lower()][0]
     if type.startswith('video'):
         return f"{file[:-len(ext)-1]}s.jpg"
@@ -1181,7 +1182,11 @@ def boardNumPage(board, page):
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute('SELECT * FROM boards WHERE uri=%s', [board])
         board = cursor.fetchone()
-        posts = bumpOrder(board['uri'])
+        if not request.args.get('search', type=str): #Board filter arguments
+            posts = bumpOrder(board['uri'])
+        else:
+            print(request.args.get('search', type=str))
+            posts = searchBumpOrder(board['uri'], request.args.get('search', type=str))
         postLength = len(posts)
         posts = posts[(page-1)*board['perPage']:page*board['perPage']]
         if posts:
@@ -1377,7 +1382,7 @@ def newThread():
 @app.route('/<board>/thread/<thread>', methods=['GET'])
 @app.route('/<board>/thread/<thread>', methods=['GET'])
 def thread(board, thread):
-    try:
+    #try:
         if request.cookies.get('ownedPosts') != None:
             ownedPosts = json.loads(request.cookies.get('ownedPosts')) #gets posts the current user has made for (you)s
         else:
@@ -1403,9 +1408,9 @@ def thread(board, thread):
         else:
             return render_template('thread.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, posts=posts, thread=parentPost[0], owned=ownedPosts, filePass=filePass, themes=themes)
         return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
-    except Exception as e:
-        print(e)
-        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+    #except Exception as e:
+    #    print(e)
+    #    return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 
 @app.route('/reply', methods=['POST'])
 def reply():
