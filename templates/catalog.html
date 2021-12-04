@@ -117,10 +117,12 @@
                                     </a>
                                 </div>
                             {%endif%}
-                            {%if thread['subject'] != None%}
-                                <span class="subject">{{thread['subject']}}</span>
-                            {%endif%}
-                            <blockquote class="catalog-comment">{{thread['message'] | checkMarkdown(thread['number'], board, thread['number']) | safe}}</blockquote>
+                            <div class="catalog-text">
+                                {%if thread['subject'] != None%}
+                                    <span class="catalog-subject">{{thread['subject']}}</span>
+                                {%endif%}
+                                <blockquote class="catalog-comment">{{thread['message'] | checkMarkdown(thread['number'], board, thread['number']) | safe}}</blockquote>
+                            </div>
                         </div>
                     </div>
                 {% endfor %}
