@@ -1129,10 +1129,46 @@ def getThreads(uri):
     threads = cursor.fetchall()
     return threads
 
+
+#board catalog (pretty much just a copy-paste of the board code)
+@app.route('/<board>/catalog')
+def catalog(board):
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
+        board = cursor.fetchone()
+        if request.cookies.get('ownedPosts') != None:
+            ownedPosts = json.loads(request.cookies.get('ownedPosts')) #gets posts the current user has made for (you)s
+        else:
+            ownedPosts = {}
+        if request.cookies.get('hidden') != None:
+            hidden = json.loads(request.cookies.get('hidden'))
+        else:
+            hidden = {}
+        filePass = checkFilePass() #gets user's password for files
+        if board == None:
+            return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
+        #Get search argument from url
+        if not request.args.get('search', type=str): #Board filter arguments
+            posts = bumpOrder(board['uri'])
+        else:
+            print(request.args.get('search', type=str))
+            posts = searchBumpOrder(board['uri'], request.args.get('search', type=str))
+        path = os.path.join(globalSettings['bannerLocation'], board['uri'])
+        if len(os.listdir(path)) > 0:
+            banner = os.path.join(path, random.choice(os.listdir(path)))
+        else:
+            banner = "static/images/defaultbanner.png"
+        if board['captcha'] == 1:
+            captcha = generateCaptcha(globalSettings['captchaDifficulty'])
+            return render_template('catalog.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, captcha=captcha, threads=posts, filePass=filePass, owned=ownedPosts, hidden=hidden, page=1, themes=themes)
+        else:
+            return render_template('catalog.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, threads=posts, filePass=filePass, owned=ownedPosts, hidden=hidden,page=1, themes=themes)
+
+
 #board page
 @app.route('/<board>/', methods=['GET'])
 def boardPage(board):
-#    try:
+    try:
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
         board = cursor.fetchone()
@@ -1165,10 +1201,9 @@ def boardPage(board):
             return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, captcha=captcha, threads=posts, filePass=filePass, postLength=postLength, owned=ownedPosts, hidden=hidden, page=1, themes=themes)
         else:
             return render_template('board.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, threads=posts, filePass=filePass, postLength=postLength, owned=ownedPosts, hidden=hidden,page=1, themes=themes)
-        return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
-#    except Exception as e:
-#        print(e)
-#        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+    except Exception as e:
+        print(e)
+        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 
 #individual pages
 @app.route('/<board>/<int:page>', methods=['GET'])

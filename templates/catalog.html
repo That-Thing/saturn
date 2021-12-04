@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>/{{board}}/ - {{boardData['name']}}</title>
+        <meta charset="UTF-8">
+        <link href="{{ url_for('static', filename='css/global.css') }}" type="text/css" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/board.css') }}" type="text/css" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/markdown.css') }}" type="text/css" rel="stylesheet">
+        <link rel="shortcut icon" type="image/png" href="/{{data['faviconUrl']}}"/>
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css">
+    </head>
+    <body class="{{currentTheme}}">
+        <nav>
+            {% include 'nav.html' %}
+            <span id="nav-secondary">
+                <span>
+                    [
+                    <a href="#banner"><i class="fas fa-arrow-up"></i></a>
+                    /
+                    <a href="#footer"><i class="fas fa-arrow-down"></i></a>
+                    ]
+                </span>
+                <div class="nav-button" onclick="showHiddenMenu()"><i class="fas fa-eye-slash text-icon"></i><label>Hidden Posts</label></div>
+            </span>
+        </nav>
+        <div id="board-info">
+            <img src="/{{banner}}" id="banner" alt="banner">
+            <h1 class="center" id="board-name">/{{board}}/ - {{boardData['name']}}</h1>
+            <h4 class="center">{{boardData['description']}}</h4>
+        </div>
+        <div id="toggle-author-box">
+            <button class="btn" onclick="showAuthor()">Start a new thread</button>
+        </div>
+        <div id="author-container" style="display: none;">  
+            <form action="{{url_for('newThread')}}" method="POST" id="authorForm" enctype="multipart/form-data">
+                <input type="hidden" name="board" value="{{board}}">
+                <table>
+                    <tbody>
+                        <tr>
+                            <td class="author-label">Name</td>
+                            {%if session['name']%}
+                                <td><input class="author-input" type="text" tabindex="1" name="name" autocomplete="off" value="{{session['name']}}" maxlength="{{data['nameCharacterLimit']}}"></td>
+                            {%else%}
+                                <td><input class="author-input" type="text" tabindex="1" name="name" autocomplete="off" placeholder="{{boardData['anonymous']}}" maxlength="{{data['nameCharacterLimit']}}"></td>
+                            {%endif%}
+                        </tr>
+                        <tr>
+                            <td class="author-label">Options</td>
+                            <td><input class="author-input" tabindex="2" type="text" name="options" autocomplete="off" maxlength="{{data['optionsCharacterLimit']}}"></td>
+                        </tr>
+                        <tr>
+                            <td class="author-label">Subject</td>
+                            <td><input class="author-input" tabindex="3" type="text" name="subject" autocomplete="off" maxlength="{{data['subjectCharacterLimit']}}"><input class="btn" id="post-button" type="submit" value="Post" tabindex="6"></td>
+                        </tr>
+                        <tr>
+                            <td class="author-label">Comment</td>
+                            <td><textarea class="author-input" id="comment" name="comment" cols="48" rows="4" wrap="soft" tabindex="4" maxlength="{{data['characterLimit']}}" required></textarea></td>
+                        </tr>
+                        {% if boardData['captcha'] == 1 %}
+                            <tr>
+                                <td class="author-label">Verification</td>
+                                <td id="captcha-td"><img src="/{{captcha}}" tabindex="5" class="captcha"><input class="author-input" tabindex="6" type="text" name="captcha" autocomplete="off" required></td>
+                                
+                            </tr>
+                        {% endif %}
+                        <tr>
+                            <td class="author-label">File</td>
+                            <td>
+                                <input id="file-input" name="file" type="file" multiple tabindex="7" required accept="{{data['mimeTypes']}}">
+                                <span id="spoiler">[<label><input type="checkbox" name="spoiler" value="on" tabindex="8">Spoiler?</label>]</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="author-label">Password</td>
+                            <td><input class="author-input" tabindex="9" type="text" name="password" autocomplete="off" value="{{filePass}}" maxlength="{{data['passwordCharacterLimit']}}"><span class="small">(For post deletion)</span>
+                        </tr>
+                        <tr id="rules">
+                            <td colspan="2">
+                                <ul>
+                                    <li class="small">Please read the <a href="/{{board}}/rules">Board Rules</a> and <a href="{{url_for('rules')}}">Global Rules</a> before posting.</li>
+                                    <li class="small">Max character limit: {{data['characterLimit']}}</li>
+                                </ul>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+        <div id="board-message">
+            <hr>
+            <span id="board-message-content">{{boardData['message']  | checkMarkdown(None, board, None) | safe}}</span>
+            <hr>
+        </div>
+        <div id="boardNavigation">
+            <span>
+              [<a href="{{url_for('boardPage', board=board)}}">Index</a>]
+            </span>
+            <span>
+              [<a href="#footer">Bottom</a>]
+            </span>
+        </div>
+        <div id="thread-list">
+            <div id="catalog-threads"> 
+                {% for thread in threads %}
+                    <div class="catalog-thread" id="t-{{thread['number']}}">
+                        <div class="catalog-op" id="{{thread['number']}}">
+                            {%if thread['files'] != None%}
+                                {%set files = thread['files'].split(',')%}
+                                {%set filenames = thread['filenames'].split(',')%}
+                                <div class="catalog-uploads">
+                                    <a class="linkImg" target="_blank" href="{{url_for('thread', board=board, thread=thread['number'])}}">
+                                        {%if thread['spoiler'] == 1%}
+                                            <img loading="lazy" class="catalog-thumbnail" src="/{{data['spoilerImage']}}">
+                                        {%else%}
+                                            <img loading="lazy" class="catalog-thumbnail" src="/{{files[0] | getThumbnailLocation}}">
+                                        {%endif%}
+                                    </a>
+                                </div>
+                            {%endif%}
+                            {%if thread['subject'] != None%}
+                                <span class="subject">{{thread['subject']}}</span>
+                            {%endif%}
+                            <blockquote class="catalog-comment">{{thread['message'] | checkMarkdown(thread['number'], board, thread['number']) | safe}}</blockquote>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        <footer id="footer">
+            <p>Any post made by a user is the responsibility of that user.</p>
+            <span id="footer-links">
+                <a href="{{url_for('faq')}}" target="_blank">FAQ</a>
+                •
+                <a href="{{url_for('rules')}}" target="_blank">Rules</a>
+                •
+                <a href="{{url_for('boardRules', board=board)}}" target="_blank">Board Rules</a>
+            </span>
+        </footer>
+        {% include 'hiddenPostsMenu.html' %}
+        <script src="{{ url_for('static', filename='js/themes.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/posting.js') }}"></script>
+    </body>
+</html>

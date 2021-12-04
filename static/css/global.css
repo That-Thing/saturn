@@ -584,9 +584,32 @@ p {
     margin: 5px;
     margin-left: 10px;
 }
-
-
-
+.catalog-threads {
+    text-align: center;
+}
+.catalog-thread {
+    display: inline-block;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    border: 1px solid var(--border-color);
+    vertical-align: top;
+    position: relative;
+    width: 12em;
+    height: 14em;
+    overflow: hidden;
+    overflow-y: hidden;
+    margin: 0.1em;
+}
+.catalog-thumbnail {
+    max-height: 100px;
+    margin: auto;
+    display: block;
+}
+.catalog-comment {
+    font-size: 70%;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+}
 
 
 
