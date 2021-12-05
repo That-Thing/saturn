@@ -94,23 +94,6 @@ mysql = MySQL(app)
 def reloadSettings():
     with open('./config/config.json') as configFile: #global config file
         globalSettings = json.load(configFile)
-    # globalSettings = dict(
-    #     port = reloadData["port"],
-    #     mediaLocation = reloadData["mediaLocation"],
-    #     siteName = reloadData["siteName"],
-    #     logoUrl = reloadData["siteLogo"],
-    #     faviconUrl = reloadData["siteFavicon"],
-    #     enableRegistration = reloadData["enableRegistration"],
-    #     requiredRole = reloadData["requiredRole"],
-    #     bannerLocation = reloadData["bannerLocation"],
-    #     mimeTypes = reloadData["mimeTypes"],
-    #     maxFiles = int(configData["maxFiles"]),
-    #     spoilerImage =  reloadData["spoilerImage"],
-    #     tripLength = reloadData["tripLength"],
-    #     pageThreads = reloadData["pageThreads"],
-    #     captchaDifficulty = int(reloadData['captchaDifficulty']),
-    #     captchaExpire = int(reloadData['captchaExpire'])
-    # )
     return globalSettings
 globalSettings = reloadSettings()
 def reloadLogSettings():
@@ -549,13 +532,33 @@ def getThumbnailLocation(file):
     mimeTypes.append("image/jfif") #I hate whoever made the JFIF format. 
     type = [y for y in mimeTypes if ext.lower() in y.lower()][0]
     if type.startswith('video'):
-        return f"{file[:-len(ext)-1]}s.jpg"
+        if os.path.exists(f"{file[:-len(ext)-1]}s.jpg"):
+            return f"{file[:-len(ext)-1]}s.jpg"
+        else:
+            return f"./static/images/file.png"
     elif type.startswith('image'):
-        return f"{file[:-len(ext)-1]}s.{ext}"
+        if os.path.exists(f"{file[:-len(ext)-1]}s.{ext}"):
+            return f"{file[:-len(ext)-1]}s.{ext}"
+        else:
+            return f"./static/images/file.png"
     elif type.startswith('audio'): #Generate thumbnail from album cover art later
-        return f"/static/images/audio.png"
+        return f"./static/images/audio.png"
     else: #Default file image
-        return f"/static/images/file.png"
+        return f"./static/images/file.png"
+
+@app.template_filter("countReplies")
+def countReplies(thread):
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute(f"SELECT * FROM posts WHERE thread = {thread} AND type=2")
+    posts = cursor.fetchall()
+    cursor.execute(f"SELECT * FROM posts WHERE thread = {thread} AND files IS NOT NULL")
+    files = cursor.fetchall()
+    filecount = 0
+    for x in files:
+        filecount += len(x['files'].split(','))
+    return [len(posts), filecount]
+
+
 
 #Make local timestamps
 #add relative times
@@ -1276,7 +1279,6 @@ def videoThumbnail(video, board, filename, ext):
             image = Image.fromarray(image)
             image.thumbnail(size)
             image.save(os.path.join(globalSettings['mediaLocation'], board, filename + "s.jpg"))
-            #cv2.imwrite(os.path.join(globalSettings['mediaLocation'], board, filename + "s.jpg"), image) #Write thumbnail image
     except IOError:
         return False
 def uploadFile(f, board, filename, spoiler):

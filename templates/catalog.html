@@ -121,6 +121,8 @@
                                 {%if thread['subject'] != None%}
                                     <span class="catalog-subject">{{thread['subject']}}</span>
                                 {%endif%}
+                                {%set replies = thread['number'] | countReplies%}
+                                <span class="catalog-info">R:{{replies[0]}} / I:{{replies[1]}}</span>
                                 <blockquote class="catalog-comment">{{thread['message'] | checkMarkdown(thread['number'], board, thread['number']) | safe}}</blockquote>
                             </div>
                         </div>

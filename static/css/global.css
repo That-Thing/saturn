@@ -594,11 +594,14 @@ p {
     border: 1px solid var(--border-color);
     vertical-align: top;
     position: relative;
-    width: 12em;
+    width: 10em;
     height: 14em;
     overflow: hidden;
     overflow-y: hidden;
     margin: 0.1em;
+}
+.catalog-thread:hover {
+    background-color: var(--marked-post);
 }
 .catalog-thumbnail {
     max-height: 100px;
@@ -619,7 +622,9 @@ p {
     color: var(--post-subject);
     font-weight: bold;
 }
-
+.catalog-info {
+    font-size: 70%;
+}
 
 
 
