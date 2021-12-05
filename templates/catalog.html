@@ -118,11 +118,11 @@
                                 </div>
                             {%endif%}
                             <div class="catalog-text">
+                                {%set replies = thread['number'] | countReplies%}
+                                <div class="catalog-info-container"><span class="catalog-info" title="Replies / Files">R:{{replies[0]}} / I:{{replies[1]}}</span></div>
                                 {%if thread['subject'] != None%}
                                     <span class="catalog-subject">{{thread['subject']}}</span>
                                 {%endif%}
-                                {%set replies = thread['number'] | countReplies%}
-                                <span class="catalog-info" title="Replies / Files">R:{{replies[0]}} / I:{{replies[1]}}</span>
                                 <blockquote class="catalog-comment">{{thread['message'] | checkMarkdown(thread['number'], board, thread['number']) | safe}}</blockquote>
                             </div>
                         </div>

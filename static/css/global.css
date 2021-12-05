@@ -626,7 +626,9 @@ p {
     font-size: 70%;
     cursor: help;
 }
-
+.catalog-info-container {
+    margin-top: 2px;
+}
 
 
 
