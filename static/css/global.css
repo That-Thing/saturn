@@ -624,6 +624,7 @@ p {
 }
 .catalog-info {
     font-size: 70%;
+    cursor: help;
 }
 
 
