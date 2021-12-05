@@ -97,8 +97,10 @@
             </form>
         </div>
         <div id="board-message">
-            <hr>
-            <span id="board-message-content">{{boardData['message']  | checkMarkdown(None, board, None) | safe}}</span>
+            {%if boardData['message'] | length > 0%}
+                <hr>
+                <span id="board-message-content">{{boardData['message']  | checkMarkdown(None, board, None) | safe}}</span>
+            {%endif%}
             <hr>
         </div>
         <div id="thread-navigation">
