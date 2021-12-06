@@ -1,5 +1,6 @@
 {
     "port": 8080,
+    "maxRequestSize": 100,
     "mediaLocation": "./media",
     "siteName": "Saturn",
     "logoUrl": "static/images/LogoS.png",
@@ -12,6 +13,8 @@
     "mimeTypes": "image/jpeg,image/png,image/gif,video/mp4,video/webm",
     "maxFiles": 3,
     "subjectCharacterLimit": 50,
+    "bumpLock": 150,
+    "maxPages":5,
     "nameCharacterLimit": 50,
     "optionsCharacterLimit": 50,
     "characterLimit": 2000,

@@ -80,7 +80,12 @@ app.secret_key = 'test'
 socketio = SocketIO(app)
 socketio.init_app(app, cors_allowed_origins="*")
 
-
+#global settings
+def reloadSettings():
+    with open('./config/config.json') as configFile: #global config file
+        globalSettings = json.load(configFile)
+    return globalSettings
+globalSettings = reloadSettings()
 
 #database
 app.config['MYSQL_HOST'] = databaseConfig["host"]
@@ -88,14 +93,9 @@ app.config['MYSQL_USER'] = databaseConfig["user"]
 app.config['MYSQL_PASSWORD'] = databaseConfig["password"]
 app.config['MYSQL_DB'] = databaseConfig["name"]
 app.config['TEMPLATES_AUTO_RELOAD'] = True
+app.config['MAX_CONTENT_LENGTH'] = globalSettings['maxRequestSize'] * 1024 * 1024
 mysql = MySQL(app)
 
-#global settings
-def reloadSettings():
-    with open('./config/config.json') as configFile: #global config file
-        globalSettings = json.load(configFile)
-    return globalSettings
-globalSettings = reloadSettings()
 def reloadLogSettings():
     with open('./config/logs.json') as logFile: #log config file
         logConfig = json.load(logFile)

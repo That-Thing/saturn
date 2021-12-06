@@ -21,6 +21,10 @@
                         <input type="number" step="1" name="port" id="serverPortInput" value="{{data['port']}}" required autocomplete="off"> <span class="small">Server must be restarted</span>
                     </label>
                     <label>
+                        Maximum size for requests:
+                        <input type="number" step="10" name="maxRequestSize" id="maxRequestSizeInput" value="{{data['maxRequestSize']}}" required autocomplete="off"> <span class="small">(mb)</span>
+                    </label>
+                    <label>
                         Media Location:
                         <input type="text" name="mediaLocation" id="serverMediaLocationInput" value="{{data['mediaLocation']}}" required autocomplete="off"> 
                     </label>
@@ -105,6 +109,14 @@
                     <label>
                         Password character limit:
                         <input type="number" step="1" name="passwordCharacterLimit" id="passwordCharacterLimitInput" value="{{data['passwordCharacterLimit']}}" required autocomplete="off">
+                    </label>
+                    <label>
+                        Thread bump lock:
+                        <input type="number" step="1" name="bumpLock" id="bumpLockInput" value="{{data['bumpLock']}}" required autocomplete="off"> <span class="small">Number of posts before thread locks</span>
+                    </label>
+                    <label>
+                        Maximum pages on board:
+                        <input type="number" step="1" name="maxPages" id="maxPagesInput" value="{{data['maxPages']}}" required autocomplete="off">
                     </label>
                     <label>
                         Tripcode Length:
