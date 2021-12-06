@@ -360,6 +360,13 @@ def checkFilesize(file):
         return False
     else:
         return True
+def checkBannerSize(file):
+    filesize = len(file.read()) #Get size of file in megabytes. 
+    print("Filesize:", filesize)
+    if filesize > globalSettings['maxBannerSize'] * 1024 * 1024:
+        return False
+    else:
+        return True
 #filters
 @app.template_filter('ut') #convert unix time to normal datetime
 def normalizetime(timestamp):
@@ -986,7 +993,10 @@ def uploadBanner(board):
         try:
             if sqlData['owner'] == session['username'] or int(session['group']) <= 1:
                 if magic.from_buffer(banner.read(1024), mime=True) not in mimes: #Check if the banner is an image,
-                    return render_template('error.html', errorMsg=errors['incorrectFiletype']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                    return render_template('error.html', errorMsg=errors['incorrectFiletype']+banner.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                banner.seek(0)
+                if checkBannerSize(banner) == False:
+                    return render_template('error.html', errorMsg=errors['filesizeExceeded']+banner.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
                 banner.seek(0)
                 path = os.path.join(globalSettings['bannerLocation'], board)
                 filename = secure_filename(banner.filename)

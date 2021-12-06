@@ -119,10 +119,6 @@
                         <input type="number" step="1" name="bumpLock" id="bumpLockInput" value="{{data['bumpLock']}}" required autocomplete="off"> <span class="small">Number of posts before thread locks</span>
                     </label>
                     <label>
-                        Maximum pages on board:
-                        <input type="number" step="1" name="maxPages" id="maxPagesInput" value="{{data['maxPages']}}" required autocomplete="off">
-                    </label>
-                    <label>
                         Tripcode Length:
                         <input type="number" step="1" name="tripLength" id="tripLength" value="{{data['tripLength']}}" required autocomplete="off"> <span class="small">Longer tripcodes take more time to bruteforce</span>
                     </label>
@@ -134,6 +130,15 @@
                         Thumbnail size:
                         <input type="number" step="1" name="thumbnailX" id="s-thumbnail-X" value="{{data['thumbnailX']}}" required autocomplete="off">x<input type="number" step="1" name="thumbnailY" id="s-thumbnail-Y" value="{{data['thumbnailY']}}" required autocomplete="off">
                         <span class="small">Sizes in px</span>
+                    </label>
+                    <h4>Board</h4>
+                    <label>
+                        Maximum pages on board:
+                        <input type="number" step="1" name="maxPages" id="maxPagesInput" value="{{data['maxPages']}}" required autocomplete="off">
+                    </label>
+                    <label>
+                        Maximum size for banners
+                        <input type="number" step="1" name="maxBannerSize" id="maxBannerSizeInput" value="{{data['maxBannerSize']}}" required autocomplete="off"> <span class="small">(mb)</span>
                     </label>
                     <h4>Captcha</h4>
                     <label>
