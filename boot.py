@@ -352,6 +352,14 @@ def checkCharLimit(subject, name, options, comment, password):
         if len(password) > globalSettings['passwordCharacterLimit']: #checks password length
             return True, "Password"
     return False, '' #if no errors, return false
+
+def checkFilesize(file):
+    filesize = len(file.read()) #Get size of file in megabytes. 
+    print("Filesize:", filesize)
+    if filesize > globalSettings['maxFilesize'] * 1024 * 1024:
+        return False
+    else:
+        return True
 #filters
 @app.template_filter('ut') #convert unix time to normal datetime
 def normalizetime(timestamp):
@@ -566,7 +574,9 @@ def countReplies(thread):
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
-
+@app.errorhandler(413)
+def request_exceeded(e):
+    return render_template('error.html', errorMsg=errors['requestExceeded'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 
 #Code ran before every request.
 @app.before_request 
@@ -1374,13 +1384,16 @@ def newThread():
             filenames = []
             filePaths = []
             for f in files: #downloads the files and stores them on the disk
-                filename = uploadFile(f, board['uri'], str(curTime), spoiler)
-                if filename == "Banned": #File was hash-banned
-                    return render_template('error.html', errorMsg=errors['fileBanned']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-                if filename == None: #This means the uploaded file was invalid. 
-                    return render_template('error.html', errorMsg=errors['incorrectFiletype']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-                filePaths.append(filename)
-                filenames.append(secure_filename(f.filename))
+                if checkFilesize(f) == True:
+                    filename = uploadFile(f, board['uri'], str(curTime), spoiler)
+                    if filename == "Banned": #File was hash-banned
+                        return render_template('error.html', errorMsg=errors['fileBanned']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                    if filename == None: #This means the uploaded file was invalid. 
+                        return render_template('error.html', errorMsg=errors['incorrectFiletype']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                    filePaths.append(filename)
+                    filenames.append(secure_filename(f.filename))
+                else:
+                    return render_template('error.html', errorMsg=errors['filesizeExceeded']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
             filenames = ','.join([str(x) for x in filenames])
             filePaths = ','.join([str(x) for x in filePaths])
         number = board['posts']+1
@@ -1519,13 +1532,16 @@ def reply():
                 filenames = []
                 filePaths = []
                 for f in files: #downloads the files and stores them on the disk
-                    filename = uploadFile(f, board['uri'], str(time.time()), spoiler)
-                    if filename == "Banned": #File was hash-banned
-                        return render_template('error.html', errorMsg=errors['fileBanned']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-                    if filename == None: #This means the uploaded file was invalid. 
-                        return render_template('error.html', errorMsg=errors['incorrectFiletype']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-                    filePaths.append(filename)
-                    filenames.append(secure_filename(f.filename))
+                    if checkFilesize(f) == True:
+                        filename = uploadFile(f, board['uri'], str(time.time()), spoiler)
+                        if filename == "Banned": #File was hash-banned
+                            return render_template('error.html', errorMsg=errors['fileBanned']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                        if filename == None: #This means the uploaded file was invalid. 
+                            return render_template('error.html', errorMsg=errors['incorrectFiletype']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                        filePaths.append(filename)
+                        filenames.append(secure_filename(f.filename))
+                    else:
+                        return render_template('error.html', errorMsg=errors['filesizeExceeded']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
                 filenames = ','.join([str(x) for x in filenames])
                 filePaths = ','.join([str(x) for x in filePaths])
                 cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s, %s, %s, NULL, NULL)', (name, subject, options, comment, number, curTime, request.form['thread'], board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode))                

@@ -19,5 +19,7 @@
     "invalidPost": "Invalid post",
     "registerDisabled": "Registrations are currently disabled",
     "invalidUri":"The uri you entered is not valid: ",
-    "characterLimit":"Character limit exceeded: "
+    "characterLimit":"Character limit exceeded: ",
+    "filesizeExceeded":"File exceeds filesize limit: ",
+    "requestExceeded":"Request too large"
 }
