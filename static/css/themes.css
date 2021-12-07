@@ -30,6 +30,7 @@
     --marked-post: #1d1d21; /*Background of marked post*/
     --marked-post-border: 1px solid #111; /*Border of marked post*/
     --banned-user: red; /*Banned user style*/
+    --alert: red;
 }
 nav {
     font-size: 70%;

@@ -936,6 +936,14 @@ def updateBoard(board):
                 desc = request.form['description']
                 anonymous = request.form['anonymous']
                 message = request.form['message']
+                if len(message) > globalSettings['maxBoardDescription']:
+                    return render_template('error.html', errorMsg=errors['characterLimit'] + "Board Message", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                if len(desc) > globalSettings['maxBoardDescription']:
+                    return render_template('error.html', errorMsg=errors['characterLimit'] + "Description", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                if len(name) > globalSettings['maxBoardName']:
+                    return render_template('error.html', errorMsg=errors['characterLimit'] + "Board Name", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                if len(anonymous) > nameCharacterLimit:
+                    return render_template('error.html', errorMsg=errors['characterLimit'] + "Default name", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
                 captcha = request.form['captcha']
                 perPage = int(request.form['perPage'])
                 if perPage > globalSettings['pageThreads']:

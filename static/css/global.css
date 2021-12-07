@@ -631,7 +631,11 @@ p {
 .catalog-info-container {
     margin-top: 2px;
 }
-
+.post-append {
+    color: var(--alert);
+    font-weight: bold;
+    display: inline-block;
+}
 
 
 

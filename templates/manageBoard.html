@@ -28,19 +28,19 @@
                     <h3>Board Settings</h3>
                     <label>
                         Board Name:
-                        <input type="text" name="name" value="{{board['name']}}" required autocomplete="off">
+                        <input type="text" name="name" value="{{board['name']}}" required autocomplete="off" maxlength="{{data['maxBoardName']}}">
                     </label>
                     <label>
                         Board Description:
-                        <input type="text" name="description" value="{{board['description']}}" required autocomplete="off">
+                        <input type="text" name="description" value="{{board['description']}}" required autocomplete="off" maxlength="{{data['maxBoardDescription']}}">
                     </label>
                     <label>
                         Default Anonymous Name:
-                        <input type="text" name="anonymous" value="{{board['anonymous']}}" required autocomplete="off">
+                        <input type="text" name="anonymous" value="{{board['anonymous']}}" required autocomplete="off" maxlength="{{data['nameCharacterLimit']}}">
                     </label>
                     <label>
                         Board Message:
-                        <textarea type="textarea" name="message" wrap="soft" tabindex="4" style="width: 100%;">{{board['message']}}</textarea>
+                        <textarea type="textarea" name="message" wrap="soft" tabindex="4" maxlength="{{data['maxBoardMessage']}}" style="width: 100%;">{{board['message']}}</textarea>
                     </label>
                     <label>
                         Captcha:
