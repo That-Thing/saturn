@@ -942,7 +942,7 @@ def updateBoard(board):
                     return render_template('error.html', errorMsg=errors['characterLimit'] + "Description", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
                 if len(name) > globalSettings['maxBoardName']:
                     return render_template('error.html', errorMsg=errors['characterLimit'] + "Board Name", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-                if len(anonymous) > nameCharacterLimit:
+                if len(anonymous) > globalSettings['nameCharacterLimit']:
                     return render_template('error.html', errorMsg=errors['characterLimit'] + "Default name", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
                 captcha = request.form['captcha']
                 perPage = int(request.form['perPage'])
