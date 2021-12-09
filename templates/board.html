@@ -32,8 +32,7 @@
             <button class="btn" onclick="showAuthor()">Start a new thread</button>
         </div>
         <div id="author-container" style="display: none;">  
-            <form action="{{url_for('newThread')}}" method="POST" id="authorForm" enctype="multipart/form-data">
-                <input type="hidden" name="board" value="{{board}}">
+            <form action="{{url_for('newThread', board=board)}}" method="POST" id="authorForm" enctype="multipart/form-data">
                 <table>
                     <tbody>
                         <tr>

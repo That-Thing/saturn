@@ -41,9 +41,7 @@
         </div>
         <div id="author-container">  
             <span class="small">Reply mode</span>
-            <form action="{{url_for('reply')}}" method="POST" id="authorForm" enctype="multipart/form-data">
-                <input type="hidden" name="board" value="{{board}}">
-                <input type="hidden" name="thread" value="{{thread['number']}}">
+            <form action="{{url_for('reply', board=board, thread=thread['number'])}}" method="POST" id="authorForm" enctype="multipart/form-data">
                 <table>
                     <tbody>
                         <tr>

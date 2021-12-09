@@ -19,16 +19,25 @@
                     </div>
                 {%else%}
                     <h1 class="box-header center">Banned</h1>
-                    <div class="center content">
-                        You are banned for <span class="banned-user">{{banned['length'] | simplifyTime}}</span><br>
-                        Reason: {{banned['reason']}}<br>
-                        Unban date: {{banned['date'] |futureTime(banned['length'])}}
-                    </div>
+                    {%for ban in banned%}
+                        <div class="center content">
+                            Ban ID: {{ban['id']}}<br>
+                            You are banned for <span class="banned-user">{{ban['length'] | simplifyTime}}</span><br>
+                            {%if ban['board'] == None%}
+                                You are banned globally
+                            {%else%}
+                                You are banned on <a href="{{url_for('boardPage', board=ban['board'])}}">/{{ban['board']}}/</a>
+                            {%endif%}
+                            <br>
+                            Reason: {{ban['reason']}}<br>
+                            Unban date: {{ban['date'] |futureTime(ban['length'])}}
+                        </div>
+                        {%if unbanned[ban.index0] == True%}
+                            <h3 class="center">Now that you have seen this message your ban has been lifted.</h3>
+                        {%endif%}
+                    {%endfor%}
+                {%endif%}
 
-                {%endif%}
-                {%if unbanned == True%}
-                    <h2 class="center">Now that you have seen this message your ban has been lifted.</h2>
-                {%endif%}
             </div>
         </div>
         {%if image and banned!=None%}

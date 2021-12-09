@@ -165,6 +165,15 @@ function deletePrompt(post) {
   children['password'].value = password;
   children['delete'].click();
 }
+//User banning
+function reasonPrompt(post) {
+  var children = post.parentNode.children;
+  var length = prompt("Length (ex: 1y2m3d4h5)");
+  var reason = prompt("Enter a reason for ban (optional)");
+  children['length'].value = length;
+  children['reason'].value = reason;
+  children['ban'].click();
+}
 
 //paste support
 document.getElementById("authorForm").addEventListener('paste', e => {

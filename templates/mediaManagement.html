@@ -86,6 +86,13 @@
                                         <input type="checkbox" name="ban-{{file}}" value="ban-{{file}}">
                                     </label>
                                     <label>
+                                        Type of ban
+                                        <select name="type-{{post['number']}}-{{post['board']}}">
+                                            <option value="global">Global ban</option>
+                                            <option value="board">Board</option>
+                                        </select>
+                                    </label>
+                                    <label>
                                         Reason:
                                         <input type="text" name="banreason-{{file}}" placeholder="ban reason">
                                     </label>

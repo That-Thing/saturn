@@ -141,6 +141,13 @@
                                     <input type="checkbox" name="ban-{{post['number']}}-{{post['board']}}" value="{{post['number']}}-{{post['board']}}">
                                 </label>
                                 <label>
+                                    Type of ban
+                                    <select name="type-{{post['number']}}-{{post['board']}}">
+                                        <option value="global">Global ban</option>
+                                        <option value="board">Board</option>
+                                    </select>
+                                </label>
+                                <label>
                                     Reason:
                                     <input type="text" name="banreason-{{post['number']}}-{{post['board']}}" placeholder="ban reason">
                                 </label>
