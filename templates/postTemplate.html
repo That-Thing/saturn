@@ -15,17 +15,20 @@
                             <div class="dropdown-link dropdown-submit" onclick="deletePrompt(this)">Delete</div>
                             <input class="dropdown-link dropdown-submit" type="submit" name="delete" value="Delete" style="display: none;">
                         {%endif%}
-                        <hr>
                         {%if session['group'] is defined and session['group'] <= 3%}
+                            <hr>
                             <input type="hidden" name="global-reason">
                             <input type="hidden" name="global-length">
-                            <div class="dropdown-link dropdown-submit" onclick="reasonPrompt(this)">Global Ban</div>
+                            <input type="hidden" name="global-message">
+                            <div class="dropdown-link dropdown-submit" onclick="banPrompt(this, 'global')">Global Ban</div>
                             <input class="dropdown-link dropdown-submit" type="submit" name="global-ban" value="Ban" style="display: none;">
                         {%endif%}
                         {%if boardData['owner'] or session['group'] is defined and session['group'] <= 3%}
+                            <hr>
                             <input type="hidden" name="reason">
                             <input type="hidden" name="length">
-                            <div class="dropdown-link dropdown-submit" onclick="reasonPrompt(this)">Ban</div>
+                            <input type="hidden" name="message">
+                            <div class="dropdown-link dropdown-submit" onclick="banPrompt(this, 'board')">Ban</div>
                             <input class="dropdown-link dropdown-submit" type="submit" name="ban" value="Ban" style="display: none;">
                         {%endif%}
                         <hr>  

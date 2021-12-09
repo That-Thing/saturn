@@ -166,15 +166,27 @@ function deletePrompt(post) {
   children['delete'].click();
 }
 //User banning
-function reasonPrompt(post) {
+function banPrompt(post, type) {
   var children = post.parentNode.children;
-  var length = prompt("Length (ex: 1y2m3d4h5)");
-  var reason = prompt("Enter a reason for ban (optional)");
-  children['length'].value = length;
-  children['reason'].value = reason;
-  children['ban'].click();
-}
+  var length = null;
+  var reason = null;
+  var message = null;
+  length = prompt("Length (ex: 1y2m3d4h5)");
+  reason = prompt("Enter a reason for ban (optional)");
+  message = prompt("Message to append (optional)");
+  if(type == "board") {
+    children['length'].value = length;
+    children['reason'].value = reason;
+    children['message'].value = message;
+    children['ban'].click();
+  } else if (type == "global") {
+    children['global-length'].value = length;
+    children['global-reason'].value = reason;
+    children['global-message'].value = message;
+    children['global-ban'].click();
+  };
 
+}
 //paste support
 document.getElementById("authorForm").addEventListener('paste', e => {
   document.getElementById("file-input").files = e.clipboardData.files;

@@ -21,7 +21,7 @@
                         <div class="ban">
                             <div class="ban-info">
                                 <span>Ban ID: {{ban['id']}}</span>
-                                <span>IP: {%if session['group'] <  data['cleartextIp']%}{{ban['ip']}}{%else%}{{ban['ip'] | hash}}{%endif%}</span>
+                                <span>IP: {%if session['group'] < data['cleartextIp']%}{{ban['ip']}}{%else%}{{ban['ip'] | hash}}{%endif%}</span>
                                 <span>Reason: {{ban['reason']}}</span>
                                 <span>Duration: {{ban['length'] | simplifyTime}}</span>
                                 <span>Date: {{ban['date'] | ut}}</span>
@@ -32,7 +32,7 @@
                                     <input type="hidden" name="id" value="{{ban['id']}}">
                                     <label>
                                         Set new ban length:
-                                        <input type="text" value="{{ban['length'] | complicateTime}}" placeholder="1y2m3d4h5" name="length">
+                                        <input type="text" value="{%if ban['length'] != None%}{{ban['length'] | complicateTime}}{%endif%}" placeholder="1y2m3d4h5" name="length">
                                     </label>
                                     <br>
                                     <label>

@@ -1601,7 +1601,7 @@ def reply(board, thread):
 
 
 
-@app.route('/<board>/actions/', methods=['POST'])
+@app.route('/<board>/actions', methods=['POST'])
 def postActions(board):
     if request.method == 'POST':
         if 'delete' in request.form:
@@ -1639,22 +1639,50 @@ def postActions(board):
                 if session['group'] >= 3:
                      return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
                 cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-                cursor.execute(f"SELECT * FROM posts WHERE board={board} AND number={int(request.form['post'])}")
+                cursor.execute(f"SELECT * FROM posts WHERE `board`='{board}' AND number={int(request.form['post'])}")
                 post = cursor.fetchone()
                 length = None
                 reason = None
                 append = None
-                if "global-legth" in request.form: #Check if length of ban was given
+                currentTime = time.time()
+                if "global-length" in request.form: #Check if length of ban was given
                     if len(request.form["global-length"]) > 0:
                         length = getMinutes(request.form["global-length"])
                 if "global-reason" in request.form: #Check if reason was given
                     if len(request.form["global-reason"]) > 0:
                         message = request.form["global-reason"]
-                if "global-append" in request.form:
-                    if len(request.form['global-append']) > 0: #Check if an append message is given
-                        append = request.form['global-append']
-                cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s, %s, %s)", (reason, length, str(post['ip']), currentTime, post['number'], post['board']))
+                if "global-message" in request.form:
+                    if len(request.form['global-message']) > 0: #Check if an append message is given
+                        append = request.form['global-message']
+                cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s, %s, %s)", (reason, length, str(post['ip']), currentTime, post['number'], None))
                 cursor.execute("UPDATE posts SET append=%s where number=%s AND board=%s", (append, request.form['post'], board))
+                mysql.connection.commit()
+                if logConfig['log-user-ban'] == 'on':
+                    storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {'ip':str(post['ip'])  , 'reason': reason, 'length':length}, None)
+                return redirect(url_for("boardPage", board=board))
+        if 'ban' in request.form:
+            if request.form['ban'] == 'Ban':
+                if session['group'] >= 3:
+                     return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+                cursor.execute(f"SELECT * FROM posts WHERE `board`='{board}' AND number={int(request.form['post'])}")
+                post = cursor.fetchone()
+                length = None
+                reason = None
+                append = None
+                currentTime = time.time()
+                if "length" in request.form: #Check if length of ban was given
+                    if len(request.form["length"]) > 0:
+                        length = getMinutes(request.form["length"])
+                if "reason" in request.form: #Check if reason was given
+                    if len(request.form["reason"]) > 0:
+                        message = request.form["reason"]
+                if "message" in request.form:
+                    if len(request.form['message']) > 0: #Check if an append message is given
+                        append = request.form['message']
+                cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s, %s, %s)", (reason, length, str(post['ip']), currentTime, post['number'], board))
+                cursor.execute("UPDATE posts SET append=%s where number=%s AND board=%s", (append, request.form['post'], board))
+                mysql.connection.commit()
                 if logConfig['log-user-ban'] == 'on':
                     storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {'ip':str(post['ip'])  , 'reason': reason, 'length':length}, None)
                 return redirect(url_for("boardPage", board=board))
@@ -2272,16 +2300,20 @@ def banned():
     boards = []
     image = None
     unbanned = []
+    print(banned)
     if len(os.listdir("static/images/banned")) > 0:
         image = os.path.join("static/images/banned", random.choice(os.listdir("static/images/banned")))
-    if banned != None:
+    if len(banned) > 0:
         for ban in banned:
-            if datetime.utcfromtimestamp(ban['date'])+timedelta(minutes = ban['length']) <= datetime.now(): #Checks if ban has expired. 
+            if ban['length'] != None and datetime.utcfromtimestamp(ban['date'])+timedelta(minutes = ban['length']) <= datetime.now(): #Checks if ban has expired. 
                 cursor.execute(f"DELETE FROM bans WHERE `id` = {ban['id']}")
                 mysql.connection.commit()
                 unbanned.append(True)
             else:
                 unbanned.append(False)
+    else:
+        banned = None
+        
     return render_template('banned.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes, banned=banned, image=image, unbanned=unbanned)
 
 @app.route("/bans", methods=['GET'])
