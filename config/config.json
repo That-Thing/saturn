@@ -22,6 +22,7 @@
     "tripLength": 10,
     "maxBoardName":30,
     "maxBoardUri": 5,
+    "perPage": 50,
     "maxBoardMessage": 256,
     "maxBoardDescription": 256,
     "pageThreads": 20,

@@ -841,17 +841,17 @@ def boardManagement():
 #Individual board management
 @app.route('/<board>/manage', methods=['GET'])
 def manageBoard(board):
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
-    sqlData = cursor.fetchone()
-    cursor.execute("SELECT * FROM rules WHERE type = 1 and board = %s", [board])
-    rules = cursor.fetchall()
-    if sqlData == None:
-        return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
-    msg=""
-    cursor.execute("SELECT * FROM banners WHERE board=%s", [board])
-    bannerData = cursor.fetchall()
-    try:
+    try:    
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
+        sqlData = cursor.fetchone()
+        cursor.execute("SELECT * FROM rules WHERE type = 1 and board = %s", [board])
+        rules = cursor.fetchall()
+        if sqlData == None:
+            return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
+        msg=""
+        cursor.execute("SELECT * FROM banners WHERE board=%s", [board])
+        bannerData = cursor.fetchall()        
         if int(session['group']) <= 1 or sqlData['owner'] == session['username']:
             return render_template('manageBoard.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=sqlData, bannerData=bannerData, msg=msg, themes=themes, rules=rules)
         else:

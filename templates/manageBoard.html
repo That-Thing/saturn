@@ -54,9 +54,57 @@
                             {% endif %}
                         </select>
                     </label>
+                    <label>
+                        Thread bump lock:
+                        <input type="number" step="1" name="bumpLock" value="{%if board['bumpLock'] != None%}{{board['bumpLock']}}{%else%}{{data['bumpLock']}}{%endif%}" required autocomplete="off"> <span class="small">Number of posts before thread locks</span>
+                    </label>
+                    <label>
+                        Maximum pages:
+                        <input type="number" step="1" name="threadLimit" value="{%if board['pages'] != None%}{{board['pages']}}{%else%}{{data['maxPages']}}{%endif%}" required autocomplete="off">
+                    </label>
+                    <h4>Posts</h4>
+                    <label>
+                        Maximum files:
+                        <input type="number" step="1" name="maxFiles" value="{%if board['maxFiles'] != None%}{{board['maxFiles']}}{%else%}{{data['maxFilesize']}}{%endif%}" required autocomplete="off">
+                    </label>
+                    <label>
+                        Maximum size for files:
+                        <input type="number" step="1" name="maxFilesize" value="{%if board['maxFileSize'] != None%}{{board['maxFileSize']}}{%else%}{{data['maxFilesize']}}{%endif%}" required autocomplete="off"> <span class="small">(mb)</span>
+                    </label>
+                    <label>
+                        Allowed MIME types:
+                        <input type="text" name="mimeTypes" id="mimeTypeInput" value="{%if board['mimeTypes'] != None%}{{board['mimeTypes']}}{%else%}{{data['mimeTypes']}}{%endif%}" required autocomplete="off"> <span class="small">Separate with ,</span>
+                    </label>
+                    <label>
+                        Subject character limit:
+                        <input type="number" step="1" name="subjectLimit" value="{%if board['subjectLimit'] != None%}{{board['subjectLimit']}}{%else%}{{data['subjectCharacterLimit']}}{%endif%}" required autocomplete="off">
+                    </label>
+                    <label>
+                        Name character limit:
+                        <input type="number" step="1" name="nameLimit" value="{%if board['nameLimit'] != None%}{{board['nameLimit']}}{%else%}{{data['nameCharacterLimit']}}{%endif%}" required autocomplete="off">
+                    </label>
+                    <label>
+                        Comment character limit:
+                        <input type="number" step="1" name="characterLimit" value="{%if board['characterLimit'] != None%}{{board['characterLimit']}}{%else%}{{data['characterLimit']}}{%endif%}" required autocomplete="off">
+                    </label>
                     <label> 
                         Threads per page:
-                        <input type="number" step="1" name="perPage" id="boardPerPage" class="settings-input" value="{{board['perPage']}}" required autocomplete="off">
+                        <input type="number" step="1" name="perPage" class="settings-input" value="{%if board['perPage'] != None%}{{board['perPage']}}{%else%}{{data['perPage']}}{%endif%}" required autocomplete="off">
+                    </label>
+                    <label>
+                        Enable thread-wide IDs:
+                        <input type="checkbox" name="postID" {%if board['postID'] == 1%}checked{%endif%} value="on">
+                        <input type="hidden" name="postID" value="off"/>
+                    </label>
+                    <label>
+                        Force anonymity:
+                        <input type="checkbox" name="forceAnonymity" {%if board['forceAnonymity'] == 1%}checked{%endif%} value="on">
+                        <input type="hidden" name="forceAnonymity" value="off"/>
+                    </label>
+                    <label>
+                        R9K mode:
+                        <input type="checkbox" name="r9k" {%if board['r9k'] == 1%}checked{%endif%} value="on">
+                        <input type="hidden" name="r9k" value="off"/>
                     </label>
                     <p><input class="btn btn-primary" type="submit" value="Update /{{board['uri']}}/"></p>
                 </form>
