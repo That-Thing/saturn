@@ -40,7 +40,7 @@
                     </label>
                     <label>
                         Board Message:
-                        <textarea type="textarea" name="message" wrap="soft" tabindex="4" maxlength="{{data['maxBoardMessage']}}" style="width: 100%;">{{board['message']}}</textarea>
+                        <textarea type="textarea" name="message" wrap="soft" tabindex="4" maxlength="{{data['maxBoardMessage']}}" style="width: 100%; height: {{board['message']| getHeight * 20}}px;">{{board['message']}}</textarea>
                     </label>
                     <label>
                         Captcha:
@@ -60,7 +60,7 @@
                     </label>
                     <label>
                         Maximum pages:
-                        <input type="number" step="1" name="threadLimit" value="{%if board['pages'] != None%}{{board['pages']}}{%else%}{{data['maxPages']}}{%endif%}" required autocomplete="off">
+                        <input type="number" step="1" name="maxPages" value="{%if board['pages'] != None%}{{board['pages']}}{%else%}{{data['maxPages']}}{%endif%}" required autocomplete="off">
                     </label>
                     <h4>Posts</h4>
                     <label>

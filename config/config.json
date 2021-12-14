@@ -25,7 +25,7 @@
     "perPage": 50,
     "maxBoardMessage": 256,
     "maxBoardDescription": 256,
-    "pageThreads": 20,
+    "pageThreads": 20, 
     "thumbnailX": 150,
     "thumbnailY": 150,
     "maxPages": 5,

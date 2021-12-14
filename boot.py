@@ -577,7 +577,9 @@ def countReplies(thread):
         filecount += len(x['files'].split(','))
     return [len(posts), filecount]
 
-
+@app.template_filter("getHeight")
+def getHeight(text):
+    return len(text.splitlines())
 
 #Make local timestamps
 #add relative times
@@ -929,17 +931,29 @@ def deleteBoard(board):
 @app.route('/<board>/update', methods=['POST'])
 def updateBoard(board):
     if request.method == 'POST':
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
-        boardData = cursor.fetchone()
-        if boardData == None:
-            return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
-        try:
+        #try:
+            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
+            boardData = cursor.fetchone()
+            if boardData == None:
+                return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
             if boardData['owner'] == session['username'] or int(session['group']) <= 1:
                 name = request.form['name']
                 desc = request.form['description']
                 anonymous = request.form['anonymous']
                 message = request.form['message']
+                bumpLock = int(request.form['bumpLock'])
+                maxPages = int(request.form['maxPages'])
+                maxFiles = int(request.form['maxFiles'])
+                maxFilesize = int(request.form['maxFilesize'])
+                mimeTypes = request.form['mimeTypes']
+                subjectLimit = int(request.form['subjectLimit'])
+                nameLimit = int(request.form['nameLimit'])
+                messageLimit = int(request.form['characterLimit'])
+                postID = request.form['postID']
+                forceAnonymity = request.form['forceAnonymity']
+                r9k = request.form['r9k']
+                captcha = request.form['captcha']
                 if len(message) > globalSettings['maxBoardDescription']:
                     return render_template('error.html', errorMsg=errors['characterLimit'] + "Board Message", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
                 if len(desc) > globalSettings['maxBoardDescription']:
@@ -948,11 +962,43 @@ def updateBoard(board):
                     return render_template('error.html', errorMsg=errors['characterLimit'] + "Board Name", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
                 if len(anonymous) > globalSettings['nameCharacterLimit']:
                     return render_template('error.html', errorMsg=errors['characterLimit'] + "Default name", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-                captcha = request.form['captcha']
                 perPage = int(request.form['perPage'])
                 if perPage > globalSettings['pageThreads']:
                     perPage = globalSettings['pageThreads']
-                cursor.execute("UPDATE boards SET name=%s, description=%s, anonymous=%s, message=%s, captcha=%s, perPage=%s WHERE uri=%s", (name, desc, anonymous, message, captcha, perPage, board))
+                #Check if the values are acceptable
+                if postID == 'on':
+                    postID = 1
+                else:
+                    postID = 0
+                if forceAnonymity == 'on':
+                    forceAnonymity = 1
+                else:
+                    forceAnonymity = 0
+                if r9k == "on":
+                    r9k = 1
+                else:
+                    r9k = 0
+                if bumpLock == None or bumpLock > globalSettings['bumpLock']:
+                    bumpLock = globalSettings['bumpLock']
+                if maxPages == None or maxPages > globalSettings['maxPages']:
+                    maxPages = globalSettings['maxPages']
+                if  maxFiles == None or maxFiles > globalSettings['maxFiles']:
+                    maxFiles = globalSettings['maxFiles']
+                if  maxFilesize == None or maxFilesize > globalSettings['maxFilesize']:
+                    maxFilesize = globalSettings['maxFilesize']
+                if  mimeTypes != None:
+                    mimeTypes = mimeTypes.split(",")
+                    for type in mimeTypes:
+                        if type not in globalSettings['mimeTypes'].split(','):
+                            mimeTypes.remove(type)
+                    mimeTypes = ",".join(mimeTypes)
+                if subjectLimit == None or subjectLimit > globalSettings['subjectCharacterLimit']:
+                    subjectLimit = globalSettings['subjectCharacterLimit']
+                if nameLimit == None or nameLimit > globalSettings['nameCharacterLimit']:
+                    nameLimit = globalSettings['nameCharacterLimit']
+                if messageLimit == None or messageLimit > globalSettings['characterLimit']:
+                    messageLimit = globalSettings['characterLimit']
+                cursor.execute(f"UPDATE boards SET name='{name}', description='{desc}', anonymous='{anonymous}', message=\"{message}\", captcha={captcha}, perPage={perPage}, bumpLock={bumpLock}, maxFiles={maxFiles}, maxFileSize={maxFilesize}, mimeTypes='{mimeTypes}', subjectLimit={subjectLimit}, nameLimit={nameLimit}, characterLimit={messageLimit}, postID={postID}, forceAnonymity={forceAnonymity}, r9k={r9k}, pages={maxPages} WHERE uri='{board}'")
                 mysql.connection.commit()
                 if logConfig['log-board-update'] == 'on':
                     cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
@@ -963,9 +1009,9 @@ def updateBoard(board):
                 return redirect(url_for('manageBoard', board=board))
             else:
                 return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-        except Exception as e:
-            print(e)
-            return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        #except Exception as e:
+        #    print(e)
+        #    return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     else:
         return errors['RequestNotPost']
 
