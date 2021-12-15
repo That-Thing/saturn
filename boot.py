@@ -1473,7 +1473,7 @@ def newThread(board):
             filenames = ','.join([str(x) for x in filenames])
             filePaths = ','.join([str(x) for x in filePaths])
         number = board['posts']+1
-        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, %s, %s, %s, %s, %s, %s, %s, %s, NULL, NULL)', (name, subject, options, comment, number, curTime, number, board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode))
+        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, %s, %s, %s, %s, %s, %s, %s, %s, NULL, NULL, 0)', (name, subject, options, comment, number, curTime, number, board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode))
         if postLink != False:
             for x in postLink:
                 cursor.execute("SELECT * FROM posts WHERE number = %s", [x])
@@ -1549,6 +1549,18 @@ def reply(board, thread):
         board = cursor.fetchone()
         if board == None: #Returns a 404 if board doesn't exist
             return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
+        #Check if board is locked
+        cursor.execute(f"SELECT * FROM posts WHERE number={thread} AND type=1")
+        if cursor.fetchone()['locked'] == 1:
+            return render_template('error.html', errorMsg=errors['threadLocked'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        #Check if the post reaches the bump lock
+        cursor.execute(f"SELECT * FROM posts WHERE thread={thread} AND type=2")
+        bumpLock = globalSettings['bumpLock']
+        if board['bumpLock'] != None:
+            bumpLock = board['bumpLock']
+        if len(cursor.fetchall()) >= bumpLock: #Lock the thread
+            cursor.execute(f"UPDATE posts SET locked=1 WHERE type=1 AND number={thread}")
+            cursor.connection.commit()
         tripcode = None
         curTime = time.time()
         number = board['posts']+1
@@ -1587,7 +1599,7 @@ def reply(board, thread):
             return render_template('error.html', errorMsg=errors['unfilledFields'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         comment = request.form['comment']
         comment = stripHTML(comment)
-        charLengthCheck = checkCharLimit(subject, name, options, comment, filePass)
+        charLengthCheck = checkCharLimit(board, subject, name, options, comment, filePass)
         if charLengthCheck[0] == True: #Checks if any given text is too long
             return render_template('error.html', errorMsg=errors['characterLimit'] + charLengthCheck[1], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         postLink = checkPostLink(comment)        
@@ -1618,9 +1630,9 @@ def reply(board, thread):
                         return render_template('error.html', errorMsg=errors['filesizeExceeded']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
                 filenames = ','.join([str(x) for x in filenames])
                 filePaths = ','.join([str(x) for x in filePaths])
-                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s, %s, %s, NULL, NULL)', (name, subject, options, comment, number, curTime, thread, board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode))                
+                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s, %s, %s, NULL, NULL, 0)', (name, subject, options, comment, number, curTime, thread, board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode))                
         else: #No files are given
-            cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s, %s, %s, %s, NULL, NULL)', (name, subject, options, comment, number, curTime, thread, board['uri'], str(request.remote_addr), spoiler,filePass, tripcode))
+            cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s, %s, %s, %s, NULL, NULL, 0)', (name, subject, options, comment, number, curTime, thread, board['uri'], str(request.remote_addr), spoiler,filePass, tripcode))
         if postLink != False:
             for x in postLink:
                 cursor.execute("SELECT * FROM posts WHERE number = %s", [x])

@@ -21,5 +21,6 @@
     "invalidUri":"The uri you entered is not valid: ",
     "characterLimit":"Character limit exceeded: ",
     "filesizeExceeded":"File exceeds filesize limit: ",
-    "requestExceeded":"Request too large"
+    "requestExceeded":"Request too large",
+    "threadLocked": "This thread is locked"
 }
