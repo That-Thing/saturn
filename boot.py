@@ -369,9 +369,12 @@ def checkCharLimit(board, subject, name, options, comment, password):
             return True, "Password"
     return False, '' #if no errors, return false
 
-def checkFilesize(file):
-    filesize = len(file.read()) #Get size of file in megabytes. 
-    if filesize > globalSettings['maxFilesize'] * 1024 * 1024:
+def checkFilesize(board, file):
+    filesize = len(file.read()) #Get size of file in megabytes.
+    max = globalSettings['maxFilesize']
+    if board['maxFileSize'] != None:
+        max = board["maxFileSize"]
+    if filesize > max * 1024 * 1024:
         return False
     else:
         return True
@@ -1460,7 +1463,7 @@ def newThread(board):
             filenames = []
             filePaths = []
             for f in files: #downloads the files and stores them on the disk
-                if checkFilesize(f) == True:
+                if checkFilesize(board, f) == True:
                     filename = uploadFile(f, board['uri'], str(curTime), spoiler)
                     if filename == "Banned": #File was hash-banned
                         return render_template('error.html', errorMsg=errors['fileBanned']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
@@ -1618,7 +1621,7 @@ def reply(board, thread):
                 filenames = []
                 filePaths = []
                 for f in files: #downloads the files and stores them on the disk
-                    if checkFilesize(f) == True:
+                    if checkFilesize(board, f) == True:
                         filename = uploadFile(f, board['uri'], str(time.time()), spoiler)
                         if filename == "Banned": #File was hash-banned
                             return render_template('error.html', errorMsg=errors['fileBanned']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
