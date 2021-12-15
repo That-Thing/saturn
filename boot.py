@@ -877,7 +877,7 @@ def createBoard():
                 if board:
                     return redirect(url_for('boardManagement', msg="Board already exists"))
                 else:
-                    cursor.execute("INSERT INTO boards VALUES (%s, %s, %s, %s, %s, '', 0, 0, 0, 0, %s)",(request.form['uri'].lower(), request.form['name'], request.form['description'], session['username'], globalSettings['anonName'], globalSettings['pageThreads'])) #create the board in the MySQL database
+                    cursor.execute("INSERT INTO boards VALUES (%s, %s, %s, %s, %s, '', 0, 0, 0, 0, %s, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, NULL)",(request.form['uri'].lower(), request.form['name'], request.form['description'], session['username'], globalSettings['anonName'], globalSettings['pageThreads'])) #create the board in the MySQL database
                     mysql.connection.commit()
                     if logConfig['log-board-creation'] == 'on':
                         cursor.execute("SELECT * FROM boards WHERE uri=%s", [request.form['uri']])

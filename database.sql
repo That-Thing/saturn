@@ -46,7 +46,7 @@ CREATE TABLE `banners` (
   `board` tinytext NOT NULL,
   `filename` text NOT NULL,
   `filesize` int NOT NULL DEFAULT '0' COMMENT 'File size in KB'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -66,7 +66,7 @@ CREATE TABLE `bans` (
   `post` text,
   `board` tinytext,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Banned users and IPs ';
+) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Banned users and IPs ';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -99,7 +99,7 @@ CREATE TABLE `boards` (
   `forceAnonymity` int NOT NULL DEFAULT '0',
   `r9k` int NOT NULL DEFAULT '0',
   `pages` int DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='The list of boards. ';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='The list of boards. ';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -112,7 +112,7 @@ DROP TABLE IF EXISTS `groups`;
 CREATE TABLE `groups` (
   `id` int NOT NULL,
   `name` text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -127,7 +127,7 @@ CREATE TABLE `hashbans` (
   `reason` text,
   `user` text NOT NULL COMMENT 'Banned by',
   `date` int NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -148,7 +148,7 @@ CREATE TABLE `logs` (
   `date` int NOT NULL COMMENT 'Unix timestamp',
   PRIMARY KEY (`id`),
   CONSTRAINT `logs_chk_1` CHECK (json_valid(`actionData`))
-) ENGINE=InnoDB AUTO_INCREMENT=375 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Logs for user actions. ';
+) ENGINE=InnoDB AUTO_INCREMENT=375 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Logs for user actions. ';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -176,7 +176,7 @@ CREATE TABLE `posts` (
   `trip` text COMMENT 'Tripcode or role signature',
   `replies` text COMMENT 'Replies for posts',
   `append` text COMMENT 'Message to be apended to the post'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -194,7 +194,7 @@ CREATE TABLE `reports` (
   `reason` text COMMENT 'Reason for report',
   `date` int DEFAULT NULL COMMENT 'Date of report',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -210,7 +210,7 @@ CREATE TABLE `rules` (
   `type` int NOT NULL COMMENT '0 for global 1 for board',
   `board` text,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -223,7 +223,7 @@ DROP TABLE IF EXISTS `server`;
 CREATE TABLE `server` (
   `posts` int NOT NULL DEFAULT '0',
   `salt` text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 

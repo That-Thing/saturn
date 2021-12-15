@@ -40,7 +40,7 @@
                     </label>
                     <label>
                         Board Message:
-                        <textarea type="textarea" name="message" wrap="soft" tabindex="4" maxlength="{{data['maxBoardMessage']}}" style="width: 100%; height: {{board['message']| getHeight * 20}}px;">{{board['message']}}</textarea>
+                        <textarea type="textarea" name="message" wrap="soft" tabindex="4" maxlength="{{data['maxBoardMessage']}}" style="width: 100%; {%if board['message'] != None and board['message'] | length > 0%}height: {{board['message']| getHeight * 20}}px;{%endif%}">{{board['message']}}</textarea>
                     </label>
                     <label>
                         Captcha:
