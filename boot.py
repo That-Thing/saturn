@@ -578,14 +578,14 @@ def getThumbnailLocation(file):
 @app.template_filter("countReplies")
 def countReplies(thread):
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute(f"SELECT * FROM posts WHERE thread = {thread} AND type=2")
+    cursor.execute(f"SELECT * FROM posts WHERE thread = {thread} AND type=2 AND files IS NULL")
     posts = cursor.fetchall()
     cursor.execute(f"SELECT * FROM posts WHERE thread = {thread} AND files IS NOT NULL")
     files = cursor.fetchall()
-    filecount = 0
-    for x in files:
-        filecount += len(x['files'].split(','))
-    return [len(posts), filecount]
+    #filecount = 0
+    #for x in files:
+    #    filecount += len(x['files'].split(','))
+    return [len(posts), len(files)]
 
 @app.template_filter("getHeight")
 def getHeight(text):

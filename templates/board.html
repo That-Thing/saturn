@@ -187,7 +187,7 @@
                                 {%endif%}
                                 <span>{{thread['date'] | ut}}</span>
                                 {%if thread['locked'] == 1%}
-                                    <span class="thread-icons"><i class="fas fa-lock text-icon" title="This thread is locked"></i></span>
+                                    <span class="thread-icons"><i class="fas fa-lock" title="This thread is locked"></i></span>
                                 {%endif%}
                                 <span><a class="postNumber" href="thread/{{thread['number']}}#{{thread['number']}}">No.</a><a href="thread/{{thread['number']}}#q{{thread['number']}}" class="postNumber">{{thread['number']}}</a></span>
                                 <span>[<a class="reply" href="thread/{{thread['number']}}#q{{thread['number']}}">Reply</a>]</span>
@@ -206,6 +206,8 @@
                                 <hr>
                                 {%if post['append'] | length > 0%}<span title="Message appended by staff" class="post-append"><i class="fas fa-exclamation-triangle text-icon"></i>{{post['append']}}</span>{%endif%}
                             {%endif%}
+                            {%set postCount = thread['number'] | countReplies%}
+                            <span class="thread-information">{{postCount[0]}} post{%if postCount[0] != 1%}s{%endif%} and {{postCount[1]}} image{%if postCount[1] != 1%}s{%endif%} omitted.</span>
                         </div>
                         {%set posts = thread['number'] | fivePosts(board)%}
                         {%for post in posts%}

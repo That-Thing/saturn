@@ -194,7 +194,7 @@
                     {%endif%}
                     <span>{{thread['date'] | ut}}</span>
                     {%if thread['locked'] == 1%}
-                        <span class="thread-icons"><i class="fas fa-lock text-icon" title="This thread is locked"></i></span>
+                        <span class="thread-icons"><i class="fas fa-lock" title="This thread is locked"></i></span>
                     {%endif%}
                     <span><a class="postNumber" href="#{{thread['number']}}">No.</a><a href="#q{{thread['number']}}" onclick="reply(this)" class="postNumber">{{thread['number']}}</a></span>
                     {%if thread['replies'] != None and thread['replies'].split(',')%}
