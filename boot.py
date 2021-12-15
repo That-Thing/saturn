@@ -339,18 +339,30 @@ def checkPost():
         return errors['RequestNotPost']
 
 #Check any text is over the character limit
-def checkCharLimit(subject, name, options, comment, password):
+def checkCharLimit(board, subject, name, options, comment, password):
+    #Everything defaults to the global settings
+    boardSubject = globalSettings['subjectCharacterLimit']
+    boardName = globalSettings['nameCharacterLimit']
+    boardMessage = globalSettings['characterLimit']
+    #Because the values can be null, these checks need to be in place so it doesn't give a error when comparing them. 
+    if board['subjectLimit'] != None:
+        boardSubject = board['subjectLimit']
+    if board['nameLimit'] != None:
+        boardName = board['nameLimit']
+    if board['characterLimit'] != None:
+        boardMessage = board['characterLimit']
+    #Check the length
     if subject != None:
-        if len(subject) > globalSettings['subjectCharacterLimit']: #checks subject length
+        if len(subject) > globalSettings['subjectCharacterLimit'] or len(subject) > boardSubject: #checks subject length
             return True, "Subject"
     if name != None:
-        if len(name) > globalSettings['nameCharacterLimit']: #checks name length
+        if len(name) > globalSettings['nameCharacterLimit'] or len(name) > boardName: #checks name length
             return True, "Name"
     if options != None:
         if len(options) > globalSettings['optionsCharacterLimit']: #checks options length
             return True, "Options"
     if comment != None:
-        if len(comment) > globalSettings['characterLimit']: #checks comment length
+        if len(comment) > globalSettings['characterLimit'] or len(comment) > boardMessage: #checks comment length
             return True, "Comment"
     if password != None:
         if len(password) > globalSettings['passwordCharacterLimit']: #checks password length
@@ -359,14 +371,12 @@ def checkCharLimit(subject, name, options, comment, password):
 
 def checkFilesize(file):
     filesize = len(file.read()) #Get size of file in megabytes. 
-    print("Filesize:", filesize)
     if filesize > globalSettings['maxFilesize'] * 1024 * 1024:
         return False
     else:
         return True
 def checkBannerSize(file):
     filesize = len(file.read()) #Get size of file in megabytes. 
-    print("Filesize:", filesize)
     if filesize > globalSettings['maxBannerSize'] * 1024 * 1024:
         return False
     else:
@@ -1433,7 +1443,7 @@ def newThread(board):
             return render_template('error.html', errorMsg=errors['unfilledFields'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         comment = request.form['comment']
         comment = stripHTML(comment)
-        charLengthCheck = checkCharLimit(subject, name, options, comment, filePass)
+        charLengthCheck = checkCharLimit(board, subject, name, options, comment, filePass)
         if charLengthCheck[0] == True: #Checks if any given text is too long
             return render_template('error.html', errorMsg=errors['characterLimit'] + charLengthCheck[1], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         postLink = checkPostLink(comment)
