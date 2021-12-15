@@ -1457,7 +1457,10 @@ def newThread(board):
                 return render_template('error.html', errorMsg=errors['incorrectCaptcha'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
             clearCaptcha() #clears captcha so it can't be used again to make a new thread
         files = request.files.getlist("file") #Gets all the files from the request
-        if len(files) > globalSettings['maxFiles']: #check if too many files are uploaded
+        maxFiles = globalSettings['maxFiles']
+        if board['maxFiles'] != None:
+            maxFiles = board['maxFiles']
+        if len(files) > maxFiles: #check if too many files are uploaded
             return render_template('error.html', errorMsg=errors['fileLimitExceeded'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         else:
             filenames = []
@@ -1615,7 +1618,10 @@ def reply(board, thread):
         files = request.files.getlist("file")
         filenames = []
         if request.files['file'].filename != '':
-            if len(files) > globalSettings['maxFiles']: #check if too many files are uploaded
+            maxFiles = globalSettings['maxFiles']
+            if board['maxFiles'] != None:
+                maxFiles = board['maxFiles']
+            if len(files) > maxFiles: #check if too many files are uploaded
                 return render_template('error.html', errorMsg=errors['fileLimitExceeded'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
             else:
                 filenames = []
