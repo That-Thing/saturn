@@ -347,6 +347,9 @@ p {
     color: var(--post-name);
     font-weight: bold;
 }
+.thread-icons {
+    color: var(--alert);
+}
 .postNumber {
     color: var(--text-color);
     text-decoration: none;
