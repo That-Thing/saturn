@@ -66,12 +66,6 @@ for f in os.listdir("./static/captchas"):
 #ASCII Art cat to keep me sane. 
 
 
-#TO DO:
-#add more board settings
-#add expansion of thumbnail on click for posts
-#catalog
-#add floating reply thing.
-
 
 #flask app configuration
 app = flask.Flask(__name__)
@@ -384,6 +378,19 @@ def checkBannerSize(file):
         return False
     else:
         return True
+#Generate a random ID or return an existing one for the thread
+def generateID(board, thread, ip):
+    postID = None
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT * FROM posts WHERE board=%s AND thread=%s AND ip=%s", (board, thread, str(ip)))
+    inThread = cursor.fetchone()
+    if inThread == None:
+        postID = "".join(random.sample(string.ascii_lowercase+string.digits, 8))
+    else:
+        postID = inThread['id']
+    return postID
+
+
 #filters
 @app.template_filter('ut') #convert unix time to normal datetime
 def normalizetime(timestamp):
@@ -1372,9 +1379,12 @@ def videoThumbnail(video, board, filename, ext):
             image.save(os.path.join(globalSettings['mediaLocation'], board, filename + "s.jpg"))
     except IOError:
         return False
-def uploadFile(f, board, filename, spoiler):
+def uploadFile(f, board, filename, spoiler, mimeTypes):
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    mimeTypes = globalSettings['mimeTypes'].split(',')
+    if mimeTypes != None:
+        mimeTypes = mimeTypes.split(',')
+    else:
+        mimeTypes = globalSettings['mimeTypes']
     extention = pathlib.Path(secure_filename(f.filename)).suffix
     cursor.execute("SELECT * FROM hashbans WHERE hash=%s", [hashlib.md5(f.read()).hexdigest()]) #Check if file being uploaded is banned. 
     ban = cursor.fetchone()
@@ -1446,6 +1456,12 @@ def newThread(board):
             return render_template('error.html', errorMsg=errors['unfilledFields'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         comment = request.form['comment']
         comment = stripHTML(comment)
+        number = board['posts']+1
+        #Check if board has IDs enabled, and if so, apply proper ID. 
+        postID = None
+        if board['postID'] == 1:
+            postID = generateID(board['uri'], number, request.remote_addr)
+        #Check character length
         charLengthCheck = checkCharLimit(board, subject, name, options, comment, filePass)
         if charLengthCheck[0] == True: #Checks if any given text is too long
             return render_template('error.html', errorMsg=errors['characterLimit'] + charLengthCheck[1], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
@@ -1467,7 +1483,7 @@ def newThread(board):
             filePaths = []
             for f in files: #downloads the files and stores them on the disk
                 if checkFilesize(board, f) == True:
-                    filename = uploadFile(f, board['uri'], str(curTime), spoiler)
+                    filename = uploadFile(f, board['uri'], str(curTime), spoiler, board['mimeTypes'])
                     if filename == "Banned": #File was hash-banned
                         return render_template('error.html', errorMsg=errors['fileBanned']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
                     if filename == None: #This means the uploaded file was invalid. 
@@ -1478,8 +1494,8 @@ def newThread(board):
                     return render_template('error.html', errorMsg=errors['filesizeExceeded']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
             filenames = ','.join([str(x) for x in filenames])
             filePaths = ','.join([str(x) for x in filePaths])
-        number = board['posts']+1
-        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, %s, %s, %s, %s, %s, %s, %s, %s, NULL, NULL, 0)', (name, subject, options, comment, number, curTime, number, board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode))
+        
+        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, %s, %s, %s, %s, %s, %s, %s, %s, NULL, NULL, 0, %s)', (name, subject, options, comment, number, curTime, number, board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode, postID))
         if postLink != False:
             for x in postLink:
                 cursor.execute("SELECT * FROM posts WHERE number = %s", [x])
@@ -1615,6 +1631,9 @@ def reply(board, thread):
                 return render_template('error.html', errorMsg=errors['unfilledFields'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
             if session['captcha'] != request.form['captcha']: #Checks if the captcha is incorrect.
                 return render_template('error.html', errorMsg=errors['incorrectCaptcha'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        postID = None
+        if board['postID'] == 1:
+            postID = generateID(board['uri'], thread, request.remote_addr)
         files = request.files.getlist("file")
         filenames = []
         if request.files['file'].filename != '':
@@ -1628,7 +1647,7 @@ def reply(board, thread):
                 filePaths = []
                 for f in files: #downloads the files and stores them on the disk
                     if checkFilesize(board, f) == True:
-                        filename = uploadFile(f, board['uri'], str(time.time()), spoiler)
+                        filename = uploadFile(f, board['uri'], str(time.time()), spoiler, board['mimeTypes'])
                         if filename == "Banned": #File was hash-banned
                             return render_template('error.html', errorMsg=errors['fileBanned']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
                         if filename == None: #This means the uploaded file was invalid. 
@@ -1639,9 +1658,9 @@ def reply(board, thread):
                         return render_template('error.html', errorMsg=errors['filesizeExceeded']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
                 filenames = ','.join([str(x) for x in filenames])
                 filePaths = ','.join([str(x) for x in filePaths])
-                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s, %s, %s, NULL, NULL, 0)', (name, subject, options, comment, number, curTime, thread, board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode))                
+                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s, %s, %s, NULL, NULL, 0, %s)', (name, subject, options, comment, number, curTime, thread, board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode, postID))
         else: #No files are given
-            cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s, %s, %s, %s, NULL, NULL, 0)', (name, subject, options, comment, number, curTime, thread, board['uri'], str(request.remote_addr), spoiler,filePass, tripcode))
+            cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s, %s, %s, %s, NULL, NULL, 0, %s)', (name, subject, options, comment, number, curTime, thread, board['uri'], str(request.remote_addr), spoiler,filePass, tripcode, postID))
         if postLink != False:
             for x in postLink:
                 cursor.execute("SELECT * FROM posts WHERE number = %s", [x])
