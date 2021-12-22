@@ -190,7 +190,7 @@
                                     <span class="thread-icons"><i class="fas fa-lock" title="This thread is locked"></i></span>
                                 {%endif%}
                                 {%if boardData['postID'] == 1 and thread['id'] != None%}
-                                    <span class="post-id">{{thread['id']}}</span>
+                                    <span class="post-id" style="background-color: #{{thread['id'] | getColor}};">{{thread['id']}}</span>
                                 {%endif%}
                                 <span><a class="postNumber" href="thread/{{thread['number']}}#{{thread['number']}}">No.</a><a href="thread/{{thread['number']}}#q{{thread['number']}}" class="postNumber">{{thread['number']}}</a></span>
                                 <span>[<a class="reply" href="thread/{{thread['number']}}#q{{thread['number']}}">Reply</a>]</span>

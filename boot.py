@@ -562,6 +562,10 @@ def hash(text):
     text = text+salt
     return hashlib.sha256(text.encode("UTF-8")).hexdigest()
 
+@app.template_filter("getColor")
+def getColor(text):
+    return hashlib.md5(text.encode("UTF-8")).hexdigest()[:6]
+
 @app.template_filter("getThumbnailLocation")
 def getThumbnailLocation(file):
     ext = pathlib.Path(file).suffix

@@ -69,7 +69,7 @@
             {%endif%}
             <span>{{post['date'] | ut}}</span>
             {%if boardData['postID'] == 1 and post['id'] != None%}
-                <span class="post-id">{{post['id']}}</span>
+                <span class="post-id" style="background-color: #{{post['id'] | getColor}};">{{post['id']}}</span>
             {%endif%}
             <span><a class="postNumber" href="/{{post['board']}}/thread/{{post['thread']}}#{{post['number']}}">No.</a><a href="/{{post['board']}}/thread/{{post['thread']}}#q{{post['number']}}" onclick="reply(this)" class="postNumber">{{post['number']}}</a></span>
             {%if post['replies'] != None and post['replies'].split(',')%}

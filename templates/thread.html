@@ -197,7 +197,7 @@
                         <span class="thread-icons"><i class="fas fa-lock" title="This thread is locked"></i></span>
                     {%endif%}
                     {%if boardData['postID'] == 1 and thread['id'] != None%}
-                        <span class="post-id">{{thread['id']}}</span>
+                        <span class="post-id" style="background-color: #{{thread['id'] | getColor}};">{{thread['id']}}</span>
                     {%endif%}
                     <span><a class="postNumber" href="#{{thread['number']}}">No.</a><a href="#q{{thread['number']}}" onclick="reply(this)" class="postNumber">{{thread['number']}}</a></span>
                     {%if thread['replies'] != None and thread['replies'].split(',')%}
