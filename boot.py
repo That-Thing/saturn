@@ -1425,7 +1425,7 @@ def newThread(board):
             return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
         tripcode = None
         curTime = time.time()
-        if "name" in request.form and len(request.form['name']) > 0: #Checks if a name is given
+        if "name" in request.form and board['forceAnonymity'] == 0 and len(request.form['name']) > 0: #Checks if a name is given
             name = request.form['name']
             name = stripHTML(name)
             session['name'] = name
@@ -1590,7 +1590,7 @@ def reply(board, thread):
         tripcode = None
         curTime = time.time()
         number = board['posts']+1
-        if "name" in request.form and len(request.form['name']) > 0: #Checks if a name is given
+        if "name" in request.form and board['forceAnonymity'] == 0 and len(request.form['name']) > 0: #Checks if a name is given
             name = request.form['name']
             name = stripHTML(name)
             session['name'] = name
