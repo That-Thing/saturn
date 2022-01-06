@@ -1498,8 +1498,28 @@ def newThread(board):
                     return render_template('error.html', errorMsg=errors['filesizeExceeded']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
             filenames = ','.join([str(x) for x in filenames])
             filePaths = ','.join([str(x) for x in filePaths])
-        
         cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, %s, %s, %s, %s, %s, %s, %s, %s, NULL, NULL, 0, %s)', (name, subject, options, comment, number, curTime, number, board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode, postID))
+        #Remove posts that bring the total pages over the limit
+        posts = bumpOrder(board['uri'])
+        maxPosts = board['pages']*board['perPage']
+        if len(posts) > maxPosts:
+            posts = posts[-(len(posts)-maxPosts):]
+            for post in posts:
+                if post['files'] != None: #delete files from disk
+                    files = post['files'].split(',')
+                    for file in files:
+                        deleteFile(file)
+                if post['type'] == 1: #Check if post is a thread and delete all child posts. 
+                    cursor.execute("SELECT * FROM posts WHERE thread=%s AND board=%s AND type=2", (post['number'], board['uri']))
+                    posts = cursor.fetchall()
+                    for x in posts:
+                        files = []
+                        if x['files'] != None:
+                            files = files + x['files'].split(',')
+                        for file in files:
+                            deleteFile(file)
+                    cursor.execute("DELETE FROM posts WHERE thread=%s AND board=%s  AND type=2", (post['number'], board['uri']))
+                cursor.execute('DELETE FROM posts WHERE number=%s and board = %s', [post['number'] ,board['uri']])
         if postLink != False:
             for x in postLink:
                 cursor.execute("SELECT * FROM posts WHERE number = %s", [x])
@@ -1584,7 +1604,7 @@ def reply(board, thread):
         bumpLock = globalSettings['bumpLock']
         if board['bumpLock'] != None:
             bumpLock = board['bumpLock']
-        if len(cursor.fetchall()) >= bumpLock: #Lock the thread
+        if len(cursor.fetchall()) - 1 >= bumpLock: #Lock the thread
             cursor.execute(f"UPDATE posts SET locked=1 WHERE type=1 AND number={thread}")
             cursor.connection.commit()
         tripcode = None

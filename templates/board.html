@@ -210,7 +210,9 @@
                                 {%if post['append'] | length > 0%}<span title="Message appended by staff" class="post-append"><i class="fas fa-exclamation-triangle text-icon"></i>{{post['append']}}</span>{%endif%}
                             {%endif%}
                             {%set postCount = thread['number'] | countReplies%}
-                            <span class="thread-information">{{postCount[0]}} post{%if postCount[0] != 1%}s{%endif%} and {{postCount[1]}} image{%if postCount[1] != 1%}s{%endif%} omitted.</span>
+                            {%if postCount | int >= 5%}
+                                <span class="thread-information">{{postCount[0]}} post{%if postCount[0] != 1%}s{%endif%} and {{postCount[1]}} image{%if postCount[1] != 1%}s{%endif%} omitted.</span>
+                            {%endif%}
                         </div>
                         {%set posts = thread['number'] | fivePosts(board)%}
                         {%for post in posts%}
