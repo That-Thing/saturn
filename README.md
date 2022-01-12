@@ -69,7 +69,7 @@ Still inside the virtual environment, enter this
 gunicorn --bind 0.0.0.0:8080 wsgi
 ```
 This should have started the Gunicorn server
-###Creating a SystemD service
+### Creating a SystemD service
 CTRL+C out of the Gunicorn process\
 run
 ```
