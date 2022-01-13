@@ -15,7 +15,6 @@ import random
 import string
 from captcha.image import ImageCaptcha
 from PIL import Image
-import re
 import hashlib
 from deepdiff import DeepDiff
 import magic
@@ -631,33 +630,45 @@ def before_request_callback():
 #index
 @app.route('/', methods=['GET'])
 def index():
-    return render_template('index.html', data=globalSettings, currentTheme=request.cookies.get('theme'), total=getTotal(), lastHour=lastHour(), themes=themes)
-
+    try:
+        return render_template('index.html', data=globalSettings, currentTheme=request.cookies.get('theme'), total=getTotal(), lastHour=lastHour(), themes=themes)
+    except Exception as e:
+        logError(e, request.base_url)
+        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 #boards
 @app.route('/boards', methods=['GET'])
 def boards():
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT * FROM boards")
-    sqlData = cursor.fetchall()
-    return render_template('boards.html', data=globalSettings, currentTheme=request.cookies.get('theme'), sqlData=sqlData, themes=themes)
-
+    try:
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT * FROM boards")
+        sqlData = cursor.fetchall()
+        return render_template('boards.html', data=globalSettings, currentTheme=request.cookies.get('theme'), sqlData=sqlData, themes=themes)
+    except Exception as e:
+        logError(e, request.base_url)
+        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 #help page
 @app.route('/help', methods=['GET'])
 def help():
-
-    return render_template('help.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+    try:
+        return render_template('help.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+    except Exception as e:
+        logError(e, request.base_url)
+        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 #FAQ page
 @app.route('/faq', methods=['GET'])
 def faq():
-    return render_template('faq.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-
+    try:
+        return render_template('faq.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+    except Exception as e:
+        logError(e, request.base_url)
+        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 #global settings redirect
 @app.route('/global', methods=['GET'])
 def siteSettings():
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT * FROM rules WHERE type = 0")
-    rules = cursor.fetchall()
     try:
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT * FROM rules WHERE type = 0")
+        rules = cursor.fetchall()
         if int(session['group']) > 1:
             return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
         return render_template('siteSettings.html', data=globalSettings, logData=reloadLogSettings(), currentTheme=request.cookies.get('theme'), themes=themes, groups=groups, rules=rules)
@@ -703,7 +714,6 @@ def saveLogSettings():
             with open('./config/logs.json', 'w') as f:
                 json.dump(result, f, indent=4)
             return redirect(url_for('siteSettings'))
-                
         except Exception as e:
             logError(e, request.base_url)
             return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
@@ -756,29 +766,33 @@ def addRule():
 @app.route('/rules/delete', methods=['POST'])
 def deleteRule():
     if request.method == 'POST':
-        if request.form['board'] == "NULL":
-            board = None
-        else:
-            board = request.form['board']
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute("SELECT * FROM boards WHERE uri = %s", [board])
-        currentBoard = cursor.fetchone()
-        if int(session['group']) <= 1 or currentBoard != None:
-            if int(session['group']) <= 1 or currentBoard['owner'] == session['username']:
-                cursor.execute("SELECT * FROM rules WHERE id = %s", [int(request.form['id'])])
-                if logConfig['log-rules'] == 'on':
-                    storeLog("removeRule", "Rule deleted", session['username'], request.remote_addr, time.time(), {"board": board, "rule": cursor.fetchone()['content']}, None)
-                if board == None:
-                    cursor.execute("DELETE FROM rules WHERE id = %s AND board IS NULL", [int(request.form['id'])])
-                else:
-                    cursor.execute("DELETE FROM rules WHERE id = %s AND board = %s", (int(request.form['id']), board))
-                mysql.connection.commit()
-            if request.form['type'] == "0":
-                return redirect(url_for("siteSettings"))
+        try:
+            if request.form['board'] == "NULL":
+                board = None
             else:
-                return redirect(url_for("manageBoard", board=board))
-        else:
-            return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)        
+                board = request.form['board']
+            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute("SELECT * FROM boards WHERE uri = %s", [board])
+            currentBoard = cursor.fetchone()
+            if int(session['group']) <= 1 or currentBoard != None:
+                if int(session['group']) <= 1 or currentBoard['owner'] == session['username']:
+                    cursor.execute("SELECT * FROM rules WHERE id = %s", [int(request.form['id'])])
+                    if logConfig['log-rules'] == 'on':
+                        storeLog("removeRule", "Rule deleted", session['username'], request.remote_addr, time.time(), {"board": board, "rule": cursor.fetchone()['content']}, None)
+                    if board == None:
+                        cursor.execute("DELETE FROM rules WHERE id = %s AND board IS NULL", [int(request.form['id'])])
+                    else:
+                        cursor.execute("DELETE FROM rules WHERE id = %s AND board = %s", (int(request.form['id']), board))
+                    mysql.connection.commit()
+                if request.form['type'] == "0":
+                    return redirect(url_for("siteSettings"))
+                else:
+                    return redirect(url_for("manageBoard", board=board))
+            else:
+                return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)        
+        except Exception as e:
+            print(e)
+            return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
     else:
         return render_template('error.html', errorMsg=errors['RequestNotPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
 
@@ -798,28 +812,32 @@ def accountSettings():
 @app.route('/account/update/password', methods=['POST'])
 def updatePassword():
     if request.method == 'POST':
-        if session['loggedin'] == True:
-            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            cursor.execute("SELECT * FROM accounts WHERE username=%s", [session['username']])
-            accountData = cursor.fetchone()
-            passwordHash = returnHash(request.form['currentPassword'])
-            newPassword = request.form['newPassword']
-            confirmPassword = request.form['confirmPassword']
-            if passwordHash == accountData['password']:
-                if newPassword == confirmPassword:
-                    if logConfig["log-self-password-change"] == 'on':
-                        storeLog("passwordUpdate", "User has changed their password", session['username'], request.remote_addr, time.time(), {}, None)
-                    cursor.execute("UPDATE accounts SET password=%s WHERE username=%s", (returnHash(newPassword), session['username']))
-                    mysql.connection.commit()
-                    session.pop('loggedin', None)
-                    session.pop('id', None)
-                    session.pop('username', None)
-                    session.pop('group', None)
-                    return render_template('login.html', msg="Password successfully updated, please log in.", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        try:
+            if session['loggedin'] == True:
+                cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+                cursor.execute("SELECT * FROM accounts WHERE username=%s", [session['username']])
+                accountData = cursor.fetchone()
+                passwordHash = returnHash(request.form['currentPassword'])
+                newPassword = request.form['newPassword']
+                confirmPassword = request.form['confirmPassword']
+                if passwordHash == accountData['password']:
+                    if newPassword == confirmPassword:
+                        if logConfig["log-self-password-change"] == 'on':
+                            storeLog("passwordUpdate", "User has changed their password", session['username'], request.remote_addr, time.time(), {}, None)
+                        cursor.execute("UPDATE accounts SET password=%s WHERE username=%s", (returnHash(newPassword), session['username']))
+                        mysql.connection.commit()
+                        session.pop('loggedin', None)
+                        session.pop('id', None)
+                        session.pop('username', None)
+                        session.pop('group', None)
+                        return render_template('login.html', msg="Password successfully updated, please log in.", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                    else:
+                        return render_template('error.html', errorMsg=errors['passwordsDoNotMatch'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
                 else:
-                    return render_template('error.html', errorMsg=errors['passwordsDoNotMatch'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-            else:
-                return render_template('error.html', errorMsg=errors['incorrectPassword'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                    return render_template('error.html', errorMsg=errors['incorrectPassword'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        except Exception as e:
+            print(e)
+            return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
     else:
         return render_template('error.html', errorMsg=errors['RequestNotPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
             
@@ -957,7 +975,7 @@ def deleteBoard(board):
 @app.route('/<board>/update', methods=['POST'])
 def updateBoard(board):
     if request.method == 'POST':
-        #try:
+        try:
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
             cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
             boardData = cursor.fetchone()
@@ -1035,21 +1053,21 @@ def updateBoard(board):
                 return redirect(url_for('manageBoard', board=board))
             else:
                 return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-        #except Exception as e:
-        #    print(e)
-        #    return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        except Exception as e:
+            logError(e, request.base_url)
+            return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
     else:
         return errors['RequestNotPost']
 
 @app.route('/<board>/update/owner', methods=['POST'])
 def setOwner(board):   
     if request.method == 'POST':
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
-        boardData = cursor.fetchone()
-        if boardData == None:
-            return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
         try:
+            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
+            boardData = cursor.fetchone()
+            if boardData == None:
+                return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
             if int(session['group']) <= 1 or session['username'] ==  boardData['owner']:
                 cursor.execute("UPDATE boards SET owner=%s WHERE uri=%s", (request.form['owner'], board))
                 mysql.connection.commit()
@@ -1069,12 +1087,12 @@ def setOwner(board):
 @app.route('/<board>/banner', methods=['POST'])
 def uploadBanner(board):
     if request.method == 'POST':
-        banner = request.files['file']
-        mimes = ['image/jpeg', 'image/png', 'image/apng', 'image/webp', 'image/gif'] #allowed mime types for banners. 
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
-        sqlData = cursor.fetchone()
         try:
+            banner = request.files['file']
+            mimes = ['image/jpeg', 'image/png', 'image/apng', 'image/webp', 'image/gif'] #allowed mime types for banners. 
+            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
+            sqlData = cursor.fetchone()
             if sqlData['owner'] == session['username'] or int(session['group']) <= 1:
                 if magic.from_buffer(banner.read(1024), mime=True) not in mimes: #Check if the banner is an image,
                     return render_template('error.html', errorMsg=errors['incorrectFiletype']+banner.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
@@ -1122,30 +1140,33 @@ def deleteBanner(board):
 #Account stuff  Most of it isn't mine lol. 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    msg = ''
-    if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
-        passwordHash = returnHash(request.form['password'])
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM accounts WHERE username = %s AND password = %s', (request.form['username'], passwordHash))
-        account = cursor.fetchone()
-        if account:
-            if account['banned'] == 1:
-                msg = 'This user is banned.'
-            elif account['password'] == passwordHash and account['username'] == request.form['username']:
-                session['loggedin'] = True
-                session['id'] = account['id']
-                session['username'] = account['username']
-                session['group'] = account['group']
-                session['email'] = account['email']
-                if logConfig['log-logins'] == 'on':
-                    storeLog("loginActions", "User logged in", session['username'], request.remote_addr, time.time(), {}, None)
-                return redirect(url_for('index'))
+    try:
+        msg = ''
+        if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
+            passwordHash = returnHash(request.form['password'])
+            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute('SELECT * FROM accounts WHERE username = %s AND password = %s', (request.form['username'], passwordHash))
+            account = cursor.fetchone()
+            if account:
+                if account['banned'] == 1:
+                    msg = 'This user is banned.'
+                elif account['password'] == passwordHash and account['username'] == request.form['username']:
+                    session['loggedin'] = True
+                    session['id'] = account['id']
+                    session['username'] = account['username']
+                    session['group'] = account['group']
+                    session['email'] = account['email']
+                    if logConfig['log-logins'] == 'on':
+                        storeLog("loginActions", "User logged in", session['username'], request.remote_addr, time.time(), {}, None)
+                    return redirect(url_for('index'))
+                else:
+                    msg = 'Incorrect username or password'
             else:
                 msg = 'Incorrect username or password'
-        else:
-            msg = 'Incorrect username or password'
-    return render_template('login.html', msg=msg, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-
+        return render_template('login.html', msg=msg, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+    except Exception as e:
+        print(e)
+        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
 @app.route('/logout')
 def logout():
     try:
@@ -1162,39 +1183,42 @@ def logout():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    if globalSettings['enableRegistration'] == 'on':
-        msg = ''
-        if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
-            username = request.form['username']
-            email = None
-            if 'email' in request.form:
-                email = request.form['email']
-            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            cursor.execute('SELECT * FROM accounts WHERE username = %s', (username,))
-            account = cursor.fetchone()
-            if account:
-                msg = "Username taken"
-            if email != None and not re.match(r'[^@]+@[^@]+\.[^@]+', email):
-                msg = "Invalid email."
-            elif not re.match(r'^[a-zA-Z0-9_.-]*$', username):
-                msg = "Invalid username"
-            elif not username:
-                msg = "A username is required"
-            else:
-                # Account doesnt exists and the form data is valid, now insert new account into accounts table
-                password = request.form['password']
-                password = returnHash(password)
-                cursor.execute('INSERT INTO accounts VALUES (NULL, %s, %s, %s, 4, %s, %s, 0)', (username, password, email, time.time(), str(request.remote_addr)))
-                mysql.connection.commit()
-                if logConfig['log-register'] == 'on':
-                    storeLog("loginActions", "User registered an account", username, request.remote_addr, time.time(), {}, None)
-                return render_template('login.html', msg="Registration complete, please log in", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-        elif request.method == 'POST':
-            msg = 'Please fill out the form!'
-        return render_template('register.html', msg=msg, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-    else:
-        return render_template('error.html', errorMsg=errors["registerDisabled"], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
-
+    try:
+        if globalSettings['enableRegistration'] == 'on':
+            msg = ''
+            if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
+                username = request.form['username']
+                email = None
+                if 'email' in request.form:
+                    email = request.form['email']
+                cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+                cursor.execute('SELECT * FROM accounts WHERE username = %s', (username,))
+                account = cursor.fetchone()
+                if account:
+                    msg = "Username taken"
+                if email != None and not re.match(r'[^@]+@[^@]+\.[^@]+', email):
+                    msg = "Invalid email."
+                elif not re.match(r'^[a-zA-Z0-9_.-]*$', username):
+                    msg = "Invalid username"
+                elif not username:
+                    msg = "A username is required"
+                else:
+                    # Account doesnt exists and the form data is valid, now insert new account into accounts table
+                    password = request.form['password']
+                    password = returnHash(password)
+                    cursor.execute('INSERT INTO accounts VALUES (NULL, %s, %s, %s, 4, %s, %s, 0)', (username, password, email, time.time(), str(request.remote_addr)))
+                    mysql.connection.commit()
+                    if logConfig['log-register'] == 'on':
+                        storeLog("loginActions", "User registered an account", username, request.remote_addr, time.time(), {}, None)
+                    return render_template('login.html', msg="Registration complete, please log in", data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+            elif request.method == 'POST':
+                msg = 'Please fill out the form!'
+            return render_template('register.html', msg=msg, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        else:
+            return render_template('error.html', errorMsg=errors["registerDisabled"], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
+    except Exception as e:
+        print(e)
+        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
 #Checks if captcha has expired. If it has, returns true so generateCaptcha() can generate a new one. 
 def checkCaptchaState():
     if "captchaExpire" in session and "captcha" in session and "captchaF" in session and os.path.isfile(session["captchaF"]):
@@ -1240,6 +1264,7 @@ def getThreads(uri):
 #board catalog (pretty much just a copy-paste of the board code)
 @app.route('/<board>/catalog')
 def catalog(board):
+    try:
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
         board = cursor.fetchone()
@@ -1270,7 +1295,9 @@ def catalog(board):
             return render_template('catalog.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, captcha=captcha, threads=posts, filePass=filePass, owned=ownedPosts, hidden=hidden, page=1, themes=themes)
         else:
             return render_template('catalog.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, threads=posts, filePass=filePass, owned=ownedPosts, hidden=hidden,page=1, themes=themes)
-
+    except Exception as e:
+        print(e)
+        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
 
 #board page
 @app.route('/<board>/', methods=['GET'])
@@ -1417,146 +1444,150 @@ def uploadFile(f, board, filename, spoiler, mimeTypes):
 @app.route('/<board>/new', methods=['POST'])
 def newThread(board):
     if request.method == 'POST':
-        if checkBanned(str(request.remote_addr), board) == True:
-            return render_template('error.html', errorMsg=errors['banned'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-        filePass = checkFilePass()
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
-        board = cursor.fetchone()
-        if board == None: #Returns a 404 if board doesn't exist
-            return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
-        tripcode = None
-        curTime = time.time()
-        if "name" in request.form and board['forceAnonymity'] == 0 and len(request.form['name']) > 0: #Checks if a name is given
-            name = request.form['name']
-            name = stripHTML(name)
-            session['name'] = name
-            tripcode = checkTrip(name, int(session['group']))
-            if tripcode != False:
-                name = name.split("##",1)[0]
+        try:
+            if checkBanned(str(request.remote_addr), board) == True:
+                return render_template('error.html', errorMsg=errors['banned'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+            filePass = checkFilePass()
+            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
+            board = cursor.fetchone()
+            if board == None: #Returns a 404 if board doesn't exist
+                return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
+            tripcode = None
+            curTime = time.time()
+            if "name" in request.form and board['forceAnonymity'] == 0 and len(request.form['name']) > 0: #Checks if a name is given
+                name = request.form['name']
+                name = stripHTML(name)
+                session['name'] = name
+                tripcode = checkTrip(name, int(session['group']))
+                if tripcode != False:
+                    name = name.split("##",1)[0]
+                else:
+                    tripcode = None
             else:
-                tripcode = None
-        else:
-            name = board['anonymous'] #sets name to default board anon name
-        if 'subject' in request.form and len(request.form['subject']) > 0: #Checks if a subject was given
-            subject = request.form['subject']
-            subject = stripHTML(subject)
-        else:
-            subject = None
-        if 'options' in request.form and len(request.form['options']) > 0: #Checks if options were given
-            options = request.form['options']
-            options = stripHTML(options)
-            options = options.lower()
-        else:
-            options = None     
-        if "spoiler" in request.form: #Checks if a spoiler was indicated
-            if request.form['spoiler'] == "on":
-                spoiler = 1
+                name = board['anonymous'] #sets name to default board anon name
+            if 'subject' in request.form and len(request.form['subject']) > 0: #Checks if a subject was given
+                subject = request.form['subject']
+                subject = stripHTML(subject)
+            else:
+                subject = None
+            if 'options' in request.form and len(request.form['options']) > 0: #Checks if options were given
+                options = request.form['options']
+                options = stripHTML(options)
+                options = options.lower()
+            else:
+                options = None     
+            if "spoiler" in request.form: #Checks if a spoiler was indicated
+                if request.form['spoiler'] == "on":
+                    spoiler = 1
+                else:
+                    spoiler = 0
             else:
                 spoiler = 0
-        else:
-            spoiler = 0
-        if 'password' in request.form: #Checks if a password was given in the request
-            filePass = request.form['password']
-        if 'comment' not in request.form and len(request.files['file'].filename) == 0: #Checks if all required files are present
-            return render_template('error.html', errorMsg=errors['unfilledFields'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-        comment = request.form['comment']
-        comment = stripHTML(comment)
-        number = board['posts']+1
-        #Check if board has IDs enabled, and if so, apply proper ID. 
-        postID = None
-        if board['postID'] == 1:
-            postID = generateID(board['uri'], number, request.remote_addr)
-        #Check character length
-        charLengthCheck = checkCharLimit(board, subject, name, options, comment, filePass)
-        if charLengthCheck[0] == True: #Checks if any given text is too long
-            return render_template('error.html', errorMsg=errors['characterLimit'] + charLengthCheck[1], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-        postLink = checkPostLink(comment)
-        if board['captcha'] == 1: #Checks if the board has captcha enabled, and if so, checks if the entred captcha text is correct.
-            if 'captcha' not in request.form:
+            if 'password' in request.form: #Checks if a password was given in the request
+                filePass = request.form['password']
+            if 'comment' not in request.form and len(request.files['file'].filename) == 0: #Checks if all required files are present
                 return render_template('error.html', errorMsg=errors['unfilledFields'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-            if session['captcha'] != request.form['captcha']: #Checks if the captcha is incorrect.
-                return render_template('error.html', errorMsg=errors['incorrectCaptcha'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-            clearCaptcha() #clears captcha so it can't be used again to make a new thread
-        files = request.files.getlist("file") #Gets all the files from the request
-        maxFiles = globalSettings['maxFiles']
-        if board['maxFiles'] != None:
-            maxFiles = board['maxFiles']
-        if len(files) > maxFiles: #check if too many files are uploaded
-            return render_template('error.html', errorMsg=errors['fileLimitExceeded'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-        else:
-            filenames = []
-            filePaths = []
-            for f in files: #downloads the files and stores them on the disk
-                if checkFilesize(board, f) == True:
-                    filename = uploadFile(f, board['uri'], str(curTime), spoiler, board['mimeTypes'])
-                    if filename == "Banned": #File was hash-banned
-                        return render_template('error.html', errorMsg=errors['fileBanned']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-                    if filename == None: #This means the uploaded file was invalid. 
-                        return render_template('error.html', errorMsg=errors['incorrectFiletype']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-                    filePaths.append(filename)
-                    filenames.append(secure_filename(f.filename))
-                else:
-                    return render_template('error.html', errorMsg=errors['filesizeExceeded']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-            filenames = ','.join([str(x) for x in filenames])
-            filePaths = ','.join([str(x) for x in filePaths])
-        cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, %s, %s, %s, %s, %s, %s, %s, %s, NULL, NULL, 0, %s)', (name, subject, options, comment, number, curTime, number, board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode, postID))
-        #Remove posts that bring the total pages over the limit
-        posts = bumpOrder(board['uri'])
-        maxPosts = board['pages']*board['perPage']
-        if len(posts) > maxPosts:
-            posts = posts[-(len(posts)-maxPosts):]
-            for post in posts:
-                if post['files'] != None: #delete files from disk
-                    files = post['files'].split(',')
-                    for file in files:
-                        deleteFile(file)
-                if post['type'] == 1: #Check if post is a thread and delete all child posts. 
-                    cursor.execute("SELECT * FROM posts WHERE thread=%s AND board=%s AND type=2", (post['number'], board['uri']))
-                    posts = cursor.fetchall()
-                    for x in posts:
-                        files = []
-                        if x['files'] != None:
-                            files = files + x['files'].split(',')
+            comment = request.form['comment']
+            comment = stripHTML(comment)
+            number = board['posts']+1
+            #Check if board has IDs enabled, and if so, apply proper ID. 
+            postID = None
+            if board['postID'] == 1:
+                postID = generateID(board['uri'], number, request.remote_addr)
+            #Check character length
+            charLengthCheck = checkCharLimit(board, subject, name, options, comment, filePass)
+            if charLengthCheck[0] == True: #Checks if any given text is too long
+                return render_template('error.html', errorMsg=errors['characterLimit'] + charLengthCheck[1], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+            postLink = checkPostLink(comment)
+            if board['captcha'] == 1: #Checks if the board has captcha enabled, and if so, checks if the entred captcha text is correct.
+                if 'captcha' not in request.form:
+                    return render_template('error.html', errorMsg=errors['unfilledFields'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                if session['captcha'] != request.form['captcha']: #Checks if the captcha is incorrect.
+                    return render_template('error.html', errorMsg=errors['incorrectCaptcha'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                clearCaptcha() #clears captcha so it can't be used again to make a new thread
+            files = request.files.getlist("file") #Gets all the files from the request
+            maxFiles = globalSettings['maxFiles']
+            if board['maxFiles'] != None:
+                maxFiles = board['maxFiles']
+            if len(files) > maxFiles: #check if too many files are uploaded
+                return render_template('error.html', errorMsg=errors['fileLimitExceeded'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+            else:
+                filenames = []
+                filePaths = []
+                for f in files: #downloads the files and stores them on the disk
+                    if checkFilesize(board, f) == True:
+                        filename = uploadFile(f, board['uri'], str(curTime), spoiler, board['mimeTypes'])
+                        if filename == "Banned": #File was hash-banned
+                            return render_template('error.html', errorMsg=errors['fileBanned']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                        if filename == None: #This means the uploaded file was invalid. 
+                            return render_template('error.html', errorMsg=errors['incorrectFiletype']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                        filePaths.append(filename)
+                        filenames.append(secure_filename(f.filename))
+                    else:
+                        return render_template('error.html', errorMsg=errors['filesizeExceeded']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                filenames = ','.join([str(x) for x in filenames])
+                filePaths = ','.join([str(x) for x in filePaths])
+            cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, %s, %s, %s, %s, %s, %s, %s, %s, NULL, NULL, 0, %s)', (name, subject, options, comment, number, curTime, number, board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode, postID))
+            #Remove posts that bring the total pages over the limit
+            posts = bumpOrder(board['uri'])
+            maxPosts = board['pages']*board['perPage']
+            if len(posts) > maxPosts:
+                posts = posts[-(len(posts)-maxPosts):]
+                for post in posts:
+                    if post['files'] != None: #delete files from disk
+                        files = post['files'].split(',')
                         for file in files:
                             deleteFile(file)
-                    cursor.execute("DELETE FROM posts WHERE thread=%s AND board=%s  AND type=2", (post['number'], board['uri']))
-                cursor.execute('DELETE FROM posts WHERE number=%s and board = %s', [post['number'] ,board['uri']])
-        if postLink != False:
-            for x in postLink:
-                cursor.execute("SELECT * FROM posts WHERE number = %s", [x])
-                currentReplies = cursor.fetchone()
-                if currentReplies:
-                    currentReplies = currentReplies['replies']
-                    if currentReplies != None:
-                        currentReplies = currentReplies.split(",")
-                    else:
-                        currentReplies = []
-                    currentReplies.append(f"{str(request.form['thread'])}/{str(number)}")
-                    currentReplies = ",".join(currentReplies)
-                    cursor.execute("UPDATE posts SET replies = %s WHERE number = %s", (currentReplies, x))
-        cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (number, board['uri']))
-        cursor.execute("SELECT * FROM server")
-        serverInfo = cursor.fetchone()
-        cursor.execute("UPDATE server SET posts=%s", [serverInfo['posts']+1])
-        mysql.connection.commit()
-        ownedPosts = request.cookies.get('ownedPosts')
-        if ownedPosts == None:
-            ownedPosts = "{}"
-        ownedPosts = json.loads(ownedPosts)
-        ownedPosts[f"{board['uri']}/{number}"] = filePass
-        resp = redirect(f"/{board['uri']}/thread/{number}")
-        resp.set_cookie('ownedPosts', json.dumps(ownedPosts))
-        if logConfig['log-thread-creation'] == 'on':
-            storeLog("threadCreation", "Thread created", session['username'] if 'username' in session else None, request.remote_addr, curTime, {"number": number, "files": str(filenames), "url": f"/{board['uri']}/thread/{number}"}, board['uri'])
-        return resp
+                    if post['type'] == 1: #Check if post is a thread and delete all child posts. 
+                        cursor.execute("SELECT * FROM posts WHERE thread=%s AND board=%s AND type=2", (post['number'], board['uri']))
+                        posts = cursor.fetchall()
+                        for x in posts:
+                            files = []
+                            if x['files'] != None:
+                                files = files + x['files'].split(',')
+                            for file in files:
+                                deleteFile(file)
+                        cursor.execute("DELETE FROM posts WHERE thread=%s AND board=%s  AND type=2", (post['number'], board['uri']))
+                    cursor.execute('DELETE FROM posts WHERE number=%s and board = %s', [post['number'] ,board['uri']])
+            if postLink != False:
+                for x in postLink:
+                    cursor.execute("SELECT * FROM posts WHERE number = %s", [x])
+                    currentReplies = cursor.fetchone()
+                    if currentReplies:
+                        currentReplies = currentReplies['replies']
+                        if currentReplies != None:
+                            currentReplies = currentReplies.split(",")
+                        else:
+                            currentReplies = []
+                        currentReplies.append(f"{str(request.form['thread'])}/{str(number)}")
+                        currentReplies = ",".join(currentReplies)
+                        cursor.execute("UPDATE posts SET replies = %s WHERE number = %s", (currentReplies, x))
+            cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (number, board['uri']))
+            cursor.execute("SELECT * FROM server")
+            serverInfo = cursor.fetchone()
+            cursor.execute("UPDATE server SET posts=%s", [serverInfo['posts']+1])
+            mysql.connection.commit()
+            ownedPosts = request.cookies.get('ownedPosts')
+            if ownedPosts == None:
+                ownedPosts = "{}"
+            ownedPosts = json.loads(ownedPosts)
+            ownedPosts[f"{board['uri']}/{number}"] = filePass
+            resp = redirect(f"/{board['uri']}/thread/{number}")
+            resp.set_cookie('ownedPosts', json.dumps(ownedPosts))
+            if logConfig['log-thread-creation'] == 'on':
+                storeLog("threadCreation", "Thread created", session['username'] if 'username' in session else None, request.remote_addr, curTime, {"number": number, "files": str(filenames), "url": f"/{board['uri']}/thread/{number}"}, board['uri'])
+            return resp
+        except Exception as e:
+            print(e)
+            return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
     else:
         return errors['RequestNotPost'] 
 
 @app.route('/<board>/thread/<thread>', methods=['GET'])
 @app.route('/<board>/thread/<thread>', methods=['GET'])
 def thread(board, thread):
-    #try:
+    try:
         if request.cookies.get('ownedPosts') != None:
             ownedPosts = json.loads(request.cookies.get('ownedPosts')) #gets posts the current user has made for (you)s
         else:
@@ -1582,140 +1613,144 @@ def thread(board, thread):
         else:
             return render_template('thread.html', data=globalSettings, currentTheme=request.cookies.get('theme'), board=board['uri'], boardData=board, banner=banner, posts=posts, thread=parentPost[0], owned=ownedPosts, filePass=filePass, themes=themes)
         return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
-    #except Exception as e:
-    #    print(e)
-    #    return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+    except Exception as e:
+        print(e)
+        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
 
 @app.route('/<board>/<thread>/reply', methods=['POST'])
 def reply(board, thread):
     if request.method == 'POST':
-        if checkBanned(str(request.remote_addr), board) == True:
-            return render_template('error.html', errorMsg=errors['banned'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-        filePass = checkFilePass()
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
-        board = cursor.fetchone()
-        if board == None: #Returns a 404 if board doesn't exist
-            return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
-        #Check if board is locked
-        cursor.execute(f"SELECT * FROM posts WHERE number={thread} AND type=1")
-        if cursor.fetchone()['locked'] == 1:
-            return render_template('error.html', errorMsg=errors['threadLocked'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-        #Check if the post reaches the bump lock
-        cursor.execute(f"SELECT * FROM posts WHERE thread={thread} AND type=2")
-        bumpLock = globalSettings['bumpLock']
-        if board['bumpLock'] != None:
-            bumpLock = board['bumpLock']
-        if len(cursor.fetchall()) - 1 >= bumpLock: #Lock the thread
-            cursor.execute(f"UPDATE posts SET locked=1 WHERE type=1 AND number={thread}")
-            cursor.connection.commit()
-        tripcode = None
-        curTime = time.time()
-        number = board['posts']+1
-        if "name" in request.form and board['forceAnonymity'] == 0 and len(request.form['name']) > 0: #Checks if a name is given
-            name = request.form['name']
-            name = stripHTML(name)
-            session['name'] = name
-            tripcode = checkTrip(name, int(session['group']))
-            if tripcode != False:
-                name = name.split("##",1)[0]
+        try:
+            if checkBanned(str(request.remote_addr), board) == True:
+                return render_template('error.html', errorMsg=errors['banned'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+            filePass = checkFilePass()
+            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute("SELECT * FROM boards WHERE uri=%s", [board])
+            board = cursor.fetchone()
+            if board == None: #Returns a 404 if board doesn't exist
+                return render_template('404.html', image=get404(), data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes), 404
+            #Check if board is locked
+            cursor.execute(f"SELECT * FROM posts WHERE number={thread} AND type=1")
+            if cursor.fetchone()['locked'] == 1:
+                return render_template('error.html', errorMsg=errors['threadLocked'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+            #Check if the post reaches the bump lock
+            cursor.execute(f"SELECT * FROM posts WHERE thread={thread} AND type=2")
+            bumpLock = globalSettings['bumpLock']
+            if board['bumpLock'] != None:
+                bumpLock = board['bumpLock']
+            if len(cursor.fetchall()) - 1 >= bumpLock: #Lock the thread
+                cursor.execute(f"UPDATE posts SET locked=1 WHERE type=1 AND number={thread}")
+                cursor.connection.commit()
+            tripcode = None
+            curTime = time.time()
+            number = board['posts']+1
+            if "name" in request.form and board['forceAnonymity'] == 0 and len(request.form['name']) > 0: #Checks if a name is given
+                name = request.form['name']
+                name = stripHTML(name)
+                session['name'] = name
+                tripcode = checkTrip(name, int(session['group']))
+                if tripcode != False:
+                    name = name.split("##",1)[0]
+                else:
+                    tripcode = None
             else:
-                tripcode = None
-        else:
-            name = board['anonymous'] #sets name to default board anon name
-        if 'subject' in request.form and len(request.form['subject']) > 0: #Checks if a subject was given
-            subject = request.form['subject']
-            subject = stripHTML(subject)
-        else:
-            subject = None
-        if 'options' in request.form and len(request.form['options']) > 0: #Checks if options were given
-            options = request.form['options']
-            options = stripHTML(options)
-            options = options.lower()
-        else:
-            options = None     
-        if "spoiler" in request.form: #Checks if a spoiler was indicated
-            if request.form['spoiler'] == "on":
-                spoiler = 1
+                name = board['anonymous'] #sets name to default board anon name
+            if 'subject' in request.form and len(request.form['subject']) > 0: #Checks if a subject was given
+                subject = request.form['subject']
+                subject = stripHTML(subject)
+            else:
+                subject = None
+            if 'options' in request.form and len(request.form['options']) > 0: #Checks if options were given
+                options = request.form['options']
+                options = stripHTML(options)
+                options = options.lower()
+            else:
+                options = None     
+            if "spoiler" in request.form: #Checks if a spoiler was indicated
+                if request.form['spoiler'] == "on":
+                    spoiler = 1
+                else:
+                    spoiler = 0
             else:
                 spoiler = 0
-        else:
-            spoiler = 0
-        if 'password' in request.form: #Checks if a password was given in the request
-            filePass = request.form['password']
-        if 'comment' not in request.form:
-            return render_template('error.html', errorMsg=errors['unfilledFields'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-        comment = request.form['comment']
-        comment = stripHTML(comment)
-        charLengthCheck = checkCharLimit(board, subject, name, options, comment, filePass)
-        if charLengthCheck[0] == True: #Checks if any given text is too long
-            return render_template('error.html', errorMsg=errors['characterLimit'] + charLengthCheck[1], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-        postLink = checkPostLink(comment)        
-        if board['captcha'] == 1: #Checks if the board has captcha enabled, and if so, checks if the entred captcha text is correct
-            clearCaptcha() #clears captcha so it can't be used again to make a new thread.
-            if 'captcha' not in request.form:
+            if 'password' in request.form: #Checks if a password was given in the request
+                filePass = request.form['password']
+            if 'comment' not in request.form:
                 return render_template('error.html', errorMsg=errors['unfilledFields'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-            if session['captcha'] != request.form['captcha']: #Checks if the captcha is incorrect.
-                return render_template('error.html', errorMsg=errors['incorrectCaptcha'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-        postID = None
-        if board['postID'] == 1:
-            postID = generateID(board['uri'], thread, request.remote_addr)
-        files = request.files.getlist("file")
-        filenames = []
-        if request.files['file'].filename != '':
-            maxFiles = globalSettings['maxFiles']
-            if board['maxFiles'] != None:
-                maxFiles = board['maxFiles']
-            if len(files) > maxFiles: #check if too many files are uploaded
-                return render_template('error.html', errorMsg=errors['fileLimitExceeded'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-            else:
-                filenames = []
-                filePaths = []
-                for f in files: #downloads the files and stores them on the disk
-                    if checkFilesize(board, f) == True:
-                        filename = uploadFile(f, board['uri'], str(time.time()), spoiler, board['mimeTypes'])
-                        if filename == "Banned": #File was hash-banned
-                            return render_template('error.html', errorMsg=errors['fileBanned']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-                        if filename == None: #This means the uploaded file was invalid. 
-                            return render_template('error.html', errorMsg=errors['incorrectFiletype']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-                        filePaths.append(filename)
-                        filenames.append(secure_filename(f.filename))
-                    else:
-                        return render_template('error.html', errorMsg=errors['filesizeExceeded']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-                filenames = ','.join([str(x) for x in filenames])
-                filePaths = ','.join([str(x) for x in filePaths])
-                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s, %s, %s, NULL, NULL, 0, %s)', (name, subject, options, comment, number, curTime, thread, board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode, postID))
-        else: #No files are given
-            cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s, %s, %s, %s, NULL, NULL, 0, %s)', (name, subject, options, comment, number, curTime, thread, board['uri'], str(request.remote_addr), spoiler,filePass, tripcode, postID))
-        if postLink != False:
-            for x in postLink:
-                cursor.execute("SELECT * FROM posts WHERE number = %s", [x])
-                currentReplies = cursor.fetchone()
-                if currentReplies:
-                    currentReplies = currentReplies['replies']
-                    if currentReplies != None:
-                        currentReplies = currentReplies.split(",")
-                    else:
-                        currentReplies = []
-                    currentReplies.append(f"{str(thread)}/{str(number)}")
-                    currentReplies = ",".join(currentReplies)
-                    cursor.execute("UPDATE posts SET replies = %s WHERE number = %s", (currentReplies, x))
-        cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (number, board['uri']))
-        cursor.execute("SELECT * FROM server")
-        serverInfo = cursor.fetchone()
-        cursor.execute("UPDATE server SET posts=%s", [serverInfo['posts']+1])
-        mysql.connection.commit()
-        ownedPosts = request.cookies.get('ownedPosts')
-        if ownedPosts == None:
-            ownedPosts = "{}"
-        ownedPosts = json.loads(ownedPosts)
-        ownedPosts[f"{board['uri']}/{number}"] = filePass
-        resp = redirect(f"/{board['uri']}/thread/{thread}#{number}")
-        resp.set_cookie('ownedPosts', json.dumps(ownedPosts))
-        socketio.emit("replyEvent", broadcast=True) #Send reload signal through websocket
-        if logConfig['log-thread-creation'] == 'on':
-            storeLog("reply", "Reply to thread", session['username'] if 'username' in session else None, request.remote_addr, curTime, {"number": number, "files": str(filenames), "thread": thread, "url": f"/{board['uri']}/thread/{thread}#{number}"}, board['uri'])
-        return resp
+            comment = request.form['comment']
+            comment = stripHTML(comment)
+            charLengthCheck = checkCharLimit(board, subject, name, options, comment, filePass)
+            if charLengthCheck[0] == True: #Checks if any given text is too long
+                return render_template('error.html', errorMsg=errors['characterLimit'] + charLengthCheck[1], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+            postLink = checkPostLink(comment)        
+            if board['captcha'] == 1: #Checks if the board has captcha enabled, and if so, checks if the entred captcha text is correct
+                clearCaptcha() #clears captcha so it can't be used again to make a new thread.
+                if 'captcha' not in request.form:
+                    return render_template('error.html', errorMsg=errors['unfilledFields'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                if session['captcha'] != request.form['captcha']: #Checks if the captcha is incorrect.
+                    return render_template('error.html', errorMsg=errors['incorrectCaptcha'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+            postID = None
+            if board['postID'] == 1:
+                postID = generateID(board['uri'], thread, request.remote_addr)
+            files = request.files.getlist("file")
+            filenames = []
+            if request.files['file'].filename != '':
+                maxFiles = globalSettings['maxFiles']
+                if board['maxFiles'] != None:
+                    maxFiles = board['maxFiles']
+                if len(files) > maxFiles: #check if too many files are uploaded
+                    return render_template('error.html', errorMsg=errors['fileLimitExceeded'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                else:
+                    filenames = []
+                    filePaths = []
+                    for f in files: #downloads the files and stores them on the disk
+                        if checkFilesize(board, f) == True:
+                            filename = uploadFile(f, board['uri'], str(time.time()), spoiler, board['mimeTypes'])
+                            if filename == "Banned": #File was hash-banned
+                                return render_template('error.html', errorMsg=errors['fileBanned']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                            if filename == None: #This means the uploaded file was invalid. 
+                                return render_template('error.html', errorMsg=errors['incorrectFiletype']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                            filePaths.append(filename)
+                            filenames.append(secure_filename(f.filename))
+                        else:
+                            return render_template('error.html', errorMsg=errors['filesizeExceeded']+f.filename, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                    filenames = ','.join([str(x) for x in filenames])
+                    filePaths = ','.join([str(x) for x in filePaths])
+                    cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, %s, %s, %s, %s, %s, %s, NULL, NULL, 0, %s)', (name, subject, options, comment, number, curTime, thread, board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode, postID))
+            else: #No files are given
+                cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 2, %s, %s, NULL, NULL, %s, %s, %s, %s, NULL, NULL, 0, %s)', (name, subject, options, comment, number, curTime, thread, board['uri'], str(request.remote_addr), spoiler,filePass, tripcode, postID))
+            if postLink != False:
+                for x in postLink:
+                    cursor.execute("SELECT * FROM posts WHERE number = %s", [x])
+                    currentReplies = cursor.fetchone()
+                    if currentReplies:
+                        currentReplies = currentReplies['replies']
+                        if currentReplies != None:
+                            currentReplies = currentReplies.split(",")
+                        else:
+                            currentReplies = []
+                        currentReplies.append(f"{str(thread)}/{str(number)}")
+                        currentReplies = ",".join(currentReplies)
+                        cursor.execute("UPDATE posts SET replies = %s WHERE number = %s", (currentReplies, x))
+            cursor.execute("UPDATE boards SET posts=%s WHERE uri=%s", (number, board['uri']))
+            cursor.execute("SELECT * FROM server")
+            serverInfo = cursor.fetchone()
+            cursor.execute("UPDATE server SET posts=%s", [serverInfo['posts']+1])
+            mysql.connection.commit()
+            ownedPosts = request.cookies.get('ownedPosts')
+            if ownedPosts == None:
+                ownedPosts = "{}"
+            ownedPosts = json.loads(ownedPosts)
+            ownedPosts[f"{board['uri']}/{number}"] = filePass
+            resp = redirect(f"/{board['uri']}/thread/{thread}#{number}")
+            resp.set_cookie('ownedPosts', json.dumps(ownedPosts))
+            socketio.emit("replyEvent", broadcast=True) #Send reload signal through websocket
+            if logConfig['log-thread-creation'] == 'on':
+                storeLog("reply", "Reply to thread", session['username'] if 'username' in session else None, request.remote_addr, curTime, {"number": number, "files": str(filenames), "thread": thread, "url": f"/{board['uri']}/thread/{thread}#{number}"}, board['uri'])
+            return resp
+        except Exception as e:
+            print(e)
+            return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
     else:
         return errors['RequestNotPost']
 
@@ -1726,127 +1761,135 @@ def reply(board, thread):
 @app.route('/<board>/actions', methods=['POST'])
 def postActions(board):
     if request.method == 'POST':
-        if 'delete' in request.form:
-            if request.form['delete'] == 'Delete': #Post deletion
-                cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-                cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (int(request.form['post']), board))
-                post = cursor.fetchone()
-                if post['password'] == session['filePassword'] or session['group'] < 3 or post['password'] == request.form['password']:
-                    if post['files'] != None: #delete files from disk
-                        files = post['files'].split(',')
-                        for file in files:
-                            deleteFile(file)
-                    if post['type'] == 1: #Check if post is a thread and delete all child posts. 
-                        cursor.execute("SELECT * FROM posts WHERE thread=%s AND board=%s AND type=2", (int(request.form['post']), board))
-                        posts = cursor.fetchall()
-                        for x in posts:
-                            files = []
-                            if x['files'] != None:
-                                files = files + x['files'].split(',')
+        try:
+            if 'delete' in request.form:
+                if request.form['delete'] == 'Delete': #Post deletion
+                    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+                    cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (int(request.form['post']), board))
+                    post = cursor.fetchone()
+                    if post['password'] == session['filePassword'] or session['group'] < 3 or post['password'] == request.form['password']:
+                        if post['files'] != None: #delete files from disk
+                            files = post['files'].split(',')
                             for file in files:
                                 deleteFile(file)
-                        cursor.execute("DELETE FROM posts WHERE thread=%s AND board=%s  AND type=2", (int(request.form['post']), board))
-                    if logConfig['log-post-delete'] == 'on':
-                        if session['group'] <= 3:
-                            storeLog("modPostDelete", "A moderator deleted posts", session['username'], request.remote_addr, time.time(), {'posts': int(request.form['post'])}, board)
-                        else:
-                            storeLog("postDelete", "A user deleted posts", session['username'], request.remote_addr, time.time(), {'posts': int(request.form['post'])}, board)
-                    cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (int(request.form['post']), board))
+                        if post['type'] == 1: #Check if post is a thread and delete all child posts. 
+                            cursor.execute("SELECT * FROM posts WHERE thread=%s AND board=%s AND type=2", (int(request.form['post']), board))
+                            posts = cursor.fetchall()
+                            for x in posts:
+                                files = []
+                                if x['files'] != None:
+                                    files = files + x['files'].split(',')
+                                for file in files:
+                                    deleteFile(file)
+                            cursor.execute("DELETE FROM posts WHERE thread=%s AND board=%s  AND type=2", (int(request.form['post']), board))
+                        if logConfig['log-post-delete'] == 'on':
+                            if session['group'] <= 3:
+                                storeLog("modPostDelete", "A moderator deleted posts", session['username'], request.remote_addr, time.time(), {'posts': int(request.form['post'])}, board)
+                            else:
+                                storeLog("postDelete", "A user deleted posts", session['username'], request.remote_addr, time.time(), {'posts': int(request.form['post'])}, board)
+                        cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (int(request.form['post']), board))
+                        mysql.connection.commit()
+                        return redirect(url_for("boardPage", board=board))
+                    else:
+                        return render_template('error.html', errorMsg=errors['incorrectPassword'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+            if 'global-ban' in request.form:
+                if request.form['global-ban'] == 'Ban':
+                    if session['group'] >= 3:
+                        return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+                    cursor.execute(f"SELECT * FROM posts WHERE `board`='{board}' AND number={int(request.form['post'])}")
+                    post = cursor.fetchone()
+                    length = None
+                    reason = None
+                    append = None
+                    currentTime = time.time()
+                    if "global-length" in request.form: #Check if length of ban was given
+                        if len(request.form["global-length"]) > 0:
+                            length = getMinutes(request.form["global-length"])
+                    if "global-reason" in request.form: #Check if reason was given
+                        if len(request.form["global-reason"]) > 0:
+                            message = request.form["global-reason"]
+                    if "global-message" in request.form:
+                        if len(request.form['global-message']) > 0: #Check if an append message is given
+                            append = request.form['global-message']
+                    cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s, %s, %s)", (reason, length, str(post['ip']), currentTime, post['number'], None))
+                    cursor.execute("UPDATE posts SET append=%s where number=%s AND board=%s", (append, request.form['post'], board))
                     mysql.connection.commit()
+                    if logConfig['log-user-ban'] == 'on':
+                        storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {'ip':str(post['ip'])  , 'reason': reason, 'length':length}, None)
                     return redirect(url_for("boardPage", board=board))
-                else:
-                    return render_template('error.html', errorMsg=errors['incorrectPassword'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-        if 'global-ban' in request.form:
-            if request.form['global-ban'] == 'Ban':
-                if session['group'] >= 3:
-                     return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-                cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-                cursor.execute(f"SELECT * FROM posts WHERE `board`='{board}' AND number={int(request.form['post'])}")
-                post = cursor.fetchone()
-                length = None
-                reason = None
-                append = None
-                currentTime = time.time()
-                if "global-length" in request.form: #Check if length of ban was given
-                    if len(request.form["global-length"]) > 0:
-                        length = getMinutes(request.form["global-length"])
-                if "global-reason" in request.form: #Check if reason was given
-                    if len(request.form["global-reason"]) > 0:
-                        message = request.form["global-reason"]
-                if "global-message" in request.form:
-                    if len(request.form['global-message']) > 0: #Check if an append message is given
-                        append = request.form['global-message']
-                cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s, %s, %s)", (reason, length, str(post['ip']), currentTime, post['number'], None))
-                cursor.execute("UPDATE posts SET append=%s where number=%s AND board=%s", (append, request.form['post'], board))
-                mysql.connection.commit()
-                if logConfig['log-user-ban'] == 'on':
-                    storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {'ip':str(post['ip'])  , 'reason': reason, 'length':length}, None)
-                return redirect(url_for("boardPage", board=board))
-        if 'ban' in request.form:
-            if request.form['ban'] == 'Ban':
-                if session['group'] >= 3:
-                     return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-                cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-                cursor.execute(f"SELECT * FROM posts WHERE `board`='{board}' AND number={int(request.form['post'])}")
-                post = cursor.fetchone()
-                length = None
-                reason = None
-                append = None
-                currentTime = time.time()
-                if "length" in request.form: #Check if length of ban was given
-                    if len(request.form["length"]) > 0:
-                        length = getMinutes(request.form["length"])
-                if "reason" in request.form: #Check if reason was given
-                    if len(request.form["reason"]) > 0:
-                        message = request.form["reason"]
-                if "message" in request.form:
-                    if len(request.form['message']) > 0: #Check if an append message is given
-                        append = request.form['message']
-                cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s, %s, %s)", (reason, length, str(post['ip']), currentTime, post['number'], board))
-                cursor.execute("UPDATE posts SET append=%s where number=%s AND board=%s", (append, request.form['post'], board))
-                mysql.connection.commit()
-                if logConfig['log-user-ban'] == 'on':
-                    storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {'ip':str(post['ip'])  , 'reason': reason, 'length':length}, None)
-                return redirect(url_for("boardPage", board=board))
-        else:
-            return "Still not implemented, check back later"
-            #handle reports
+            if 'ban' in request.form:
+                if request.form['ban'] == 'Ban':
+                    if session['group'] >= 3:
+                        return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+                    cursor.execute(f"SELECT * FROM posts WHERE `board`='{board}' AND number={int(request.form['post'])}")
+                    post = cursor.fetchone()
+                    length = None
+                    reason = None
+                    append = None
+                    currentTime = time.time()
+                    if "length" in request.form: #Check if length of ban was given
+                        if len(request.form["length"]) > 0:
+                            length = getMinutes(request.form["length"])
+                    if "reason" in request.form: #Check if reason was given
+                        if len(request.form["reason"]) > 0:
+                            message = request.form["reason"]
+                    if "message" in request.form:
+                        if len(request.form['message']) > 0: #Check if an append message is given
+                            append = request.form['message']
+                    cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s, %s, %s)", (reason, length, str(post['ip']), currentTime, post['number'], board))
+                    cursor.execute("UPDATE posts SET append=%s where number=%s AND board=%s", (append, request.form['post'], board))
+                    mysql.connection.commit()
+                    if logConfig['log-user-ban'] == 'on':
+                        storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {'ip':str(post['ip'])  , 'reason': reason, 'length':length}, None)
+                    return redirect(url_for("boardPage", board=board))
+            else:
+                return "Still not implemented, check back later"
+                #handle reports
+        except Exception as e:
+            print(e)
+            return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
     else:
         return errors['RequestNotPost']
 
 @app.route('/<board>/actions/password', methods=['POST'])
 def passworddelete(board):
     if request.method == 'POST':
-        if "password" not in request.form:
-            return render_template('error.html', errorMsg=errors['unfilledFields'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute("SELECT * FROM posts WHERE password=%s and board=%s", (request.form['password'], board))
-        posts = cursor.fetchall()
-        if posts == None:
-            return redirect(url_for("boardPage", board=board))
-        for post in posts:
-            if post['files'] != None: #delete files from disk
-                files = post['files'].split(',')
-                for file in files:
-                    deleteFile(file)
-            if post['type'] == 1: #Check if post is a thread and delete all child posts. 
-                cursor.execute("SELECT * FROM posts WHERE thread=%s AND board=%s AND type=2", (post['number'], board))
-                children = cursor.fetchall()
-                for x in children:
-                    files = []
-                    if x['files'] != None:
-                        files = files + x['files'].split(',')
+        try:
+            if "password" not in request.form:
+                return render_template('error.html', errorMsg=errors['unfilledFields'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute("SELECT * FROM posts WHERE password=%s and board=%s", (request.form['password'], board))
+            posts = cursor.fetchall()
+            if posts == None:
+                return redirect(url_for("boardPage", board=board))
+            for post in posts:
+                if post['files'] != None: #delete files from disk
+                    files = post['files'].split(',')
                     for file in files:
                         deleteFile(file)
-                cursor.execute("DELETE FROM posts WHERE thread=%s AND board=%s AND type=2", (post['number'], board))
-        if logConfig['log-post-delete'] == 'on':
-            numbers = []
-            for post in posts:
-                numbers.append(post['number'])
-            storeLog("postDelete", "A user deleted their posts", session['username'], request.remote_addr, time.time(), {'posts': str(numbers)}, board)
-        cursor.execute("DELETE FROM posts WHERE password=%s and board=%s", (request.form['password'], board))
-        mysql.connection.commit()
-        return redirect(url_for("boardPage", board=board))
+                if post['type'] == 1: #Check if post is a thread and delete all child posts. 
+                    cursor.execute("SELECT * FROM posts WHERE thread=%s AND board=%s AND type=2", (post['number'], board))
+                    children = cursor.fetchall()
+                    for x in children:
+                        files = []
+                        if x['files'] != None:
+                            files = files + x['files'].split(',')
+                        for file in files:
+                            deleteFile(file)
+                    cursor.execute("DELETE FROM posts WHERE thread=%s AND board=%s AND type=2", (post['number'], board))
+            if logConfig['log-post-delete'] == 'on':
+                numbers = []
+                for post in posts:
+                    numbers.append(post['number'])
+                storeLog("postDelete", "A user deleted their posts", session['username'], request.remote_addr, time.time(), {'posts': str(numbers)}, board)
+            cursor.execute("DELETE FROM posts WHERE password=%s and board=%s", (request.form['password'], board))
+            mysql.connection.commit()
+            return redirect(url_for("boardPage", board=board))
+        except Exception as e:
+            print(e)
+            return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
     else:
         return errors['RequestNotPost']
 #Moderation pages. 
@@ -2070,413 +2113,439 @@ def unbanUser(user):
 
 @app.route("/logs", methods=['GET'])
 def logs():
-    if not request.args.get('board', type=str): #Board filter arguments
-        board = "board OR board IS NULL"
-    else:
-        board = f'"{request.args.get("board", type=str)}"'
-    if not request.args.get('user', type=str): #user filter arguments
-        user = "user OR user IS NULL"
-    else:
-        user = f'"{request.args.get("user", type=str)}"'
-    if not request.args.get('ip', type=str): #IP filter arguments
-        ip = "ip OR ip IS NULL"
-    else:
-        ip = f'"{request.args.get("ip", type=str)}"'
-    if not request.args.get("action", type=str): #type of action
-        action = "type"
-    else:
-        action = f'"{request.args.get("action", type=str)}"'
-    if not request.args.get('id', type=str): # ID filter arguments
-        id = "id"
-    else:
-        id = f'"{request.args.get("id", type=str)}"'
-    query = f"SELECT * FROM logs WHERE id={id} AND (type={action}) AND (user={user}) AND (ip={ip}) AND (board={board}) ORDER BY id desc"
-    print(query)
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute(query)
-    logs = cursor.fetchall()
-    return render_template('logs.html', logs=logs, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-
+    try:
+        if not request.args.get('board', type=str): #Board filter arguments
+            board = "board OR board IS NULL"
+        else:
+            board = f'"{request.args.get("board", type=str)}"'
+        if not request.args.get('user', type=str): #user filter arguments
+            user = "user OR user IS NULL"
+        else:
+            user = f'"{request.args.get("user", type=str)}"'
+        if not request.args.get('ip', type=str): #IP filter arguments
+            ip = "ip OR ip IS NULL"
+        else:
+            ip = f'"{request.args.get("ip", type=str)}"'
+        if not request.args.get("action", type=str): #type of action
+            action = "type"
+        else:
+            action = f'"{request.args.get("action", type=str)}"'
+        if not request.args.get('id', type=str): # ID filter arguments
+            id = "id"
+        else:
+            id = f'"{request.args.get("id", type=str)}"'
+        query = f"SELECT * FROM logs WHERE id={id} AND (type={action}) AND (user={user}) AND (ip={ip}) AND (board={board}) ORDER BY id desc"
+        print(query)
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute(query)
+        logs = cursor.fetchall()
+        return render_template('logs.html', logs=logs, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+    except Exception as e:
+        print(e)
+        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
 @app.route('/latest', methods=['GET'])
 def latest():
-    if not request.args.get('board', type=str): #Board filter arguments
-        board = "board OR board=NULL"
-    else:
-        board = f'"{request.args.get("board", type=str)}"'
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    query = f"SELECT * FROM posts WHERE board={board} ORDER BY number desc"
-    cursor.execute(query)
-    posts = cursor.fetchall()
-    return render_template('latest.html', posts=posts, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-
+    try:
+        if not request.args.get('board', type=str): #Board filter arguments
+            board = "board OR board=NULL"
+        else:
+            board = f'"{request.args.get("board", type=str)}"'
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        query = f"SELECT * FROM posts WHERE board={board} ORDER BY number desc"
+        cursor.execute(query)
+        posts = cursor.fetchall()
+        return render_template('latest.html', posts=posts, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+    except Exception as e:
+        print(e)
+        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
 @app.route('/latest/actions', methods=['POST'])
 def latestActions():
-    checkPost()
-    if session['group'] > 3: #Returns error if insufficient perms
-        return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    requestData = json.loads(json.dumps(request.form))
-    currentTime = time.time()
-    for x in requestData:
-        if x.startswith("post-"):
-            number = requestData[x].split('-')[0]
-            board = requestData[x].split('-')[1]
-            cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
-            post = cursor.fetchone()
-            if post == None: #Returns error if post is none
-                return render_template('error.html', errorMsg=errors['invalidPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-            if "multiple-ban-posters" in request.form: #Checks if the post need to be banned.
-                if request.form['multiple-ban-posters'] == "on": #Checks if the posters need to be banned before the files are deleted
+    try:
+        checkPost()
+        if session['group'] > 3: #Returns error if insufficient perms
+            return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        requestData = json.loads(json.dumps(request.form))
+        currentTime = time.time()
+        for x in requestData:
+            if x.startswith("post-"):
+                number = requestData[x].split('-')[0]
+                board = requestData[x].split('-')[1]
+                cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
+                post = cursor.fetchone()
+                if post == None: #Returns error if post is none
+                    return render_template('error.html', errorMsg=errors['invalidPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                if "multiple-ban-posters" in request.form: #Checks if the post need to be banned.
+                    if request.form['multiple-ban-posters'] == "on": #Checks if the posters need to be banned before the files are deleted
+                        reason = None
+                        length = None
+                        message = globalSettings['banMessage']
+                        cursor.execute("SELECT * FROM bans WHERE ip=%s", [post['ip']]) #New ban overwrites the old one
+                        if cursor.fetchone() != None:
+                            cursor.execute("DELETE FROM bans WHEre ip=%s", [post['ip']])
+                        if 'multiple-ban-reason' in request.form: #Checks if a reason is given
+                            if len(request.form['multiple-ban-reason']) > 0:
+                                reason = request.form['multiple-ban-reason']
+                        if 'multiple-ban-length' in request.form: #Checks if the length is given
+                            if len(request.form['multiple-ban-length']) > 0:
+                                length = getMinutes(request.form['multiple-ban-length'])
+                        if 'multiple-ban-message' in request.form: #Checks if the length is given
+                            if len(request.form['multiple-ban-message']) > 0:
+                                message = request.form['multiple-ban-message']
+                        cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s, %s, %s)", (reason, length, str(post['ip']), currentTime, post['number'], post['board']))
+                        cursor.execute("UPDATE posts SET append=%s where number=%s AND board=%s", (message, post['number'], post['board']))
+                        if logConfig['log-user-ban'] == 'on':
+                            storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {'ip':str(post['ip'])  , 'reason': reason, 'length':length}, None)
+                if 'multiple-hash-ban-media' in request.form: #Checks if media needs to be banned. STILL NEED TO CHECK AND CREATE DB TABLE!!
                     reason = None
-                    length = None
-                    message = globalSettings['banMessage']
-                    cursor.execute("SELECT * FROM bans WHERE ip=%s", [post['ip']]) #New ban overwrites the old one
-                    if cursor.fetchone() != None:
-                        cursor.execute("DELETE FROM bans WHEre ip=%s", [post['ip']])
-                    if 'multiple-ban-reason' in request.form: #Checks if a reason is given
-                        if len(request.form['multiple-ban-reason']) > 0:
-                            reason = request.form['multiple-ban-reason']
-                    if 'multiple-ban-length' in request.form: #Checks if the length is given
-                        if len(request.form['multiple-ban-length']) > 0:
-                            length = getMinutes(request.form['multiple-ban-length'])
-                    if 'multiple-ban-message' in request.form: #Checks if the length is given
-                        if len(request.form['multiple-ban-message']) > 0:
-                            message = request.form['multiple-ban-message']
-                    cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s, %s, %s)", (reason, length, str(post['ip']), currentTime, post['number'], post['board']))
-                    cursor.execute("UPDATE posts SET append=%s where number=%s AND board=%s", (message, post['number'], post['board']))
-                    if logConfig['log-user-ban'] == 'on':
-                        storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {'ip':str(post['ip'])  , 'reason': reason, 'length':length}, None)
-            if 'multiple-hash-ban-media' in request.form: #Checks if media needs to be banned. STILL NEED TO CHECK AND CREATE DB TABLE!!
+                    if request.form['multiple-hash-ban-media'] == 'on':
+                        if 'multiple-hash-ban-reason' in request.form: #Checks if a reason for the hash ban was given
+                            if len(request.form['multiple-hash-ban-reason']) > 0:
+                                reason = request.form['multiple-hash-ban-reason']
+                        for file in post["files"].split(","):
+                            if logConfig['log-hash-ban'] == 'on':
+                                storeLog("hashBan", "Media has been hash banned", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(file,'rb').read()).hexdigest(), 'Post': post['number']}, board)
+                            cursor.execute("INSERT INTO hashbans VALUES (%s, %s, %s, %s)", (hashlib.md5(open(file,'rb').read()).hexdigest(), reason, session['username'], currentTime))
+                if 'multiple-delete-media' in request.form: #Checks if the media needs to be deleted.
+                    if request.form['multiple-delete-media'] == 'on':
+                        if post['files'] != None: #delete files from disk
+                            files = post['files'].split(',')
+                            for file in files:
+                                deleteFile(file)
+                        cursor.execute("UPDATE posts SET files=NULL, filenames=NULL WHERE number=%s AND board=%s", (number, board))
+                        if post['message'] == None or len(post['message']) == 0: #Delete posts that don't have a message if the files are deleted
+                            cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (post['number'], post['board']))
+                if 'multiple-delete-posts' in request.form: #Checks if the post needs to be deleted.
+                    if request.form['multiple-delete-posts'] == 'on':
+                        if post['files'] != None: #delete files from disk
+                            files = post['files'].split(',')
+                            for file in files:
+                                deleteFile(file)
+                        cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (number, board))
+            if x.startswith("ban-"): #Ban individual poster
+                number = requestData[x].split('-')[0]
+                board = requestData[x].split('-')[1]
+                cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
+                post = cursor.fetchone()
+                if post == None: #Returns error if post is none
+                    return render_template('error.html', errorMsg=errors['invalidPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
                 reason = None
-                if request.form['multiple-hash-ban-media'] == 'on':
-                    if 'multiple-hash-ban-reason' in request.form: #Checks if a reason for the hash ban was given
-                        if len(request.form['multiple-hash-ban-reason']) > 0:
-                            reason = request.form['multiple-hash-ban-reason']
-                    for file in post["files"].split(","):
-                        if logConfig['log-hash-ban'] == 'on':
-                            storeLog("hashBan", "Media has been hash banned", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(file,'rb').read()).hexdigest(), 'Post': post['number']}, board)
-                        cursor.execute("INSERT INTO hashbans VALUES (%s, %s, %s, %s)", (hashlib.md5(open(file,'rb').read()).hexdigest(), reason, session['username'], currentTime))
-            if 'multiple-delete-media' in request.form: #Checks if the media needs to be deleted.
-                if request.form['multiple-delete-media'] == 'on':
-                    if post['files'] != None: #delete files from disk
-                        files = post['files'].split(',')
-                        for file in files:
-                            deleteFile(file)
+                length = None
+                type = None
+                message = globalSettings['banMessage']
+                if f"banreason-{number}-{board}" in request.form: #Check if reaosn for ban was given
+                    if len(request.form[f"banreason-{number}-{board}"]) > 0:
+                        reason = request.form[f"banreason-{number}-{board}"]
+                if f"banduration-{number}-{board}" in request.form: #Check if length of ban was given
+                    if len(request.form[f"banduration-{number}-{board}"]) > 0:
+                        length = getMinutes(request.form[f"banduration-{number}-{board}"])
+                if f"banmessage-{number}-{board}" in request.form: #Check if append message was given
+                    if len(request.form[f"banmessage-{number}-{board}"]) > 0:
+                        message = request.form[f"banmessage-{number}-{board}"]
+                if request.form[f'type-{number}-{board}'] == 'board':
+                    type = post['board']
+                cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s, %s, %s)", (reason, length, str(post['ip']), currentTime, post['number'], type))
+                cursor.execute("UPDATE posts SET append=%s where number=%s AND board=%s", (message, post['number'], post['board']))
+                if logConfig['log-user-ban'] == 'on':
+                    storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {'ip':str(post['ip'])  , 'reason': reason, 'length':length}, None)
+            if x.startswith("deletemedia-"): #Remove media from post
+                number = requestData[x].split('-')[0]
+                board = requestData[x].split('-')[1]
+                cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
+                post = cursor.fetchone()
+                if post == None: #Returns error if post is none
+                    return render_template('error.html', errorMsg=errors['invalidPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                if post['files'] != None:
+                    files = post['files'].split(',')
+                    for file in files:
+                        deleteFile(file)
                     cursor.execute("UPDATE posts SET files=NULL, filenames=NULL WHERE number=%s AND board=%s", (number, board))
                     if post['message'] == None or len(post['message']) == 0: #Delete posts that don't have a message if the files are deleted
                         cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (post['number'], post['board']))
-            if 'multiple-delete-posts' in request.form: #Checks if the post needs to be deleted.
-                if request.form['multiple-delete-posts'] == 'on':
-                    if post['files'] != None: #delete files from disk
-                        files = post['files'].split(',')
-                        for file in files:
-                            deleteFile(file)
-                    cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (number, board))
-        if x.startswith("ban-"): #Ban individual poster
-            number = requestData[x].split('-')[0]
-            board = requestData[x].split('-')[1]
-            cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
-            post = cursor.fetchone()
-            if post == None: #Returns error if post is none
-                return render_template('error.html', errorMsg=errors['invalidPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-            reason = None
-            length = None
-            type = None
-            message = globalSettings['banMessage']
-            if f"banreason-{number}-{board}" in request.form: #Check if reaosn for ban was given
-                if len(request.form[f"banreason-{number}-{board}"]) > 0:
-                    reason = request.form[f"banreason-{number}-{board}"]
-            if f"banduration-{number}-{board}" in request.form: #Check if length of ban was given
-                if len(request.form[f"banduration-{number}-{board}"]) > 0:
-                    length = getMinutes(request.form[f"banduration-{number}-{board}"])
-            if f"banmessage-{number}-{board}" in request.form: #Check if append message was given
-                if len(request.form[f"banmessage-{number}-{board}"]) > 0:
-                    message = request.form[f"banmessage-{number}-{board}"]
-            if request.form[f'type-{number}-{board}'] == 'board':
-                type = post['board']
-            cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s, %s, %s)", (reason, length, str(post['ip']), currentTime, post['number'], type))
-            cursor.execute("UPDATE posts SET append=%s where number=%s AND board=%s", (message, post['number'], post['board']))
-            if logConfig['log-user-ban'] == 'on':
-                storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {'ip':str(post['ip'])  , 'reason': reason, 'length':length}, None)
-        if x.startswith("deletemedia-"): #Remove media from post
-            number = requestData[x].split('-')[0]
-            board = requestData[x].split('-')[1]
-            cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
-            post = cursor.fetchone()
-            if post == None: #Returns error if post is none
-                return render_template('error.html', errorMsg=errors['invalidPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-            if post['files'] != None:
-                files = post['files'].split(',')
-                for file in files:
-                    deleteFile(file)
-                cursor.execute("UPDATE posts SET files=NULL, filenames=NULL WHERE number=%s AND board=%s", (number, board))
-                if post['message'] == None or len(post['message']) == 0: #Delete posts that don't have a message if the files are deleted
-                    cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (post['number'], post['board']))
-        if x.startswith("spoil-"): #Spoil files
-            number = requestData[x].split('-')[0]
-            board = requestData[x].split('-')[1]
-            cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
-            post = cursor.fetchone()
-            if post == None: #Returns error if post is none
-                return render_template('error.html', errorMsg=errors['invalidPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-            cursor.execute("UPDATE posts SET spoiler=1 WHERE number=%s AND board=%s", (number, board))
-            if logConfig['log-media-spoil'] == 'on':
-                storeLog("mediaSpoil", "Media has been spoiled", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'url': f"/{board}/thread/{post['thread']}#{number}"}, board)
-        if x.startswith("unspoil-"): #Remove spoiler
-            number = requestData[x].split('-')[0]
-            board = requestData[x].split('-')[1]
-            cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
-            post = cursor.fetchone()
-            if post == None: #Returns error if post is none
-                return render_template('error.html', errorMsg=errors['invalidPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-            cursor.execute("UPDATE posts SET spoiler=0 WHERE number=%s AND board=%s", (number, board))
-            if logConfig['log-media-spoil'] == 'on':
-                storeLog("mediaSpoil", "Media has been unspoiled", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'url': f"/{board}/thread/{post['thread']}#{number}"}, board)
-        if x.startswith("hashban-"): #Individual post hash ban
-            number = requestData[x].split('-')[0]
-            board = requestData[x].split('-')[1]
-            reason = None
-            cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
-            post = cursor.fetchone()
-            if post == None: #Returns error if post is none
-                return render_template('error.html', errorMsg=errors['invalidPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-            if f'hashbanreason-{number}-{board}' in request.form:
-                if len(request.form[f'hashbanreason-{number}-{board}']) > 0:
-                    reason = request.form[f'hashbanreason-{number}-{board}']
-            for file in post["files"].split(","):
-                if logConfig['log-hash-ban'] == 'on':
-                    storeLog("hashBan", "Media has been hash banned", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(file,'rb').read()).hexdigest(), 'Post': post['number']}, board)
-                cursor.execute("INSERT INTO hashbans VALUES (%s, %s, %s, %s)", (hashlib.md5(open(file,'rb').read()).hexdigest(), reason, session['username'], currentTime))
-        if x.startswith("delete-"): #Delete individual post
-            number = requestData[x].split('-')[0]
-            board = requestData[x].split('-')[1]
-            cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
-            post = cursor.fetchone()
-            if post == None: #Returns error if post is none
-                return render_template('error.html', errorMsg=errors['invalidPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-            if post['files'] != None: #delete files from disk
-                files = post['files'].split(',')
-                for file in files:
-                    deleteFile(file)
-            if logConfig['log-post-delete'] == 'on':
-                storeLog("modPostDelete", "A moderator deleted posts", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread']}, board)
-            cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (number, board))
-        mysql.connection.commit()
-    return redirect(url_for('latest'))
-
+            if x.startswith("spoil-"): #Spoil files
+                number = requestData[x].split('-')[0]
+                board = requestData[x].split('-')[1]
+                cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
+                post = cursor.fetchone()
+                if post == None: #Returns error if post is none
+                    return render_template('error.html', errorMsg=errors['invalidPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                cursor.execute("UPDATE posts SET spoiler=1 WHERE number=%s AND board=%s", (number, board))
+                if logConfig['log-media-spoil'] == 'on':
+                    storeLog("mediaSpoil", "Media has been spoiled", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'url': f"/{board}/thread/{post['thread']}#{number}"}, board)
+            if x.startswith("unspoil-"): #Remove spoiler
+                number = requestData[x].split('-')[0]
+                board = requestData[x].split('-')[1]
+                cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
+                post = cursor.fetchone()
+                if post == None: #Returns error if post is none
+                    return render_template('error.html', errorMsg=errors['invalidPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                cursor.execute("UPDATE posts SET spoiler=0 WHERE number=%s AND board=%s", (number, board))
+                if logConfig['log-media-spoil'] == 'on':
+                    storeLog("mediaSpoil", "Media has been unspoiled", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'url': f"/{board}/thread/{post['thread']}#{number}"}, board)
+            if x.startswith("hashban-"): #Individual post hash ban
+                number = requestData[x].split('-')[0]
+                board = requestData[x].split('-')[1]
+                reason = None
+                cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
+                post = cursor.fetchone()
+                if post == None: #Returns error if post is none
+                    return render_template('error.html', errorMsg=errors['invalidPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                if f'hashbanreason-{number}-{board}' in request.form:
+                    if len(request.form[f'hashbanreason-{number}-{board}']) > 0:
+                        reason = request.form[f'hashbanreason-{number}-{board}']
+                for file in post["files"].split(","):
+                    if logConfig['log-hash-ban'] == 'on':
+                        storeLog("hashBan", "Media has been hash banned", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(file,'rb').read()).hexdigest(), 'Post': post['number']}, board)
+                    cursor.execute("INSERT INTO hashbans VALUES (%s, %s, %s, %s)", (hashlib.md5(open(file,'rb').read()).hexdigest(), reason, session['username'], currentTime))
+            if x.startswith("delete-"): #Delete individual post
+                number = requestData[x].split('-')[0]
+                board = requestData[x].split('-')[1]
+                cursor.execute("SELECT * FROM posts WHERE number=%s AND board=%s", (number, board))
+                post = cursor.fetchone()
+                if post == None: #Returns error if post is none
+                    return render_template('error.html', errorMsg=errors['invalidPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                if post['files'] != None: #delete files from disk
+                    files = post['files'].split(',')
+                    for file in files:
+                        deleteFile(file)
+                if logConfig['log-post-delete'] == 'on':
+                    storeLog("modPostDelete", "A moderator deleted posts", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread']}, board)
+                cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (number, board))
+            mysql.connection.commit()
+        return redirect(url_for('latest'))
+    except Exception as e:
+        print(e)
+        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
 
 
 
 @app.route('/media', methods=['GET'])
 def media():
-    if session['group'] > 3:
-        return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute('SELECT * FROM posts WHERE files IS NOT NULL ORDER BY number DESC')
-    posts = cursor.fetchall()
-    return render_template('mediaManagement.html', posts=posts, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-
+    try:
+        if session['group'] > 3:
+            return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute('SELECT * FROM posts WHERE files IS NOT NULL ORDER BY number DESC')
+        posts = cursor.fetchall()
+        return render_template('mediaManagement.html', posts=posts, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+    except Exception as e:
+        print(e)
+        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
 
 @app.route('/media/actions', methods=['POST'])
 def mediaActions():
-    checkPost()
-    if session['group'] > 3: #Returns error if insufficient perms
-        return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    requestData = json.loads(json.dumps(request.form))
-    currentTime = time.time()
-    for x in requestData:
-        if x.startswith("media-"):
-            currentFile = requestData[x].split("-")[1]
-            cursor.execute("SELECT * FROM posts WHERE files LIKE '%"+currentFile+"%'") #Get post that has this file.
-            post = cursor.fetchone()
-            if post == None: #Returns error if post is none
-                return render_template('error.html', errorMsg=errors['invalidPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-            if "multiple-ban-posters" in request.form: #Checks if the post need to be banned.
-                if request.form['multiple-ban-posters'] == "on": #Checks if the posters need to be banned
+    try:
+        checkPost()
+        if session['group'] > 3: #Returns error if insufficient perms
+            return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        requestData = json.loads(json.dumps(request.form))
+        currentTime = time.time()
+        for x in requestData:
+            if x.startswith("media-"):
+                currentFile = requestData[x].split("-")[1]
+                cursor.execute("SELECT * FROM posts WHERE files LIKE '%"+currentFile+"%'") #Get post that has this file.
+                post = cursor.fetchone()
+                if post == None: #Returns error if post is none
+                    return render_template('error.html', errorMsg=errors['invalidPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                if "multiple-ban-posters" in request.form: #Checks if the post need to be banned.
+                    if request.form['multiple-ban-posters'] == "on": #Checks if the posters need to be banned
+                        reason = None
+                        length = None
+                        message = globalSettings['banMessage']
+                        cursor.execute("SELECT * FROM bans WHERE ip=%s", [post['ip']]) #New ban overwrites the old one
+                        if cursor.fetchone() != None:
+                            cursor.execute("DELETE FROM bans WHEre ip=%s", [post['ip']])
+                        if 'multiple-ban-reason' in request.form: #Checks if a reason is given
+                            if len(request.form['multiple-ban-reason']) > 0:
+                                reason = request.form['multiple-ban-reason']
+                        if 'multiple-ban-length' in request.form: #Checks if the length is given
+                            if len(request.form['multiple-ban-length']) > 0:
+                                length = getMinutes(request.form['multiple-ban-length'])
+                        if 'multiple-ban-message' in request.form: #Checks if a mesage is given
+                            if len(request.form['multiple-ban-message']) > 0:
+                                message = request.form['multiple-ban-message']
+                        cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s, %s, %s)", (reason, length, str(post['ip']), currentTime, post['number'], post['board']))
+                        cursor.execute("UPDATE posts SET append=%s where number=%s AND board=%s", (message, post['number'], post['board']))
+                        if logConfig['log-user-ban'] == 'on':
+                            storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {'ip':str(post['ip'])  , 'reason': reason, 'length':length}, None)
+                if 'multiple-hash-ban-media' in request.form: #Checks if media needs to be banned. STILL NEED TO CHECK AND CREATE DB TABLE!!
                     reason = None
-                    length = None
-                    message = globalSettings['banMessage']
-                    cursor.execute("SELECT * FROM bans WHERE ip=%s", [post['ip']]) #New ban overwrites the old one
-                    if cursor.fetchone() != None:
-                        cursor.execute("DELETE FROM bans WHEre ip=%s", [post['ip']])
-                    if 'multiple-ban-reason' in request.form: #Checks if a reason is given
-                        if len(request.form['multiple-ban-reason']) > 0:
-                            reason = request.form['multiple-ban-reason']
-                    if 'multiple-ban-length' in request.form: #Checks if the length is given
-                        if len(request.form['multiple-ban-length']) > 0:
-                            length = getMinutes(request.form['multiple-ban-length'])
-                    if 'multiple-ban-message' in request.form: #Checks if a mesage is given
-                        if len(request.form['multiple-ban-message']) > 0:
-                            message = request.form['multiple-ban-message']
-                    cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s, %s, %s)", (reason, length, str(post['ip']), currentTime, post['number'], post['board']))
-                    cursor.execute("UPDATE posts SET append=%s where number=%s AND board=%s", (message, post['number'], post['board']))
-                    if logConfig['log-user-ban'] == 'on':
-                        storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {'ip':str(post['ip'])  , 'reason': reason, 'length':length}, None)
-            if 'multiple-hash-ban-media' in request.form: #Checks if media needs to be banned. STILL NEED TO CHECK AND CREATE DB TABLE!!
+                    if request.form['multiple-hash-ban-media'] == 'on':
+                        if 'multiple-hash-ban-reason' in request.form: #Checks if a reason for the hash ban was given
+                            if len(request.form['multiple-hash-ban-reason']) > 0:
+                                reason = request.form['multiple-hash-ban-reason']
+                        for file in post["files"].split(","):
+                            if logConfig['log-hash-ban'] == 'on':
+                                storeLog("hashBan", "Media has been hash banned", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(file,'rb').read()).hexdigest(), 'Post': post['number']}, board)
+                            cursor.execute("INSERT INTO hashbans VALUES (%s, %s, %s, %s)", (hashlib.md5(open(file,'rb').read()).hexdigest(), reason, session['username'], currentTime))
+                if 'multiple-media-delete' in request.form: #Checks if the media needs to be deleted.
+                    if request.form['multiple-media-delete'] == 'on':
+                        if post['files'] != None: #delete files from disk
+                            files = post['files'].split(',')
+                            for file in files:
+                                deleteFile(file)
+                            filenames = post['filenames'].split(',')
+                            del filenames[files.index(currentFile)]
+                            ",".join(filenames)
+                            files.remove(currentFile)
+                            ",".join(files)
+                            if len(files) == 0:
+                                cursor.execute("UPDATE posts SET files=NULL, filenames=NULL WHERE number=%s AND board=%s", (post['number'], post['board']))
+                            else:
+                                cursor.execute("UPDATE posts SET files=%s, filenames=%s WHERE number=%s AND board=%s", (files, filenames, post['number'], post['board']))
+                            if post['message'] == None or len(post['message']) == 0: #Delete posts that don't have a message if the files are deleted
+                                    cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (post['number'], post['board']))
+            if x.startswith('spoil-'): #Spoil individual media
+                cursor.execute("UPDATE posts SET spoiler=1 WHERE files LIKE '%"+x.split('-')[1]+"%'")
+                if logConfig['log-media-spoil'] == 'on':
+                    cursor.execute("SELECT * FROM posts WHERE files LIKE '%"+x.split('-')[1]+"%'")
+                    post = cursor.fetchone()
+                    storeLog("mediaSpoil", "Media has been spoiled", session['username'], request.remote_addr, time.time(), {'post': post['number'], 'url': f"/{post['board']}/thread/{post['thread']}#{post['number']}"}, post['board'])
+            if x.startswith('unspoil-'):
+                cursor.execute("UPDATE posts SET spoiler=0 WHERE files LIKE '%"+x.split('-')[1]+"%'")
+                if logConfig['log-media-spoil'] == 'on':
+                    cursor.execute("SELECT * FROM posts WHERE files LIKE '%"+x.split('-')[1]+"%'")
+                    post = cursor.fetchone()
+                    storeLog("mediaSpoil", "Media has been unspoiled", session['username'], request.remote_addr, time.time(), {'post': post['number'], 'url': f"/{post['board']}/thread/{post['thread']}#{post['number']}"}, post['board'])
+            if x.startswith("ban-"):
+                currentFile = x.split('-')[1]
+                cursor.execute("SELECT * FROM posts WHERE files LIKE '%"+currentFile+"%'")
+                post = cursor.fetchone()
+                if post == None: #Returns error if post is none
+                    return render_template('error.html', errorMsg=errors['invalidPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
                 reason = None
-                if request.form['multiple-hash-ban-media'] == 'on':
-                    if 'multiple-hash-ban-reason' in request.form: #Checks if a reason for the hash ban was given
-                        if len(request.form['multiple-hash-ban-reason']) > 0:
-                            reason = request.form['multiple-hash-ban-reason']
-                    for file in post["files"].split(","):
-                        if logConfig['log-hash-ban'] == 'on':
-                            storeLog("hashBan", "Media has been hash banned", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(file,'rb').read()).hexdigest(), 'Post': post['number']}, board)
-                        cursor.execute("INSERT INTO hashbans VALUES (%s, %s, %s, %s)", (hashlib.md5(open(file,'rb').read()).hexdigest(), reason, session['username'], currentTime))
-            if 'multiple-media-delete' in request.form: #Checks if the media needs to be deleted.
-                if request.form['multiple-media-delete'] == 'on':
-                    if post['files'] != None: #delete files from disk
-                        files = post['files'].split(',')
-                        for file in files:
+                length = None
+                type = None
+                message = globalSettings['banMessage']
+                if f"banreason-{currentFile}" in request.form: #Check if reaosn for ban was given
+                    if len(request.form[f"banreason-{currentFile}"]) > 0:
+                        reason = request.form[f"banreason-{currentFile}"]
+                if f"banduration-{currentFile}" in request.form: #Check if length of ban was given
+                    if len(request.form[f"banduration-{currentFile}"]) > 0:
+                        length = getMinutes(request.form[f"banduration-{currentFile}"])
+                if f"banmessage-{currentFile}" in request.form: #Check if message for ban was given
+                    if len(request.form[f"banmessage-{currentFile}"]) > 0:
+                        message = request.form[f"banmessage-{currentFile}"]
+                if request.form[f'type-{number}-{board}'] == 'board':
+                    type = post['board']
+                cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s, %s, %s)", (reason, length, str(post['ip']), currentTime, post['number'], type))
+                cursor.execute("UPDATE posts SET append=%s where number=%s AND board=%s", (message, post['number'], post['board']))
+                if logConfig['log-user-ban'] == 'on':
+                    storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {'ip':str(post['ip'])  , 'reason': reason, 'length':length}, None)
+            if x.startswith("hashban-"):
+                reason = None
+                currentFile = x.split('-')[1]
+                currentTime = time.time()
+                cursor.execute("SELECT * FROM posts WHERE files LIKE '%"+currentFile+"%'")
+                post = cursor.fetchone()
+                if f'hashbanreason-{currentFile}' in request.form:
+                    reason = request.form[f'hashbanreason-{currentFile}']
+                if logConfig['log-hash-ban'] == 'on':
+                    storeLog("hashBan", "Media has been hash banned", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(currentFile,'rb').read()).hexdigest(), 'Post': post['number']}, post['board'])
+                cursor.execute("INSERT INTO hashbans VALUES (%s, %s, %s, %s)", (hashlib.md5(open(currentFile,'rb').read()).hexdigest(), reason, session['username'], currentTime))
+            if x.startswith('delete-'): #Delete individual file.
+                currentFile = requestData[x].split('-')[1]
+                cursor.execute("SELECT * FROM posts WHERE files LIKE '%"+currentFile+"%'")
+                post = cursor.fetchone()
+                if post == None: #Returns error if post is none
+                    return render_template('error.html', errorMsg=errors['invalidPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+                if post['files'] != None: #delete files from disk
+                    files = post['files'].split(',')
+                    for file in files:
+                        if file == currentFile:
                             deleteFile(file)
-                        filenames = post['filenames'].split(',')
-                        del filenames[files.index(currentFile)]
-                        ",".join(filenames)
-                        files.remove(currentFile)
-                        ",".join(files)
-                        if len(files) == 0:
-                            cursor.execute("UPDATE posts SET files=NULL, filenames=NULL WHERE number=%s AND board=%s", (post['number'], post['board']))
-                        else:
-                            cursor.execute("UPDATE posts SET files=%s, filenames=%s WHERE number=%s AND board=%s", (files, filenames, post['number'], post['board']))
-                        if post['message'] == None or len(post['message']) == 0: #Delete posts that don't have a message if the files are deleted
-                                cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (post['number'], post['board']))
-        if x.startswith('spoil-'): #Spoil individual media
-            cursor.execute("UPDATE posts SET spoiler=1 WHERE files LIKE '%"+x.split('-')[1]+"%'")
-            if logConfig['log-media-spoil'] == 'on':
-                cursor.execute("SELECT * FROM posts WHERE files LIKE '%"+x.split('-')[1]+"%'")
-                post = cursor.fetchone()
-                storeLog("mediaSpoil", "Media has been spoiled", session['username'], request.remote_addr, time.time(), {'post': post['number'], 'url': f"/{post['board']}/thread/{post['thread']}#{post['number']}"}, post['board'])
-        if x.startswith('unspoil-'):
-            cursor.execute("UPDATE posts SET spoiler=0 WHERE files LIKE '%"+x.split('-')[1]+"%'")
-            if logConfig['log-media-spoil'] == 'on':
-                cursor.execute("SELECT * FROM posts WHERE files LIKE '%"+x.split('-')[1]+"%'")
-                post = cursor.fetchone()
-                storeLog("mediaSpoil", "Media has been unspoiled", session['username'], request.remote_addr, time.time(), {'post': post['number'], 'url': f"/{post['board']}/thread/{post['thread']}#{post['number']}"}, post['board'])
-        if x.startswith("ban-"):
-            currentFile = x.split('-')[1]
-            cursor.execute("SELECT * FROM posts WHERE files LIKE '%"+currentFile+"%'")
-            post = cursor.fetchone()
-            if post == None: #Returns error if post is none
-                return render_template('error.html', errorMsg=errors['invalidPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-            reason = None
-            length = None
-            type = None
-            message = globalSettings['banMessage']
-            if f"banreason-{currentFile}" in request.form: #Check if reaosn for ban was given
-                if len(request.form[f"banreason-{currentFile}"]) > 0:
-                    reason = request.form[f"banreason-{currentFile}"]
-            if f"banduration-{currentFile}" in request.form: #Check if length of ban was given
-                if len(request.form[f"banduration-{currentFile}"]) > 0:
-                    length = getMinutes(request.form[f"banduration-{currentFile}"])
-            if f"banmessage-{currentFile}" in request.form: #Check if message for ban was given
-                if len(request.form[f"banmessage-{currentFile}"]) > 0:
-                    message = request.form[f"banmessage-{currentFile}"]
-            if request.form[f'type-{number}-{board}'] == 'board':
-                type = post['board']
-            cursor.execute("INSERT INTO bans VALUES (NULL, %s, %s, NULL, %s, %s, %s, %s)", (reason, length, str(post['ip']), currentTime, post['number'], type))
-            cursor.execute("UPDATE posts SET append=%s where number=%s AND board=%s", (message, post['number'], post['board']))
-            if logConfig['log-user-ban'] == 'on':
-                storeLog("userBan", "A user has been banned", session['username'], request.remote_addr, currentTime, {'ip':str(post['ip'])  , 'reason': reason, 'length':length}, None)
-        if x.startswith("hashban-"):
-            reason = None
-            currentFile = x.split('-')[1]
-            currentTime = time.time()
-            cursor.execute("SELECT * FROM posts WHERE files LIKE '%"+currentFile+"%'")
-            post = cursor.fetchone()
-            if f'hashbanreason-{currentFile}' in request.form:
-                reason = request.form[f'hashbanreason-{currentFile}']
-            if logConfig['log-hash-ban'] == 'on':
-                storeLog("hashBan", "Media has been hash banned", session['username'], request.remote_addr, currentTime, {'post': post['number'], 'thread': post['thread'], 'MD5': hashlib.md5(open(currentFile,'rb').read()).hexdigest(), 'Post': post['number']}, post['board'])
-            cursor.execute("INSERT INTO hashbans VALUES (%s, %s, %s, %s)", (hashlib.md5(open(currentFile,'rb').read()).hexdigest(), reason, session['username'], currentTime))
-        if x.startswith('delete-'): #Delete individual file.
-            currentFile = requestData[x].split('-')[1]
-            cursor.execute("SELECT * FROM posts WHERE files LIKE '%"+currentFile+"%'")
-            post = cursor.fetchone()
-            if post == None: #Returns error if post is none
-                return render_template('error.html', errorMsg=errors['invalidPost'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-            if post['files'] != None: #delete files from disk
-                files = post['files'].split(',')
-                for file in files:
-                    if file == currentFile:
-                        deleteFile(file)
-                filenames = post['filenames'].split(',')
-                del filenames[files.index(currentFile)]
-                ",".join(filenames)
-                files.remove(currentFile)
-                ",".join(files)
-                if len(files) == 0:
-                    cursor.execute("UPDATE posts SET files=NULL, filenames=NULL WHERE number=%s AND board=%s", (post['number'], post['board']))
-                else:
-                    cursor.execute("UPDATE posts SET files=%s, filenames=%s WHERE number=%s AND board=%s", (files, filenames, post['number'], post['board']))
-                if post['message'] == None or len(post['message']) == 0: #Delete posts that don't have a message if the files are deleted
-                        cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (post['number'], post['board']))
-        mysql.connection.commit() 
-    return redirect(url_for('media'))
-
+                    filenames = post['filenames'].split(',')
+                    del filenames[files.index(currentFile)]
+                    ",".join(filenames)
+                    files.remove(currentFile)
+                    ",".join(files)
+                    if len(files) == 0:
+                        cursor.execute("UPDATE posts SET files=NULL, filenames=NULL WHERE number=%s AND board=%s", (post['number'], post['board']))
+                    else:
+                        cursor.execute("UPDATE posts SET files=%s, filenames=%s WHERE number=%s AND board=%s", (files, filenames, post['number'], post['board']))
+                    if post['message'] == None or len(post['message']) == 0: #Delete posts that don't have a message if the files are deleted
+                            cursor.execute("DELETE FROM posts WHERE number=%s AND board=%s", (post['number'], post['board']))
+            mysql.connection.commit() 
+        return redirect(url_for('media'))
+    except Exception as e:
+        print(e)
+        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
 
 @app.route("/banned", methods=["GET"])
 def banned():
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute(f"SELECT * FROM bans WHERE ip='{request.remote_addr}'")
-    banned = cursor.fetchall()
-    boards = []
-    image = None
-    unbanned = []
-    print(banned)
-    if len(os.listdir("static/images/banned")) > 0:
-        image = os.path.join("static/images/banned", random.choice(os.listdir("static/images/banned")))
-    if len(banned) > 0:
-        for ban in banned:
-            if ban['length'] != None and datetime.utcfromtimestamp(ban['date'])+timedelta(minutes = ban['length']) <= datetime.now(): #Checks if ban has expired. 
-                cursor.execute(f"DELETE FROM bans WHERE `id` = {ban['id']}")
-                mysql.connection.commit()
-                unbanned.append(True)
-            else:
-                unbanned.append(False)
-    else:
-        banned = None
-        
-    return render_template('banned.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes, banned=banned, image=image, unbanned=unbanned)
-
+    try:
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute(f"SELECT * FROM bans WHERE ip='{request.remote_addr}'")
+        banned = cursor.fetchall()
+        boards = []
+        image = None
+        unbanned = []
+        print(banned)
+        if len(os.listdir("static/images/banned")) > 0:
+            image = os.path.join("static/images/banned", random.choice(os.listdir("static/images/banned")))
+        if len(banned) > 0:
+            for ban in banned:
+                if ban['length'] != None and datetime.utcfromtimestamp(ban['date'])+timedelta(minutes = ban['length']) <= datetime.now(): #Checks if ban has expired. 
+                    cursor.execute(f"DELETE FROM bans WHERE `id` = {ban['id']}")
+                    mysql.connection.commit()
+                    unbanned.append(True)
+                else:
+                    unbanned.append(False)
+        else:
+            banned = None      
+        return render_template('banned.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes, banned=banned, image=image, unbanned=unbanned)
+    except Exception as e:
+        print(e)
+        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
 @app.route("/bans", methods=['GET'])
 def bans():
-    if int(session['group']) > 2:
-        return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT * FROM bans WHERE ip IS NOT NULL AND user IS NULL")
-    bans=cursor.fetchall()
-    return render_template('bans.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes, bans=bans)
-
+    try:
+        if int(session['group']) > 2:
+            return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT * FROM bans WHERE ip IS NOT NULL AND user IS NULL")
+        bans=cursor.fetchall()
+        return render_template('bans.html', data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes, bans=bans)
+    except Exception as e:
+        print(e)
+        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
 @app.route("/bans/unban", methods=['POST'])
 def unban(): #unban from bans listing page
-    checkPost()
-    if session['group'] > 2: #Returns error if insufficient perms
-        return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    if 'id' not in request.form: #ID of post to unban isn't given
-        return render_template('error.html', errorMsg=errors['unfilledFields'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-    cursor.execute("DELETE FROM bans WHERE `id`=%s", [request.form['id']])
-    print(request.form['id'])
-    mysql.connection.commit()
-    return redirect(url_for('bans'))
-
+    try:
+        checkPost()
+        if session['group'] > 2: #Returns error if insufficient perms
+            return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        if 'id' not in request.form: #ID of post to unban isn't given
+            return render_template('error.html', errorMsg=errors['unfilledFields'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        cursor.execute("DELETE FROM bans WHERE `id`=%s", [request.form['id']])
+        print(request.form['id'])
+        mysql.connection.commit()
+        return redirect(url_for('bans'))
+    except Exception as e:
+        print(e)
+        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
 @app.route("/bans/update", methods=['POST'])
 def banUpdate():
-    checkPost()
-    if session['group'] > 3: #Returns error if insufficient perms
-            return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-    reason = None
-    length = None
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    if 'id' not in request.form: #ID of post to unban isn't given
-        return render_template('error.html', errorMsg=errors['unfilledFields'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
-    if 'reason' in request.form: #Get new reason
-        reason = request.form['reason']
-    if 'length' in request.form: #Get new length
-        length = getMinutes(request.form['length'])
-    cursor.execute("UPDATE bans SET reason=%s, length=%s WHERE id = %s", (reason, length, request.form['id']))
-    mysql.connection.commit()
-    return redirect(url_for("bans"))
-
+    try:
+        checkPost()
+        if session['group'] > 3: #Returns error if insufficient perms
+                return render_template('error.html', errorMsg=errors['insufficientPermissions'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        reason = None
+        length = None
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        if 'id' not in request.form: #ID of post to unban isn't given
+            return render_template('error.html', errorMsg=errors['unfilledFields'], data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes)
+        if 'reason' in request.form: #Get new reason
+            reason = request.form['reason']
+        if 'length' in request.form: #Get new length
+            length = getMinutes(request.form['length'])
+        cursor.execute("UPDATE bans SET reason=%s, length=%s WHERE id = %s", (reason, length, request.form['id']))
+        mysql.connection.commit()
+        return redirect(url_for("bans"))
+    except Exception as e:
+        print(e)
+        return render_template('error.html', errorMsg=e, data=globalSettings, currentTheme=request.cookies.get('theme'), themes=themes) 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=configData["port"])
