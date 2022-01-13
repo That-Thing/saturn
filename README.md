@@ -47,6 +47,15 @@ GRANT CREATE, ALTER, DROP, INSERT, UPDATE, DELETE, SELECT, REFERENCES, RELOAD on
 FLUSH PRIVILEGES;
 exit
 ```
+Now execute the SQL script to set up the Saturn database
+```
+mysql -u saturn -p < database.sql
+```
+Now your database is set up.
+
+### Configuration
+Now you need to fill out the database configuration file\
+Edit config/database.json and enter your database connection information
 
 ### Initializing Venv
 Install the venv package
@@ -130,4 +139,11 @@ sudo ln -s /etc/nginx/sites-available/saturn /etc/nginx/sites-enabled
 Restart Nginx
 ```
 sudo systemctl restart nginx
+```
+### Creating a root user account
+To change settings on the site you will need a user account wiht the highest permission level.\
+To do this, run the python file `createAccount.py`
+>Replace USERNAME with a username, PASSWORD with a password, and username@test.com with an email (email is optional)
+```
+python3 createAccount.py -u USERNAME -p PASSWORD -g 0 -e username@test.com
 ```

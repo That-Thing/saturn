@@ -44,3 +44,4 @@ query = "INSERT INTO `accounts` VALUES (NULL, %s, %s, %s, %s, %s, NULL, 0)"
 values = (username, hashlib.sha512(password.encode("UTF-8")).hexdigest(), email, group, time.time())
 cursor.execute(query, values)
 database.commit()
+print("Account created")

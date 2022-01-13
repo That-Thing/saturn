@@ -100,3 +100,4 @@ yarg==0.1.9
 zipp==1.0.0
 gunicorn==20.1.0
 wheel==0.37.1
+mysql-connector-python==8.0.27
