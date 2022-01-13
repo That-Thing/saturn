@@ -1,23 +1,13 @@
--- --------------------------------------------------------
--- Host:                         127.0.0.1
--- Server version:               10.4.11-MariaDB - mariadb.org binary distribution
--- Server OS:                    Win64
--- HeidiSQL Version:             11.3.0.6295
--- --------------------------------------------------------
-
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET NAMES utf8 */;
 /*!50503 SET NAMES utf8mb4 */;
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-
-
--- Dumping database structure for saturn
 CREATE DATABASE IF NOT EXISTS `saturn` /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
 USE `saturn`;
 
--- Dumping structure for table saturn.accounts
+-- accounts
 CREATE TABLE IF NOT EXISTS `accounts` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'User ID',
   `username` varchar(50) NOT NULL COMMENT 'Username',
@@ -30,18 +20,14 @@ CREATE TABLE IF NOT EXISTS `accounts` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=94 DEFAULT CHARSET=utf8;
 
--- Data exporting was unselected.
-
--- Dumping structure for table saturn.banners
+-- banners
 CREATE TABLE IF NOT EXISTS `banners` (
   `board` tinytext NOT NULL,
   `filename` text NOT NULL,
   `filesize` int(11) NOT NULL DEFAULT 0 COMMENT 'File size in KB'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Data exporting was unselected.
-
--- Dumping structure for table saturn.bans
+-- bans
 CREATE TABLE IF NOT EXISTS `bans` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'Ban ID',
   `reason` tinytext DEFAULT NULL COMMENT 'Reason for ban',
@@ -54,9 +40,7 @@ CREATE TABLE IF NOT EXISTS `bans` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=utf8mb4 COMMENT='Banned users and IPs ';
 
--- Data exporting was unselected.
-
--- Dumping structure for table saturn.boards
+-- boards
 CREATE TABLE IF NOT EXISTS `boards` (
   `uri` varchar(8) NOT NULL,
   `name` varchar(100) NOT NULL,
@@ -82,17 +66,13 @@ CREATE TABLE IF NOT EXISTS `boards` (
   `pages` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='The list of boards. ';
 
--- Data exporting was unselected.
-
--- Dumping structure for table saturn.groups
+-- groups
 CREATE TABLE IF NOT EXISTS `groups` (
   `id` int(11) NOT NULL,
   `name` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Data exporting was unselected.
-
--- Dumping structure for table saturn.hashbans
+-- hashbans
 CREATE TABLE IF NOT EXISTS `hashbans` (
   `hash` text NOT NULL COMMENT 'MD5 Hash of file',
   `reason` text DEFAULT NULL,
@@ -100,9 +80,7 @@ CREATE TABLE IF NOT EXISTS `hashbans` (
   `date` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Data exporting was unselected.
-
--- Dumping structure for table saturn.logs
+-- logs
 CREATE TABLE IF NOT EXISTS `logs` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'Action ID',
   `type` tinytext NOT NULL,
@@ -116,9 +94,7 @@ CREATE TABLE IF NOT EXISTS `logs` (
   CONSTRAINT `logs_chk_1` CHECK (json_valid(`actionData`))
 ) ENGINE=InnoDB AUTO_INCREMENT=418 DEFAULT CHARSET=utf8mb4 COMMENT='Logs for user actions. ';
 
--- Data exporting was unselected.
-
--- Dumping structure for table saturn.posts
+-- Posts
 CREATE TABLE IF NOT EXISTS `posts` (
   `name` tinytext DEFAULT NULL COMMENT 'Post name',
   `subject` tinytext DEFAULT NULL COMMENT 'Post subject',
@@ -141,9 +117,7 @@ CREATE TABLE IF NOT EXISTS `posts` (
   `id` tinytext DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Data exporting was unselected.
-
--- Dumping structure for table saturn.reports
+-- Reports
 CREATE TABLE IF NOT EXISTS `reports` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'Report ID',
   `reporterIP` tinytext DEFAULT NULL COMMENT 'IP of reporter',
@@ -154,9 +128,7 @@ CREATE TABLE IF NOT EXISTS `reports` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Data exporting was unselected.
-
--- Dumping structure for table saturn.rules
+-- Rules
 CREATE TABLE IF NOT EXISTS `rules` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `content` text NOT NULL COMMENT 'Rule content',
@@ -165,17 +137,17 @@ CREATE TABLE IF NOT EXISTS `rules` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4;
 
--- Data exporting was unselected.
-
--- Dumping structure for table saturn.server
+-- Server
 CREATE TABLE IF NOT EXISTS `server` (
   `posts` int(11) NOT NULL DEFAULT 0,
   `salt` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Data exporting was unselected.
 
-/*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
-/*!40014 SET FOREIGN_KEY_CHECKS=IFNULL(@OLD_FOREIGN_KEY_CHECKS, 1) */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40111 SET SQL_NOTES=IFNULL(@OLD_SQL_NOTES, 1) */;
+-- Populate with default data
+INSERT INTO `server` (posts, salt) VALUES (0, SUBSTRING(MD5(RAND()) FROM 1 FOR 50));
+INSERT INTO `groups` (id, name) VALUES (0, 'root');
+INSERT INTO `groups` (id, name) VALUES (1, 'administrator');
+INSERT INTO `groups` (id, name) VALUES (2, 'moderator');
+INSERT INTO `groups` (id, name) VALUES (3, 'janitor');
+INSERT INTO `groups` (id, name) VALUES (4, 'user');
