@@ -70,7 +70,6 @@ for f in os.listdir("./static/captchas"):
 #flask app configuration
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
-app.secret_key = 'test'
 socketio = SocketIO(app)
 socketio.init_app(app, cors_allowed_origins="*")
 
@@ -89,6 +88,17 @@ app.config['MYSQL_DB'] = databaseConfig["name"]
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 app.config['MAX_CONTENT_LENGTH'] = globalSettings['maxRequestSize'] * 1024 * 1024
 mysql = MySQL(app)
+#This gets the salt from the server table in the database
+def getSalt():
+    with app.app_context():
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT * FROM server")
+        server = cursor.fetchone()
+        return server['salt']
+salt = getSalt()
+app.secret_key = hashlib.sha1(salt.encode("UTF-8")).hexdigest()
+
+
 
 def reloadLogSettings():
     with open('./config/logs.json') as logFile: #log config file
@@ -103,14 +113,6 @@ def getUserGroups():
         groups = cursor.fetchall()
         return groups
 groups = getUserGroups()
-#This gets the salt from the server table in the database
-def getSalt():
-    with app.app_context():
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute("SELECT * FROM server")
-        server = cursor.fetchone()
-        return server['salt']
-salt = getSalt()
 groups = getUserGroups()
 def getThemes():
     with open('./config/themes.json') as themes:
