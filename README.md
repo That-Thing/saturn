@@ -30,7 +30,7 @@ Enter `2` for the security level\
 Set the password for the root user\
 Finish the setup and import the database file
 ```
-sudo mysql < database.sql
+sudo mysql < install/database.sql
 ```
 enter the MySQL shell with
 ```
@@ -46,10 +46,6 @@ Now grant privileges for the Saturn Database
 GRANT CREATE, ALTER, DROP, INSERT, UPDATE, DELETE, SELECT, REFERENCES, RELOAD on saturn TO 'saturn'@'localhost' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 exit
-```
-Now execute the SQL script to set up the Saturn database
-```
-mysql -u saturn -p < database.sql
 ```
 Now your database is set up.
 
