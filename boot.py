@@ -1531,7 +1531,10 @@ def newThread(board):
             cursor.execute('INSERT INTO posts VALUES (%s, %s, %s, %s, %s, %s, 1, %s, %s, %s, %s, %s, %s, %s, %s, NULL, NULL, 0, %s)', (name, subject, options, comment, number, curTime, number, board['uri'], str(filePaths), str(filenames), str(request.remote_addr), spoiler,filePass, tripcode, postID))
             #Remove posts that bring the total pages over the limit
             posts = bumpOrder(board['uri'])
-            maxPosts = board['pages']*board['perPage']
+            if board['pages'] != None:
+                maxPosts = board['pages']*board['perPage']
+            else: 
+                maxPosts = globalSettings['maxPages']*board['perPage']
             if len(posts) > maxPosts:
                 posts = posts[-(len(posts)-maxPosts):]
                 for post in posts:
