@@ -261,8 +261,8 @@ def returnHash(password):
     return password
 
 def checkTrip(name, role): #check if tripcode password is included and hash it if it is.
-    if "##" in name:
-        password = name.split("##",1)[1]
+    if "#" in name:
+        password = name.split("#",1)[1]
         if password == "rs":
             try:
                 password = groups[role]['name']
@@ -1461,7 +1461,7 @@ def newThread(board):
                 session['name'] = name
                 tripcode = checkTrip(name, int(session['group']))
                 if tripcode != False:
-                    name = name.split("##",1)[0]
+                    name = name.split("#",1)[0]
                 else:
                     tripcode = None
             else:
@@ -1653,7 +1653,7 @@ def reply(board, thread):
                 session['name'] = name
                 tripcode = checkTrip(name, int(session['group']))
                 if tripcode != False:
-                    name = name.split("##",1)[0]
+                    name = name.split("#",1)[0]
                 else:
                     tripcode = None
             else:
