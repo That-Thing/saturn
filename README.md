@@ -1,5 +1,5 @@
 # Saturn
-The saturn imageboard software project.
+The saturn BBS software project.
 
 
 ## Manual Installation
